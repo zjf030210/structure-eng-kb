@@ -349,6 +349,14 @@
   .q-opt.lock.wrong:hover{border-color:#dc2626; background:#fef2f2;}
   .q-exp{margin-top:10px; font-size:12.5px; line-height:1.75; color:#334155; background:#fffbeb; border:1px solid #fde68a; border-radius:9px; padding:10px 14px;}
   .q-exp b{color:#92400e;}
+  .q-why{margin-top:9px; border:1px solid var(--border); border-radius:9px; overflow:hidden; background:#fff;}
+  .qw-t{font-size:11.5px; font-weight:bold; color:var(--sub); padding:8px 13px; background:#f8fafc; border-bottom:1px solid var(--border);}
+  .qw-row{display:flex; gap:10px; align-items:flex-start; padding:8px 13px; border-bottom:1px dashed var(--border);}
+  .qw-row:last-child{border-bottom:none;}
+  .qw-l{flex-shrink:0; width:19px; height:19px; border-radius:6px; background:#fef2f2; color:#dc2626;
+    font-size:11px; font-weight:bold; display:flex; align-items:center; justify-content:center;}
+  .qw-o{flex-shrink:0; width:118px; font-size:12px; color:#94a3b8; text-decoration:line-through; line-height:1.7;}
+  .qw-w{flex:1; font-size:12px; color:#334155; line-height:1.75; min-width:0;}
 
   /* ══════ 计算器 ══════ */
   .calc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(345px,1fr)); gap:14px;}
@@ -586,6 +594,35 @@
   .fm-eg code, .gs-d code{font-family:ui-monospace,Consolas,monospace; background:rgba(37,99,235,.08);
     padding:1px 5px; border-radius:4px; font-size:11.5px;}
 
+  /* ══════ 术语「实际用法」 ══════ */
+  .gl-u{margin-top:9px; padding:9px 12px; border-radius:9px; background:#eef6ff; border:1px solid #cfe3fb;
+    font-size:12px; line-height:1.8; color:#1e3a5f;}
+  .gl-u-k{display:inline-block; font-size:10.5px; font-weight:bold; color:#fff; background:#3b82f6;
+    border-radius:6px; padding:2px 7px; margin-right:8px; vertical-align:1px;}
+
+  /* ══════ 速查表新增行 ══════ */
+  table.mini tbody tr.add{background:#f7fbff;}
+  table.mini tbody tr.add td:first-child::before{content:"＋"; color:#3b82f6; font-weight:bold; margin-right:5px; font-size:11px;}
+  table.mini tbody tr.add:hover{background:#eef6ff;}
+
+  /* ══════ 学习地图「学完你能」 ══════ */
+  .layer-cap{margin:0 20px; margin-top:12px; padding:10px 14px; border-radius:10px;
+    background:#ecfdf5; border:1px solid #a7f3d0; font-size:12.5px; line-height:1.8; color:#065f46;}
+  .lc-k{display:inline-block; font-size:10.5px; font-weight:bold; color:#fff; background:#10b981;
+    border-radius:6px; padding:2px 8px; margin-right:8px; vertical-align:1px;}
+
+  /* ══════ 案例 DFM 检讨记录 ══════ */
+  .dfm-item{border:1px solid var(--border); border-radius:11px; padding:12px 15px; margin-top:11px; background:#fff;}
+  .dfm-q{display:flex; gap:9px; align-items:flex-start; font-size:13px; font-weight:bold; color:#0f172a;
+    line-height:1.75; padding-bottom:9px; border-bottom:1px dashed var(--border);}
+  .dfm-no{flex-shrink:0; font-size:10.5px; font-weight:bold; color:#fff; background:#f59e0b;
+    border-radius:6px; padding:2px 8px; margin-top:3px;}
+  .dfm-row{display:flex; gap:10px; align-items:flex-start; padding-top:9px;}
+  .dfm-k{flex-shrink:0; width:34px; font-size:11px; font-weight:bold; color:#1d4ed8; line-height:1.75;}
+  .dfm-v{flex:1; font-size:12.5px; line-height:1.8; color:#334155; min-width:0;}
+  .dfm-row.res .dfm-k{color:#047857;}
+  .dfm-row.res .dfm-v{color:#065f46;}
+
   @media print{
     .topbar,.navbar,.detail-panel,.detail-backdrop,#watermark,#site-stats,.no-print{display:none !important;}
     body{background:#fff; padding:0;}
@@ -622,6 +659,11 @@
     .fm-expr{font-size:12.5px;}
     .fv-s{min-width:64px;}
     .dp-memo{flex-direction:column; gap:7px;}
+    .qw-row{flex-direction:column; gap:4px;}
+    .qw-o{width:auto;}
+    .layer-cap{margin:10px 14px 0;}
+    .dfm-row{flex-direction:column; gap:2px;}
+    .dfm-k{width:auto;}
     .tr-sym{flex:none;}
     .iss{flex-direction:column; gap:5px;}
     .iss .iq{min-width:0;}
@@ -1057,6 +1099,13 @@
 <script src="kb-select.js"></script>
 <script src="kb-mistake.js"></script>
 <script src="kb-formula.js"></script>
+<script src="kb-quiz-exp-1.js"></script>
+<script src="kb-quiz-exp-2.js"></script>
+<script src="kb-gloss-1.js"></script>
+<script src="kb-gloss-2.js"></script>
+<script src="kb-quick-add.js"></script>
+<script src="kb-map-cap.js"></script>
+<script src="kb-case-dfm.js"></script>
 <script>
 const DC = {
   material:     {c:"#d97706", s:"#b45309", w:"#fff7ed"},
@@ -1802,19 +1851,21 @@ function renderQuick(){
   document.getElementById("qvTabs").innerHTML = KB_QUICK.map(t=>
     `<button class="qv-tab${t.id===activeQuick?" active":""}" data-qv="${t.id}">${t.icon} ${esc(t.name)}</button>`).join("");
   const t = KB_QUICK.find(x=>x.id===activeQuick) || KB_QUICK[0];
-  let rows = t.rows;
-  if(q) rows = rows.filter(r=> r.join(" ").replace(/&[a-z]+;/g,"").toLowerCase().includes(q));
+  const EXTRA = (window.KB_QUICK_ADD||{})[t.id] || [];
+  const totalN = t.rows.length + EXTRA.length;
+  let rows = t.rows.map(r=>({r, add:false})).concat(EXTRA.map(r=>({r, add:true})));
+  if(q) rows = rows.filter(x=> x.r.join(" ").replace(/&[a-z]+;/g,"").toLowerCase().includes(q));
   const table = rows.length ? `
     <div class="table-card"><div class="tbl-scroll">
       <table class="mini">
         <thead><tr>${t.cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
-        <tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>
+        <tbody>${rows.map(x=>`<tr class="${x.add?"add":""}">${x.r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>
       </table>
     </div></div>` : `<div class="card"><div class="empty">没有匹配的数据行，换个关键词试试～</div></div>`;
   document.getElementById("qvBody").innerHTML = `
     <div class="card">
       <h3>${t.icon} ${esc(t.name)}</h3>
-      <div class="qv-desc">${esc(t.desc)} · 共 ${t.rows.length} 行${q?`（筛出 ${rows.length} 行）`:""}</div>
+      <div class="qv-desc">${esc(t.desc)} · 共 ${totalN} 行${EXTRA.length?`（其中本轮补充 ${EXTRA.length} 行，表中以浅底标出）`:""}${q?` · 筛出 ${rows.length} 行`:""}</div>
     </div>
     ${table}
     ${t.note?`<div class="qv-note">⚠️ ${esc(t.note)}</div>`:""}`;
@@ -1903,6 +1954,15 @@ function renderCases(){
       <h3>⚠️ 常见问题与对策</h3>
       ${c.issues.map(s=>`<div class="iss"><div class="iq">${esc(s.t)}</div><div class="ia">${esc(s.d)}</div></div>`).join("")}
     </div>
+    ${((window.KB_CASE_DFM||{})[c.id]||[]).length?`<div class="card">
+      <h3>🔍 DFM 检讨记录</h3>
+      <div class="qv-desc">开模前评审与试模检讨的真实过程：模具厂/工艺提出的问题 → 怎么处理 → 结果是什么</div>
+      ${((window.KB_CASE_DFM||{})[c.id]||[]).map((x,i)=>`<div class="dfm-item">
+        <div class="dfm-q"><span class="dfm-no">Q${i+1}</span><span>${esc(x.q)}</span></div>
+        <div class="dfm-row"><span class="dfm-k">改法</span><span class="dfm-v">${esc(x.a)}</span></div>
+        <div class="dfm-row res"><span class="dfm-k">结果</span><span class="dfm-v">${esc(x.r)}</span></div>
+      </div>`).join("")}
+    </div>`:""}
     <div class="card">
       <h3>💰 成本构成估算</h3>
       <table class="mini">
@@ -1921,16 +1981,20 @@ function renderGloss(){
   const q = (document.getElementById("glSearch").value||"").trim().toLowerCase();
   const list = KB_GLOSS.filter(g=>{
     if(glCat!=="全部" && g.c!==glCat) return false;
-    if(q && !(g.en+" "+g.cn+" "+g.d+" "+g.c).toLowerCase().includes(q)) return false;
+    if(q && !(g.en+" "+g.cn+" "+g.d+" "+g.c+" "+((window.KB_GLOSS_USE||{})[g.en]||"")).toLowerCase().includes(q)) return false;
     return true;
   });
   document.getElementById("glCount").textContent = KB_GLOSS.length + " 个术语";
-  document.getElementById("glBody").innerHTML = list.length ? list.map(g=>`
+  document.getElementById("glBody").innerHTML = list.length ? list.map(g=>{
+    const u = (window.KB_GLOSS_USE||{})[g.en];
+    return `
     <div class="gl-card">
       <div class="gl-en">${esc(g.en)}<span class="gl-tag">${esc(g.c)}</span></div>
       <div class="gl-cn">${esc(g.cn)}</div>
       <div class="gl-d">${g.d}</div>
-    </div>`).join("") : `<div class="empty" style="grid-column:1/-1">没有匹配的术语，换个关键词试试～</div>`;
+      ${u?`<div class="gl-u"><span class="gl-u-k">实际用法</span>${esc(u)}</div>`:""}
+    </div>`;
+  }).join("") : `<div class="empty" style="grid-column:1/-1">没有匹配的术语，换个关键词试试～</div>`;
 }
 
 /* ══════════════ 模块五：学习路径 ══════════════ */
@@ -1966,17 +2030,21 @@ function renderMap(){
     <div class="map-goal">🎯 <b>学完这个领域你应该能做到：</b>${esc(d.goal)}<br>
       <span style="color:var(--sub); font-size:12px;">共 ${d.layers.length} 层 · ${total} 个知识点 · 建议按层顺序学，不要跳层。点任意知识点直接打开详情</span>
     </div>`;
-  document.getElementById("mapBody").innerHTML = d.layers.map((l,i)=>`
+  document.getElementById("mapBody").innerHTML = d.layers.map((l,i)=>{
+    const cap = (window.KB_MAP_CAP||{})[d.id+"|"+i];
+    return `
     <div class="layer-card">
       <div class="layer-head">
         <div class="layer-no">${i+1}</div>
         <div><h4>${esc(l.t)}</h4><div class="ld">${esc(l.d)}</div></div>
       </div>
+      ${cap?`<div class="layer-cap"><span class="lc-k">学完你能</span>${esc(cap)}</div>`:""}
       <div class="layer-body">
         ${l.items.map(it=>`<div class="map-item" data-rel="${esc(it.n)}">
           <div class="mn">${esc(it.n)}</div><div class="mw">${esc(it.why)}</div></div>`).join("")}
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 /* ══════════════ 模块七：自测题库 ══════════════ */
@@ -1985,6 +2053,21 @@ let quizState = {};
 try{ quizState = JSON.parse(localStorage.getItem(QUIZ_KEY) || "{}"); }catch(e){ quizState = {}; }
 function quizSave(){ try{ localStorage.setItem(QUIZ_KEY, JSON.stringify(quizState)); }catch(e){} }
 function quizAnsOf(pid){ if(!quizState[pid]) quizState[pid] = {}; return quizState[pid]; }
+
+/* ══════════════ 深度解析加厚：题库 / 术语 / 速查 / 地图 / 案例 ══════════════ */
+// 题库：优先用加厚解析，并逐项说明干扰项为什么不对
+function quizExpHTML(pid, q, i, chosen){
+  const x = (window.KB_QUIZ_EXP || {})[pid + "|" + i];
+  const e = (x && x.e) ? x.e : q.exp;
+  const head = chosen === q.a ? "✓ 回答正确" : "✗ 正确答案是 " + "ABCD"[q.a];
+  let w = "";
+  if(x && Array.isArray(x.w) && q.opts.length > 2){
+    const rows = q.opts.map((o,j)=> (j !== q.a && x.w[j])
+      ? `<div class="qw-row"><span class="qw-l">${"ABCD"[j]}</span><span class="qw-o">${esc(o)}</span><span class="qw-w">${esc(x.w[j])}</span></div>` : "").join("");
+    if(rows) w = `<div class="q-why"><div class="qw-t">其他选项为什么不对</div>${rows}</div>`;
+  }
+  return `<div class="q-exp"><b>${head}</b> — ${esc(e)}</div>${w}`;
+}
 
 function renderQuiz(){
   document.getElementById("quizTabs").innerHTML = KB_QUIZ.map(p=>{
@@ -2027,7 +2110,7 @@ function renderQuiz(){
       <div class="qq-title"><div class="qq-no">${i+1}</div>
         <div>${esc(q.q)}${q.t==="tf"?' <span style="font-size:11px;color:var(--sub);font-weight:normal">（判断题）</span>':''}</div></div>
       ${opts}
-      ${answered?`<div class="q-exp"><b>${chosen===q.a ? "✓ 回答正确" : "✗ 正确答案是 "+"ABCD"[q.a]}</b> — ${esc(q.exp)}</div>`:""}
+      ${answered?quizExpHTML(p.id, q, i, chosen):""}
     </div>`;
   }).join("");
 }
