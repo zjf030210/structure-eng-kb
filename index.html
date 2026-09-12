@@ -998,6 +998,16 @@ function hl(text, q){
 function domainItems(d){ return KB_ITEMS.filter(it=>d.subs.includes(it.cat)); }
 function sortByLv(list){ return [...list].sort((a,b)=> LV_ORDER[a.lv]-LV_ORDER[b.lv]); }
 
+// 图片路径工具：主图缩略图（列表用 3.5KB） / 参考图缩略图（图库用，约为原图一半）
+function thumbOf(p){
+  if(!p || p.indexOf("images/") !== 0 || p.indexOf("images/ref/") === 0 || p.indexOf("images/thumb/") === 0) return p || "";
+  return "images/thumb/" + p.slice(7).replace(/\.(jpe?g|png)$/i, ".jpg");
+}
+function refThumbOf(p){
+  if(!p || p.indexOf("images/ref/") !== 0) return p || "";
+  return p.replace("images/ref/", "images/ref/thumb/").replace(/\.(jpe?g|png)$/i, ".jpg");
+}
+
 // 平台配色
 const PLAT = {
   "B站":    {cls:"bili",    label:"B站",    enc: kw => "https://search.bilibili.com/all?keyword=" + encodeURIComponent(kw)},
@@ -1112,7 +1122,7 @@ function openDetail(it){
   // 图片区
   const imgEl = document.getElementById("dpImg");
   if(it.img){
-    imgEl.innerHTML = `<img src="${esc(it.img)}" alt="${esc(it.name)}">`;
+    imgEl.innerHTML = `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy" decoding="async">`;
   }else{
     imgEl.innerHTML = `<div class="ph"><b>📷 暂无示意图</b>可通过下方按钮搜索或让 AI 生成</div>`;
   }
@@ -1174,7 +1184,7 @@ function renderRef(it){
   sec.style.display = "";
   cnt.textContent = arr.length + " 张";
   grid.innerHTML = arr.map(x=>`<div class="ref-card" data-ref="${esc(x.f)}" data-cap="${esc(x.t)}" data-src="${esc(x.s||"")}">
-    <div class="rc-img"><img src="${esc(x.f)}" alt="${esc(x.t)}" loading="lazy"></div>
+    <div class="rc-img"><img src="${esc(x.f)}" alt="${esc(x.t)}" loading="lazy" decoding="async"></div>
     <div class="rc-cap">${esc(x.t)}</div>
     <div class="rc-src">来源：${esc(x.s||"—")}</div>
   </div>`).join("");
@@ -1355,7 +1365,7 @@ function rowHTML(it, i, q, catLabel, catStyle){
   const stv = getSt(it.name);
   const rc = refCount(it.name);
   const imgCell = (it.img
-    ? `<button class="img-btn" data-img="${esc(it.img)}" data-name="${esc(it.name)}"><img src="${esc(it.img)}" alt=""></button>`
+    ? `<button class="img-btn" data-img="${esc(it.img)}" data-name="${esc(it.name)}"><img src="${esc(thumbOf(it.img))}" alt="" loading="lazy" decoding="async" width="36" height="36"></button>`
     : `<button class="img-btn none" data-name="${esc(it.name)}">＋ 配图</button>`) + (rc ? `<span class="ref-mini" title="另有 ${rc} 张参考图，点开行查看">＋${rc}</span>` : "");
   const videos = it.videos || [];
   const vidCell = videos.slice(0,2).map(v=>{
@@ -1913,6 +1923,7 @@ function renderField(){
 }
 
 /* ══════════════ 模块十：参考图库 ══════════════ */
+let gwLimit = 60;   // 分页渲染，避免手机端一次插入 498 个节点
 function renderGallery(){
   const sel = document.getElementById("gwCat");
   if(!sel.dataset.init){
@@ -1931,19 +1942,28 @@ function renderGallery(){
       cards.push({it, x, d});
     });
   });
+  const shown = cards.slice(0, gwLimit);
   document.getElementById("gwCount").textContent = cards.length + " 张";
   document.getElementById("gwStat").innerHTML =
     `共 <b>${cards.length}</b> 张参考图，覆盖 <b>${new Set(cards.map(c=>c.it.name)).size}</b> 个知识点` +
     (q||cat ? `（已筛选）` : `　·　点图片放大，点标题进入知识点`);
-  document.getElementById("gwBody").innerHTML = cards.length ? cards.map(c=>`
+  document.getElementById("gwBody").innerHTML = (shown.length ? shown.map(c=>`
     <div class="gw-card" data-ref="${esc(c.x.f)}" data-cap="${esc(c.x.t)}" data-src="${esc(c.x.s||"")}">
-      <div class="gc-img"><img src="${esc(c.x.f)}" alt="${esc(c.x.t)}" loading="lazy"></div>
+      <div class="gc-img"><img src="${esc(refThumbOf(c.x.f))}" alt="${esc(c.x.t)}" loading="lazy" decoding="async"></div>
       <div class="gc-body">
         <div class="gc-item" data-rel="${esc(c.it.name)}">${c.d.icon} ${esc(c.it.name)} →</div>
         <div class="gc-cap">${esc(c.x.t)}</div>
       </div>
-    </div>`).join("") : `<div class="empty" style="grid-column:1/-1">没有匹配的图片，换个关键词试试～</div>`;
+    </div>`).join("") : `<div class="empty" style="grid-column:1/-1">没有匹配的图片，换个关键词试试～</div>`)
+    + (cards.length > gwLimit
+        ? `<div style="grid-column:1/-1; text-align:center; padding:18px 0;">
+             <button class="mini-btn" id="gwMore">加载更多（还有 ${cards.length - gwLimit} 张）</button>
+           </div>`
+        : "");
 }
+
+// 图库筛选变化时重置分页
+function resetGallery(keepQ){ gwLimit = 60; renderGallery(); }
 
 function renderAll(){
   navbar.querySelectorAll(".nav-tab").forEach(b=>b.classList.toggle("active", b.dataset.mod===activeModule));
@@ -2012,7 +2032,10 @@ document.addEventListener("click", e=>{
   const stEl = e.target.closest(".st[data-name]");
   if(stEl){ e.stopPropagation(); cycleSt(stEl.dataset.name); return; }
   const imgBtn = e.target.closest(".img-btn[data-name]");
-  if(imgBtn){ e.stopPropagation();
+  if(imgBtn){
+    // 点缩略图本身 → 只放大看图，不打开详情面板（避免同时弹出两个层）
+    if(e.target.tagName === "IMG" && imgBtn.dataset.img) return;
+    e.stopPropagation();
     const it = KB_ITEMS.find(x=>x.name === imgBtn.dataset.name);
     if(it) openDetail(it);
     return;
@@ -2048,9 +2071,10 @@ document.addEventListener("click", e=>{
   if(card){
     src = card.dataset.ref; cap = card.dataset.cap + (card.dataset.src ? "　|　来源：" + card.dataset.src : "");
   }else{
-    const im = e.target.closest("img");
     const btn = e.target.closest(".img-btn[data-img]");
-    src = im ? im.src : "";
+    const im = e.target.closest("img");
+    // 列表里显示的是缩略图，放大时要换成原图
+    src = (btn && btn.dataset.img) ? btn.dataset.img : (im ? im.getAttribute("src") : "");
     cap = btn ? btn.dataset.name : "";
   }
   if(!src) return;
@@ -2080,8 +2104,12 @@ document.getElementById("imgModal").addEventListener("click", e=>{
 })();
 
 // 参考图库筛选
-document.getElementById("gwCat").addEventListener("change", renderGallery);
-document.getElementById("gwSearch").addEventListener("input", renderGallery);
+document.getElementById("gwCat").addEventListener("change", ()=>resetGallery());
+document.getElementById("gwSearch").addEventListener("input", ()=>resetGallery());
+// 加载更多
+document.getElementById("gwBody").addEventListener("click", e=>{
+  if(e.target.closest("#gwMore")){ gwLimit += 60; renderGallery(); }
+});
 
 // 实战宝典搜索
 document.getElementById("fieldSearch").addEventListener("input", renderField);
