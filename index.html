@@ -816,8 +816,64 @@
   .kbd-hint kbd{display:inline-block; min-width:20px; text-align:center; padding:1px 6px; border:1px solid var(--border);
     border-bottom-width:2px; border-radius:5px; font-family:ui-monospace,Consolas,monospace; font-size:11px; background:var(--bg); margin-right:6px;}
 
+  /* ══════════════════════ 每日一题 ══════════════════════ */
+  .qd-head{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:10px;}
+  .qd-badge{font-size:11px; padding:2px 9px; border-radius:7px; background:var(--primary-weak); color:var(--primary); font-weight:bold;}
+  .qd-q{font-size:14px; font-weight:bold; line-height:1.75; margin:8px 0 12px;}
+  .qd-opts{display:flex; flex-direction:column; gap:8px;}
+  .qd-opt{display:flex; gap:10px; align-items:flex-start; padding:10px 13px; border:1px solid var(--border);
+    border-radius:10px; cursor:pointer; font-size:13px; line-height:1.65; transition:all .15s; background:var(--card);}
+  .qd-opt:hover{border-color:var(--primary); background:var(--primary-weak);}
+  .qd-opt .ol{width:22px; height:22px; flex-shrink:0; border-radius:6px; background:var(--st0-bg);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;}
+  .qd-opt.right{background:var(--st2-bg); border-color:#a7f3d0;}
+  .qd-opt.right .ol{background:var(--st2); color:#fff;}
+  .qd-opt.wrong{background:var(--lv1-bg); border-color:#fecaca;}
+  .qd-opt.wrong .ol{background:var(--lv1); color:#fff;}
+  .qd-opt.lock{cursor:default;}
+  html[data-theme="dark"] .qd-opt.right{border-color:#1f5f4b;}
+  html[data-theme="dark"] .qd-opt.wrong{border-color:#6b2b2b;}
+
+  /* ══════════════════════ 搜索历史下拉 ══════════════════════ */
+  .search-hist{position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card); border:1px solid var(--border);
+    border-radius:12px; box-shadow:0 8px 24px rgba(16,24,40,.14); padding:8px; display:none; z-index:30;
+    max-height:290px; overflow:auto;}
+  .search-hist.on{display:block;}
+  .search-hist .sh-cap{font-size:11px; color:var(--sub); padding:4px 8px 6px; display:flex; justify-content:space-between; align-items:center;}
+  .search-hist .sh-cap button{background:none; border:none; color:var(--sub); cursor:pointer; font-size:11px; font-family:inherit; padding:0;}
+  .search-hist .sh-cap button:hover{color:var(--lv1);}
+  .search-hist button.sh-item{display:block; width:100%; text-align:left; padding:7px 10px; border:none; background:none;
+    border-radius:8px; font-size:12.5px; color:var(--text); cursor:pointer; font-family:inherit;}
+  .search-hist button.sh-item:hover{background:var(--primary-weak); color:var(--primary);}
+
+  /* ══════════════════════ 最近浏览 ══════════════════════ */
+  .recent-item{display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:9px; cursor:pointer;
+    transition:all .15s; font-size:12.5px;}
+  .recent-item:hover{background:var(--primary-weak);}
+  .recent-item .ri-ic{flex-shrink:0;}
+  .recent-item .ri-n{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .recent-item .ri-t{font-size:11px; color:var(--sub); flex-shrink:0;}
+
+  /* ══════════════════════ 学习打卡 ══════════════════════ */
+  .streak-top{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
+  .streak-top b{font-size:30px; font-weight:800; color:var(--primary); line-height:1;}
+  .streak-top span{font-size:12.5px; color:var(--sub);}
+  .heat{display:grid; grid-template-columns:repeat(15, 1fr); gap:4px; margin-top:8px;}
+  .heat i{display:block; aspect-ratio:1; border-radius:3px; background:var(--st0-bg);}
+  .heat i.l1{background:#bfdbfe;} .heat i.l2{background:#60a5fa;} .heat i.l3{background:#2563eb;}
+  html[data-theme="dark"] .heat i.l1{background:#1d3a6b;}
+  html[data-theme="dark"] .heat i.l2{background:#2b5ea8;}
+  html[data-theme="dark"] .heat i.l3{background:#4b8bf0;}
+  .heat-legend{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--sub); margin-top:10px;}
+  .heat-legend i{width:11px; height:11px; border-radius:3px; display:inline-block;}
+
+  /* ══════════════════════ 数据管理 ══════════════════════ */
+  .data-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .data-note{font-size:11.5px; color:var(--sub); line-height:1.75; margin-top:10px;}
+
   @media print{
     @page{margin:12mm 10mm;}
+    .search-hist{display:none !important;}
     .topbar,.navbar,.detail-panel,.detail-backdrop,#watermark,#site-stats,#toTop,
     .kbd-hint,.no-print,.tpl-actions,.dp-actions,.hero-actions,.mod-tools,.field-search,
     .back-btn,.modal{display:none !important;}
@@ -922,7 +978,8 @@
     </div>
     <div class="search">
       <span class="icon">🔍</span>
-      <input id="kw" type="text" placeholder="全站搜索：脱模斜度、Draft、GB 7000、缩水…">
+      <input id="kw" type="text" placeholder="全站搜索：脱模斜度、Draft、GB 7000、缩水…" autocomplete="off">
+      <div class="search-hist" id="searchHist"></div>
     </div>
     <select id="lvFilter" style="display:none">
       <option value="">全部优先级</option>
@@ -1143,16 +1200,19 @@
   <div id="homeView">
     <div class="hero">
       <h2>👋 结构工程师知识库 · 塑料灯具方向</h2>
-      <p>按「<b>学 → 查 → 练 → 考</b>」闭环组织的完整学习系统：<b>166 条</b>知识点（每条含经验数值、5 节深度解析、动手练习、3 张参考图）· <b>498 张</b>实景参考图 · <b>120 道</b>自测题 · <b>8 个</b>工程计算器 · 学习地图 / 速查手册 / 检查清单 / 整机案例 / 术语词典 / 实战宝典。</p>
+      <p>按「<b>学 → 查 → 练 → 考 → 补</b>」闭环组织的完整学习系统：<b>186 条</b>知识点（每条含一句话记忆、经验数值、5 节深度解析、动手练习、B 站视频、3 张参考图）· <b>420 道</b>自测题 · <b>558 张</b>实景参考图 · <b>13 个</b>工程计算器 · 错题本 / 学习数据 / 选型决策 / 速查手册 / 检查清单 / 实战模板 / 整机案例 / 术语词典 / 实战宝典。</p>
       <div class="hero-actions">
         <button class="h-btn hot" id="coreBtn">🔥 只看核心必会</button>
         <button class="h-btn" id="allBtn">📚 浏览全部知识点</button>
+        <button class="h-btn" id="randBtn">🎲 随机抽一题</button>
       </div>
       <div class="hero-stats" id="homeStats"></div>
     </div>
+    <div class="panel" id="panelDaily"></div>
     <div class="home-panels">
       <div class="panel" id="panelOverview"></div>
       <div class="panel" id="panelProgress"></div>
+      <div class="panel" id="panelRecent"></div>
     </div>
     <div class="sec-title"><h3>知识领域</h3><span>点击进入领域详情</span></div>
     <div class="domains" id="domains"></div>
@@ -1281,8 +1341,11 @@
     内容与页面分离：<b>data.js</b>（主数据）+ <b>kb-plus.js</b>（新增知识点）· <b>deep.js</b>（深度解析）· <b>kb-extra-1~4.js</b>（经验数值/关联）·
     <b>kb-tools.js</b>（速查表/清单）· <b>kb-cases.js</b>（案例/术语/路径）· <b>kb-quiz*.js</b>（题库）· <b>kb-map*.js</b>（地图）·
     <b>kb-field.js</b>（排查/面试/标准）· <b>kb-task-1~3.js</b>（动手练习）· <b>kb-img.js</b>（参考图索引）·
-    <b>kb-syn.js</b>（同义词表）· <b>kb-template.js</b>（实战模板）<br>
-    学习进度 / 清单勾选 / 答题记录 / 收藏 / 笔记 / 模板填写 / 深浅色偏好 全部保存在本机浏览器，换电脑或清缓存会重置
+    <b>kb-syn.js</b>（同义词表）· <b>kb-template.js</b>（实战模板）·
+    <b>kb-quiz-add-7.js</b>（题库第三批）· <b>kb-domain-plus.js</b>（导读补全）· <b>kb-path-plus.js</b>（第 5 周）·
+    <b>kb-quick2.js</b>（新增速查表）· <b>kb-formula-plus.js</b>（补充公式与单位）<br>
+    学习进度 / 清单勾选 / 答题记录 / 收藏 / 笔记 / 模板填写 / 深浅色偏好 / 浏览记录 / 搜索历史 / 打卡记录
+    全部保存在本机浏览器 —— 可在「📈 学习数据 → 💾 我的数据」里导出备份、换设备后一键恢复
   </div>
 </div>
 
@@ -1432,6 +1495,11 @@
 <script src="kb-quick-add.js"></script>
 <script src="kb-map-cap.js"></script>
 <script src="kb-case-dfm.js"></script>
+<script src="kb-quiz-add-7.js"></script>
+<script src="kb-domain-plus.js"></script>
+<script src="kb-path-plus.js"></script>
+<script src="kb-quick2.js"></script>
+<script src="kb-formula-plus.js"></script>
 <script src="kb-syn.js"></script>
 <script src="kb-template.js"></script>
 <script src="kb-plus.js"></script>
@@ -1558,10 +1626,11 @@ let progress = {};
 try{ progress = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); }catch(e){ progress = {}; }
 function getSt(name){ return progress[name] || 0; }
 function setSt(name, v){ progress[name] = v; localStorage.setItem(LS_KEY, JSON.stringify(progress)); }
-function cycleSt(name){ setSt(name, (getSt(name)+1) % 3); renderAll(); }
+function cycleSt(name){ setSt(name, (getSt(name)+1) % 3); markStudy(1); renderAll(); }
 
 /* ── 本机存储：主题 / 收藏 / 笔记 / 模板草稿 ── */
 const LS_THEME = "kb-theme-v1", LS_FAV = "kb-fav-v1", LS_NOTE = "kb-note-v1", LS_TPL = "kb-tpl-v1";
+const LS_RECENT = "kb-recent-v1", LS_SEARCH = "kb-search-v1", LS_STREAK = "kb-streak-v1";
 function lsGet(k, dft){ try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v === null ? dft : v; }catch(e){ return dft; } }
 function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
@@ -1569,9 +1638,47 @@ let theme = lsGet(LS_THEME, "light");
 let favs = lsGet(LS_FAV, {});          // { 条目名: 收藏时间戳 }
 let notes = lsGet(LS_NOTE, {});        // { 条目名: 文本 }
 let tplDraft = lsGet(LS_TPL, {});      // { "模板id|块序号|行|列": "填写内容" }
+let recents = lsGet(LS_RECENT, []);    // [ { n:条目名, t:时间戳 } ]  最多 30 条
+let searchHist = lsGet(LS_SEARCH, []); // [ 关键词 ]  最多 12 条
+let streak = lsGet(LS_STREAK, {});     // { "YYYY-MM-DD": 动作次数 }
 function favOn(n){ return !!favs[n]; }
 function favCount(){ return Object.keys(favs).length; }
 function noteCount(){ return Object.values(notes).filter(x => x && x.trim()).length; }
+function todayStr(d0){
+  const d = d0 || new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+/* 学习打卡：任何「学习动作」都会记一次（打开知识点 / 答题 / 勾清单 / 切状态 / 收藏 / 写笔记） */
+function markStudy(step){
+  const d = todayStr();
+  streak[d] = (streak[d] || 0) + (step || 1);
+  lsSet(LS_STREAK, streak);
+  return streak[d];
+}
+function streakDays(){
+  let n = 0;
+  const d = new Date();
+  if(!streak[todayStr(d)]) d.setDate(d.getDate() - 1);   // 今天还没学，则从昨天开始数（连续未断）
+  while(streak[todayStr(d)]){ n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function streakTotal(){ return Object.keys(streak).length; }
+function pushRecent(name){
+  if(!name) return;
+  recents = recents.filter(x => x.n !== name);
+  recents.unshift({ n: name, t: Date.now() });
+  if(recents.length > 30) recents = recents.slice(0, 30);
+  lsSet(LS_RECENT, recents);
+}
+function pushSearchHist(q){
+  q = (q || "").trim();
+  if(q.length < 2) return;
+  searchHist = searchHist.filter(x => x !== q);
+  searchHist.unshift(q);
+  if(searchHist.length > 12) searchHist = searchHist.slice(0, 12);
+  lsSet(LS_SEARCH, searchHist);
+  renderSearchHist();
+}
 function applyTheme(){
   document.documentElement.setAttribute("data-theme", theme);
   const b = document.getElementById("themeBtn");
@@ -1790,6 +1897,8 @@ function openDetail(it){
   updateAnchors();
   // 收藏 / 笔记 / 打印
   curDetail = it;
+  pushRecent(it.name);
+  markStudy(1);
   renderDpActions(it);
   const ta = document.getElementById("dpNote");
   if(ta){
@@ -2007,6 +2116,8 @@ function renderHome(){
   domainsEl.querySelectorAll(".d-card").forEach(c=>{
     c.onclick = ()=>{ activeDomain = c.dataset.id; activeSub = "all"; browseAll = false; openDomain(); };
   });
+  renderDaily();
+  renderRecent();
 }
 
 // 领域详情
@@ -2728,7 +2839,67 @@ const CALCS = [
    return { main:{l:"最坏情况法总公差", val:"±"+nfmt(wc,3), u:"mm"},
    extra:[{k:"统计法（RSS）总公差", v:"±"+nfmt(rss,3)+" mm"},
           {k:"差值", v:nfmt(wc-rss,3)+" mm"},
-          {k:"建议预留装配间隙", v:"≥ "+nfmt(wc,3)+" mm（取保守值）"}]};}}
+          {k:"建议预留装配间隙", v:"≥ "+nfmt(wc,3)+" mm（取保守值）"}]};}},
+{id:"snap", icon:"🪝", name:"卡扣应变校核", desc:"算出卡扣的最大应变，判断会不会装一次就断",
+ fields:[{k:"t", l:"卡扣厚度 t (mm)", v:1.5}, {k:"y", l:"扣入量 / 挠度 y (mm)", v:1},
+         {k:"L", l:"悬臂有效长度 L (mm)", v:12}, {k:"allow", l:"材料允许应变 (%)", v:1.5}],
+ formula:"ε = 1.5 · t · y / L²　·　允许应变参考：ABS 约 1.5%、PC 约 2.0%、PP 约 3.0%、POM 约 2.5%（已含安全系数）",
+ calc:v=>{ const eps = 1.5*v.t*v.y/(Math.max(v.L,0.001)*Math.max(v.L,0.001))*100;
+   const ratio = v.allow ? eps/v.allow : 0;
+   const verdict = !isFinite(eps) ? "参数有误" : ratio<=0.7 ? "✅ 安全（有余量）" : ratio<=1 ? "⚠️ 接近上限，建议留更多余量" : "❌ 超出允许应变，易断裂";
+   return { main:{l:"卡扣最大应变 ε", val:nfmt(eps,2), u:"%"},
+   extra:[{k:"材料允许应变", v:nfmt(v.allow,2)+" %"},
+          {k:"安全裕度（允许/实际）", v:nfmt(ratio?1/ratio:0,2)+" 倍"},
+          {k:"判定", v:verdict},
+          {k:"调优方向", v:"加长 L 最有效（应变与 L² 成反比），其次减小 y 或 t"}]};}},
+{id:"lux", icon:"💡", name:"照度与光效换算", desc:"由光通量估算照射面平均照度，并核算整灯光效",
+ fields:[{k:"flux", l:"总光通量 Φ (lm)", v:800}, {k:"area", l:"照射面积 (m²)", v:6},
+         {k:"cu", l:"利用系数 CU (0-1)", v:0.7}, {k:"mf", l:"维护系数 MF (0-1)", v:0.8},
+         {k:"pw", l:"输入功率 (W)", v:10}],
+ formula:"E = Φ · CU · MF / A　·　光效 η = Φ / P　·　CU 常见 0.5-0.8，MF 常见 0.7-0.9",
+ calc:v=>{ const E = v.flux*v.cu*v.mf/Math.max(v.area,0.0001);
+   const eff = v.flux/Math.max(v.pw,0.0001);
+   const lvl = eff>=120 ? "优秀" : eff>=100 ? "良好" : eff>=80 ? "一般，可优化光学件或驱动" : "偏低，损耗过大";
+   return { main:{l:"平均照度 E", val:nfmt(E,1), u:"lx"},
+   extra:[{k:"整灯光效 η", v:nfmt(eff,1)+" lm/W（"+lvl+"）"},
+          {k:"阅读场景（需 ≥300 lx）", v:E>=300 ? "✅ 达标" : "❌ 不足，需提高光通量或缩小面积"},
+          {k:"注意", v:"整灯光效通常比单颗 LED 低 20%-40%，损失在扩散件、透镜与驱动上"}]};}},
+{id:"stack", icon:"📦", name:"包装堆码强度", desc:"按堆码层数与仓储条件反推纸箱所需抗压强度",
+ fields:[{k:"w", l:"单箱重量 (kg)", v:8}, {k:"n", l:"堆码层数", v:6}, {k:"k", l:"安全系数", v:2}],
+ formula:"BCT ≥ (n − 1) × W × K　·　K 取 1.6-3.0（仓储越久、湿度越高取越大；纸箱长期堆码强度会衰减到 50%-60%）",
+ calc:v=>{ const need = Math.max(v.n-1,0)*v.w*v.k;
+   return { main:{l:"所需纸箱抗压强度 BCT", val:nfmt(need,1), u:"kgf"},
+   extra:[{k:"理论承重（不含安全系数）", v:nfmt(Math.max(v.n-1,0)*v.w,1)+" kgf"},
+          {k:"折合牛顿", v:nfmt(need*9.807,0)+" N"},
+          {k:"堆高参考（单箱按 300mm 估）", v:nfmt((v.n-1)*0.3,1)+" m"},
+          {k:"提示", v:"按最底层箱子计算；仓储超过 30 天建议 K 取 2.5 以上"}]};}},
+{id:"pilot", icon:"🔩", name:"自攻螺丝底孔", desc:"算出底孔、柱外径与柱壁厚，避免滑牙或撑裂",
+ fields:[{k:"d", l:"螺丝外径 d (mm)", v:3}, {k:"kf", l:"底孔系数 (0.78-0.82)", v:0.8},
+         {k:"len", l:"螺丝旋入长度 (mm)", v:6}],
+ formula:"底孔 ≈ d × 0.8　·　柱外径 ≈ d × 2（保证柱壁厚 ≥1.0mm）　·　内孔深 ≥ 旋入长度 + 0.5mm",
+ calc:v=>{ const hole = v.d*v.kf, boss = v.d*2, wall = (boss-hole)/2;
+   const warn = wall < 1 ? "⚠️ 柱壁厚不足 1.0mm，建议加粗柱外径" : "✅ 柱壁厚充足";
+   return { main:{l:"底孔直径", val:nfmt(hole,2), u:"mm"},
+   extra:[{k:"建议柱外径", v:nfmt(boss,2)+" mm"},
+          {k:"实际柱壁厚", v:nfmt(wall,2)+" mm（"+warn+"）"},
+          {k:"建议内孔深度", v:nfmt(v.len+0.5,1)+" mm 以上"},
+          {k:"根部", v:"加 R0.25-0.5 圆角或加强筋，抗裂能力明显提升"}]};}},
+{id:"cool", icon:"❄️", name:"注塑冷却时间", desc:"理论冷却时间估算，判断周期是否还有压缩空间",
+ fields:[{k:"T", l:"制品壁厚 T (mm)", v:2}, {k:"a", l:"热扩散系数 α (mm²/s)", v:0.09},
+         {k:"tm", l:"熔体温度 (℃)", v:230}, {k:"tw", l:"模具温度 (℃)", v:60}, {k:"te", l:"顶出温度 (℃)", v:90}],
+ formula:"t = { T² / (π² · α) } · ln{ (4/π) · (Tm − Tw) / (Te − Tw) }　·　α 参考：ABS 约 0.09、PC 约 0.10、PP 约 0.08 mm²/s",
+ calc:v=>{ const ok = (v.te > v.tw) && (v.tm > v.te);
+   const base = v.T*v.T/(Math.PI*Math.PI*Math.max(v.a,0.0001));
+   const ratio = (4/Math.PI)*(v.tm-v.tw)/Math.max(v.te-v.tw,0.0001);
+   const tc = ok ? base*Math.log(ratio) : NaN;
+   const ex = [];
+   if(!ok){ ex.push({k:"参数不成立", v:"需满足：熔体温度 > 顶出温度 > 模具温度"}); }
+   else{
+     ex.push({k:"壁厚加倍后", v:nfmt(tc*4,2)+" s（厚度是平方关系）"});
+     ex.push({k:"冷却时间占比", v:"实际周期中冷却常占 50%-70%"});
+   }
+   ex.push({k:"提示", v:"缩短周期的优先手段是减薄壁厚与优化水路，而不是一味降温"});
+   return { main:{l:"理论冷却时间", val:nfmt(tc,2), u:"s"}, extra:ex };}}
 ];
 function runCalc(c){
   const v = {};
@@ -3184,6 +3355,31 @@ function renderStats(){
       <div class="chd">每个领域已作答的题数占比——覆盖面比正确率更优先，先做全再做好</div>
       ${barsSVG(doms.map(d=>({label:d.p.name, v:d.total? Math.round(d.done/d.total*100):0})), v=>v>=80?"#2563eb":v>=40?"#7c3aed":"#94a3b8")}
     </div>
+    <div class="ch-card">
+      <h3>🔥 学习打卡</h3>
+      <div class="chd">打开知识点、答题、勾清单、收藏、写笔记都算一次「学习动作」</div>
+      <div class="streak-top">
+        <b>${streakDays()}</b><span>天当前连续</span>
+        <b style="font-size:20px; color:var(--sub)">${streakTotal()}</b><span>天累计打卡</span>
+        <b style="font-size:20px; color:var(--sub)">${streak[todayStr()] || 0}</b><span>次今日动作</span>
+      </div>
+      ${heatHTML()}
+    </div>
+    <div class="ch-card">
+      <h3>💾 我的数据</h3>
+      <div class="chd">所有记录都存在这台电脑的浏览器里；导出后可在其他设备或重装后一键恢复</div>
+      <div style="font-size:12.5px; line-height:2.1">
+        学习进度 <b>${Object.keys(progress).length}</b> 条　·　答题记录 <b>${answeredQ}</b> 题　·　清单勾选 <b>${cOn}</b> 项<br>
+        收藏 <b>${favCount()}</b> 条　·　笔记 <b>${noteCount()}</b> 条　·　模板草稿 <b>${Object.keys(tplDraft).length}</b> 格<br>
+        浏览记录 <b>${recents.length}</b> 条　·　搜索历史 <b>${searchHist.length}</b> 条　·　打卡 <b>${streakTotal()}</b> 天
+      </div>
+      <div class="data-actions">
+        <button class="mini-btn" data-data="export">⬇️ 导出备份</button>
+        <button class="mini-btn" data-data="import">⬆️ 导入恢复</button>
+        <button class="mini-btn" data-data="clear">🧹 清空全部记录</button>
+      </div>
+      <div class="data-note">导出文件为 JSON，包含：学习进度、清单勾选、答题记录、收藏、笔记、模板草稿、深浅色偏好、浏览记录、搜索历史与打卡记录。<br>导入时会覆盖同名的现有记录，建议先导出一次再导入。</div>
+    </div>
   </div>
   <div class="next-step" id="statsAdvice"></div>`;
 
@@ -3291,9 +3487,174 @@ function renderDpActions(it){
 function toggleFav(name){
   if(favs[name]) delete favs[name]; else favs[name] = Date.now();
   lsSet(LS_FAV, favs);
+  markStudy(1);
   if(curDetail && curDetail.name === name) renderDpActions(curDetail);
   refreshBadges();
   if(activeModule === "fav") renderFav();
+}
+
+/* ══════════════ 首页：每日一题 ══════════════ */
+function hashStr(s){ let h = 2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function quizPool(){
+  const pool = [];
+  KB_QUIZ.forEach(p=>{ for(let i=0;i<quizTotal(p);i++){ const q = quizAt(p,i); if(q) pool.push({p, i, q}); } });
+  return pool;
+}
+let dailyState = lsGet("kb-daily-v1", {});   // { date, key, chosen }
+function dailyPick(){
+  const pool = quizPool(); if(!pool.length) return null;
+  const d = todayStr();
+  const idx = hashStr(d) % pool.length;
+  return { pool, item: pool[idx], idx, date: d };
+}
+function renderDaily(){
+  const box = document.getElementById("panelDaily"); if(!box) return;
+  const pk = dailyPick(); if(!pk){ box.innerHTML = ""; return; }
+  const { item, idx, date } = pk;
+  if(dailyState.date !== date){ dailyState = { date: date, key: idx, chosen: undefined }; lsSet("kb-daily-v1", dailyState); }
+  const q = item.q, answered = dailyState.chosen !== undefined, chosen = dailyState.chosen;
+  const lv = quizLvAt(item.p, item.i), tp = quizTypeOf(q);
+  const exp = ((window.KB_QUIZ_EXP||{})[item.p.id+"|"+item.i]||{}).e || q.exp || "";
+  box.innerHTML = `
+    <h3>☀️ 今日一题　<span style="font-size:12px; font-weight:normal; color:var(--sub)">${date}</span></h3>
+    <div class="pdesc">每天固定一题，答完可以看解析；也可以点右上角「随机抽一题」换一道</div>
+    <div class="qd-head">
+      <span class="qd-badge">${item.p.icon} ${esc(item.p.name)}</span>
+      <span class="qd-badge" style="background:var(--st0-bg); color:var(--sub)">第 ${item.i+1} 题</span>
+      ${lv?`<span class="qd-badge" style="background:var(--lv2-bg); color:var(--lv2)">${esc(lv)}</span>`:""}
+      ${tp!=="choice"?`<span class="qd-badge" style="background:var(--lv3-bg); color:var(--lv3)">${QUIZ_TYPE[tp]||tp}</span>`:""}
+    </div>
+    <div class="qd-q">${esc(q.q)}</div>
+    <div class="qd-opts">${q.opts.map((o,j)=>{
+      let cls = "qd-opt";
+      if(answered){ cls += " lock"; cls += j === q.a ? " right" : (j === chosen ? " wrong" : ""); }
+      return `<div class="${cls}" data-daily="${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`;
+    }).join("")}</div>
+    ${answered ? `<div class="q-exp" style="margin-top:12px"><b>${chosen===q.a?"✓ 回答正确":"✗ 正确答案是 "+"ABCD"[q.a]}</b> — ${esc(exp)}</div>` : ""}`;
+}
+
+/* 随机抽一题（与今日一题共用渲染逻辑，但临时覆盖） */
+function randomDaily(){
+  const pool = quizPool(); if(!pool.length) return;
+  const idx = Math.floor(Math.random()*pool.length);
+  const item = pool[idx];
+  dailyState = { date: todayStr(), key: idx, chosen: undefined };
+  lsSet("kb-daily-v1", dailyState);
+  // 直接渲染这一题（不改每日一题的固定选题）
+  const box = document.getElementById("panelDaily"); if(!box) return;
+  const q = item.q, lv = quizLvAt(item.p, item.i), tp = quizTypeOf(q);
+  box.innerHTML = `
+    <h3>🎲 随机练习题</h3>
+    <div class="pdesc">从 420 题中随机抽一道；刷新或回到首页会恢复「今日一题」</div>
+    <div class="qd-head">
+      <span class="qd-badge">${item.p.icon} ${esc(item.p.name)}</span>
+      <span class="qd-badge" style="background:var(--st0-bg); color:var(--sub)">第 ${item.i+1} 题</span>
+      ${lv?`<span class="qd-badge" style="background:var(--lv2-bg); color:var(--lv2)">${esc(lv)}</span>`:""}
+      ${tp!=="choice"?`<span class="qd-badge" style="background:var(--lv3-bg); color:var(--lv3)">${QUIZ_TYPE[tp]||tp}</span>`:""}
+    </div>
+    <div class="qd-q">${esc(q.q)}</div>
+    <div class="qd-opts">${q.opts.map((o,j)=>`<div class="qd-opt" data-rand="${idx}|${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`).join("")}</div>`;
+  box._randItem = item;
+}
+
+/* ══════════════ 首页：最近浏览 ══════════════ */
+function relTime(ts){
+  const s = Math.floor((Date.now() - ts)/1000);
+  if(s < 60) return "刚刚";
+  if(s < 3600) return Math.floor(s/60) + " 分钟前";
+  if(s < 86400) return Math.floor(s/3600) + " 小时前";
+  return Math.floor(s/86400) + " 天前";
+}
+function renderRecent(){
+  const box = document.getElementById("panelRecent"); if(!box) return;
+  const list = recents.filter(x => KB_ITEMS.some(it => it.name === x.n)).slice(0, 8);
+  box.innerHTML = `<h3>🕘 最近浏览</h3>
+    <div class="pdesc">点任意条目直接回到详情（只记录在本机）</div>
+    ${list.length ? list.map(x=>{
+      const it = KB_ITEMS.find(y => y.name === x.n), d = it ? CAT_DOMAIN[it.cat] : null;
+      return `<div class="recent-item" data-recent="${esc(x.n)}">
+        <span class="ri-ic">${d ? d.icon : "📄"}</span>
+        <span class="ri-n">${esc(x.n)}</span>
+        <span class="ri-t">${relTime(x.t)}</span></div>`;
+    }).join("") : `<div class="empty" style="padding:14px 0">还没有浏览记录，点开任意知识点就会出现在这里。</div>`}
+    ${recents.length > 8 ? `<div class="data-note">共 ${recents.length} 条记录，仅显示最近 8 条</div>` : ""}`;
+}
+
+/* ══════════════ 搜索历史下拉 ══════════════ */
+function renderSearchHist(){
+  const box = document.getElementById("searchHist"); if(!box) return;
+  if(!searchHist.length || kw.value.trim()){ box.classList.remove("on"); box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="sh-cap"><span>🕘 搜索历史</span><button data-shclear="1">清空</button></div>` +
+    searchHist.map(q => `<button class="sh-item" data-sh="${esc(q)}">🔍 ${esc(q)}</button>`).join("");
+  box.classList.add("on");
+}
+function hideSearchHist(){ const b = document.getElementById("searchHist"); if(b) b.classList.remove("on"); }
+
+/* ══════════════ 学习打卡热力图 ══════════════ */
+function heatHTML(){
+  const cells = [];
+  for(let i = 29; i >= 0; i--){
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = todayStr(d), n = streak[k] || 0;
+    const lv = n === 0 ? "" : n < 3 ? "l1" : n < 8 ? "l2" : "l3";
+    cells.push(`<i class="${lv}" title="${k}　${n} 次学习动作"></i>`);
+  }
+  return `<div class="heat">${cells.join("")}</div>
+    <div class="heat-legend">少 <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i> 多　·　每格一天，颜色越深当天学习动作越多</div>`;
+}
+
+/* ══════════════ 学习数据备份与恢复 ══════════════ */
+const LS_ALL = ["kb-progress-v1","kb-check-v2","kb-quiz-v1","kb-fav-v1","kb-note-v1","kb-tpl-v1",
+                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1"];
+function exportData(){
+  const bag = {};
+  LS_ALL.forEach(k => { const v = localStorage.getItem(k); if(v !== null) bag[k] = v; });
+  const payload = { app: "结构工程师知识库", ver: 1, at: new Date().toISOString(), data: bag };
+  try{
+    const blob = new Blob([JSON.stringify(payload, null, 1)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "结构工程师知识库-学习记录-" + todayStr() + ".json";
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); }catch(e){} a.remove(); }, 300);
+    return true;
+  }catch(e){ return false; }
+}
+/* 把导入的数据写回本机存储（供测试与导入共用） */
+function importPayload(d){
+  const bag = (d && d.data) ? d.data : d;
+  if(!bag || typeof bag !== "object") return 0;
+  let n = 0;
+  LS_ALL.forEach(k => {
+    if(bag[k] !== undefined){
+      try{ localStorage.setItem(k, typeof bag[k] === "string" ? bag[k] : JSON.stringify(bag[k])); n++; }catch(e){}
+    }
+  });
+  return n;
+}
+function importData(){
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = ".json,application/json";
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      try{
+        const n = importPayload(JSON.parse(fr.result));
+        if(!n) throw new Error("文件里没有可识别的记录");
+        alert("导入成功，共恢复 " + n + " 类记录。页面将刷新以应用。");
+        try{ location.reload(); }catch(e){}
+      }catch(e){ alert("导入失败：" + e.message); }
+    };
+    fr.readAsText(f);
+  };
+  inp.click();
+}
+function clearAllData(){
+  if(!confirm("确定清空全部学习记录吗？\n\n将清除：学习进度、清单勾选、答题记录、收藏、笔记、模板草稿、打卡与浏览历史。\n此操作不可撤销，建议先「导出备份」。")) return;
+  LS_ALL.forEach(k => { if(k !== "kb-theme-v1"){ try{ localStorage.removeItem(k); }catch(e){} } });
+  alert("已清空，页面将刷新。");
+  try{ location.reload(); }catch(e){}
 }
 
 function renderAll(){
@@ -3519,7 +3880,7 @@ document.getElementById("quizBody").addEventListener("click", e=>{
   if(o.classList.contains("lock")) return;
   const p = KB_QUIZ.find(x=>x.id===activeQuiz); if(!p) return;
   quizAnsOf(p.id)[+o.dataset.q] = +o.dataset.o;
-  quizSave(); renderQuiz();
+  quizSave(); markStudy(1); renderQuiz();
 });
 document.getElementById("quizActions").addEventListener("click", e=>{
   const b = e.target.closest("[data-qact]"); if(!b) return;
@@ -3600,6 +3961,7 @@ document.getElementById("chkBody").addEventListener("click", e=>{
   const parts = it.dataset.ck.split("|");
   const id = parts[0], g = +parts[1], i = +parts[2];
   chkSet(id, g, i, !chkOn(id,g,i));
+  markStudy(1);
   renderChecks();
 });
 document.getElementById("chkReset").onclick = ()=>{
@@ -3724,6 +4086,74 @@ document.getElementById("favBody").addEventListener("click", e=>{
   }
   const item = e.target.closest("[data-open]");
   if(item) openItemByName(item.dataset.open);
+});
+
+/* ══════════ 每日一题 / 随机练习 ══════════ */
+document.getElementById("panelDaily").addEventListener("click", e=>{
+  const box = document.getElementById("panelDaily");
+  const r = e.target.closest("[data-rand]");
+  if(r){
+    const item = box._randItem; if(!item) return;
+    const [, oi] = r.dataset.rand.split("|").map(Number);
+    const correct = item.q.a;
+    box.querySelectorAll("[data-rand]").forEach((el, j)=>{
+      el.classList.add("lock");
+      if(j === correct) el.classList.add("right");
+      else if(j === oi) el.classList.add("wrong");
+      el.removeAttribute("data-rand");
+    });
+    const exp = ((window.KB_QUIZ_EXP||{})[item.p.id+"|"+item.i]||{}).e || item.q.exp || "";
+    box.insertAdjacentHTML("beforeend",
+      `<div class="q-exp" style="margin-top:12px"><b>${oi===correct?"✓ 回答正确":"✗ 正确答案是 "+"ABCD"[correct]}</b> — ${esc(exp)}</div>
+       <div class="data-note">做完可点「🎲 随机抽一题」再来一道，或去「🎯 自测题库」按领域系统练习</div>`);
+    markStudy(1);
+    return;
+  }
+  const d = e.target.closest("[data-daily]");
+  if(!d || dailyState.chosen !== undefined) return;
+  dailyState.chosen = Number(d.dataset.daily);
+  lsSet("kb-daily-v1", dailyState);
+  markStudy(1);
+  renderDaily();
+});
+document.getElementById("randBtn").addEventListener("click", ()=>{
+  randomDaily();
+  const el = document.getElementById("panelDaily");
+  if(el && el.scrollIntoView) try{ el.scrollIntoView({ behavior: "smooth", block: "center" }); }catch(e){}
+});
+
+/* ══════════ 最近浏览 ══════════ */
+document.addEventListener("click", e=>{
+  const r = e.target.closest("[data-recent]"); if(!r) return;
+  openItemByName(r.dataset.recent);
+});
+
+/* ══════════ 搜索历史 ══════════ */
+document.getElementById("searchHist").addEventListener("click", e=>{
+  const c = e.target.closest("[data-shclear]");
+  if(c){ searchHist = []; lsSet(LS_SEARCH, searchHist); renderSearchHist(); return; }
+  const b = e.target.closest("[data-sh]");
+  if(!b) return;
+  kw.value = b.dataset.sh;
+  kw.dispatchEvent(new Event("input", { bubbles: true }));
+  hideSearchHist();
+});
+kw.addEventListener("focus", ()=>renderSearchHist());
+kw.addEventListener("blur", ()=>setTimeout(hideSearchHist, 200));
+kw.addEventListener("keydown", e=>{
+  if(e.key === "Enter"){ pushSearchHist(kw.value); hideSearchHist(); }
+  else if(e.key === "Escape"){ hideSearchHist(); }
+});
+document.addEventListener("click", e=>{ if(!e.target.closest(".search")) hideSearchHist(); });
+
+/* ══════════ 数据备份 / 恢复 / 清空 ══════════ */
+document.getElementById("statsBody").addEventListener("click", e=>{
+  const b = e.target.closest("[data-data]"); if(!b) return;
+  if(b.dataset.data === "export"){
+    if(exportData()) alert("已生成备份文件，请在浏览器的「下载」里找到这个 JSON 并妥善保存。");
+    else alert("导出失败，请检查浏览器是否拦截了下载。");
+  }else if(b.dataset.data === "import"){ importData(); }
+  else if(b.dataset.data === "clear"){ clearAllData(); }
 });
 
 /* ══════════ 键盘快捷键 ══════════ */
