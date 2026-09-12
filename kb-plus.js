@@ -7,102 +7,102 @@ window.KB_ITEMS_PLUS = [
   /* ── 1 ── */ { cat:"mat", name:"PC/ABS 合金", lv:2, img:"images/plus01.jpg", imgKw:"PC ABS alloy plastic pellet",
     points:"PC 的强度韧性 + ABS 的流动性与涂装性；比纯 PC 好成型、比纯 ABS 强；耐候与耐化学仍有限，户外长期使用仍需 ASA 体系。",
     usage:"薄壁高强度外壳、兼顾外观与抗冲的中大型件；纯 PC 充填困难或成本偏高时的折中方案。",
-    imgAi:"工程示意图：PC/ABS 合金。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：PC/ABS 合金。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"高分子材料——PC+ABS合金","u":"https://www.bilibili.com/video/BV1Uy4y1M7An"},{"p":"YouTube","t":"PC ABS alloy plastic tutorial","u":"https://www.youtube.com/results?search_query=PC%20ABS%20alloy%20plastic%20tutorial"}] },
 
   /* ── 2 ── */ { cat:"mat", name:"常用塑料牌号对照", lv:2, img:"images/plus02.jpg", imgKw:"plastic material grade datasheet",
     points:"同一材料不同厂牌性能差异可达 30%；灯具常用集中在奇美、台化、LG、SABIC、科思创几家；认牌号比认材料名更接近真相。",
     usage:"出 BOM、写图纸材料栏、比价与替代验证时，必须写到「材料 + 厂牌 + 牌号」三级。",
-    imgAi:"工程示意图：塑料牌号对照表。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：塑料牌号对照表。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"产品结构设计选材,塑胶ABS,PP,PC材料特性,缩水,价格,牌号,应用,五金纯铝,合金","u":"https://www.bilibili.com/video/BV1Z24y1Q7Ad"},{"p":"YouTube","t":"plastic material grade datasheet tutorial","u":"https://www.youtube.com/results?search_query=plastic%20material%20grade%20datasheet%20tutorial"}] },
 
   /* ── 3 ── */ { cat:"mat", name:"塑料耐化学性速查", lv:2, img:"images/plus03.jpg", imgKw:"plastic chemical resistance chart",
     points:"PC 怕碱与溶剂（酒精也会诱发 ESC），ABS 怕酮酯与强碱，PP/PE 几乎耐一切常见化学品，PMMA 怕醇与酮。",
     usage:"选材阶段先问「会接触什么」：酒精擦拭、护手霜、防晒霜、精油、清洁剂——这些都是灯具实际会遇到的介质。",
-    imgAi:"工程示意图：塑料耐化学性。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：塑料耐化学性。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"透明PC产品附近开裂怎么办","u":"https://www.bilibili.com/video/BV1WT4y1q7Wn"},{"p":"YouTube","t":"plastic chemical resistance tutorial","u":"https://www.youtube.com/results?search_query=plastic%20chemical%20resistance%20tutorial"}] },
 
   /* ── 4 ── */ { cat:"mat", name:"导热塑料", lv:3, img:"images/plus04.jpg", imgKw:"thermally conductive plastic",
     points:"填充氮化硼/氧化铝等导热填料，导热系数可达 1~20 W/(m·K)，是普通塑料的 5~100 倍；代价是强度与韧性下降、价格翻数倍。",
     usage:"无法做金属散热件、又需要一定导热能力的外壳或灯体；多用于中低功率灯具的辅助散热。",
-    imgAi:"工程示意图：导热塑料。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：导热塑料。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"为什么导热塑料比铝材要更胜一筹？","u":"https://www.bilibili.com/video/BV1vu4y1877V"},{"p":"YouTube","t":"thermally conductive plastic tutorial","u":"https://www.youtube.com/results?search_query=thermally%20conductive%20plastic%20tutorial"}] },
 
   /* ── 5 ── */ { cat:"proc", name:"嵌件注塑（Insert Molding）", lv:2, img:"images/plus05.jpg", imgKw:"insert molding metal insert",
     points:"先把金属件（螺母/螺柱/端子/轴）放入模腔，再注塑包覆成型；连接强度与密封性远高于后装，是灯具电气与结构节点的关键工艺。",
     usage:"需要高强度螺纹、导电端子、转轴的塑料件；替代热熔螺母得到更高拉拔力与更好一致性。",
-    imgAi:"工程示意图：嵌件注塑。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：嵌件注塑。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"产品结构设计入门-模内注塑金属(嵌件)","u":"https://www.bilibili.com/video/BV1qi4y1x7AD"},{"p":"YouTube","t":"insert molding process tutorial","u":"https://www.youtube.com/results?search_query=insert%20molding%20process%20tutorial"}] },
 
   /* ── 6 ── */ { cat:"proc", name:"硅胶包塑（双色硅胶）", lv:2, img:"images/plus06.jpg", imgKw:"silicone overmolding double shot",
     points:"在硬胶（PC/ABS/PA）上包覆硅胶层，得到「硬骨架 + 软触感」的一体件；靠机械互锁（燕尾槽/通孔）而非仅靠粘接来固定。",
     usage:"软胶按键、防滑手柄、防水圈一体化的灯具；小夜灯拍打面、氛围灯触控区最常见。",
-    imgAi:"工程示意图：硅胶包塑。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：硅胶包塑。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"液态硅胶的成型过程你了解吗？","u":"https://www.bilibili.com/video/BV1Bt3xzJEft"},{"p":"YouTube","t":"LSR silicone overmolding tutorial","u":"https://www.youtube.com/results?search_query=LSR%20silicone%20overmolding%20tutorial"}] },
 
   /* ── 7 ── */ { cat:"proc", name:"塑料激光焊接", lv:3, img:"images/plus07.jpg", imgKw:"plastic laser welding transmission",
     points:"上层透光塑料（PC/PA）让激光穿过，下层吸光塑料（含碳黑）吸收能量熔化，两层在夹紧压力下熔接；焊缝强度接近母材、无飞边、无振动。",
     usage:"需要高气密/水密、且不能用胶或超声的塑料壳体；小型灯具、传感器外壳的密封结构。",
-    imgAi:"工程示意图：塑料激光焊接。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：塑料激光焊接。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"塑料激光焊接透明+透明、透明+有色均可焊，非接触无振动，无痕气密塑料激光焊接","u":"https://www.bilibili.com/video/BV1qJXPB6EUa"},{"p":"YouTube","t":"plastic laser welding tutorial","u":"https://www.youtube.com/results?search_query=plastic%20laser%20welding%20tutorial"}] },
 
   /* ── 8 ── */ { cat:"struct", name:"灯罩固定方式", lv:1, img:"images/plus08.jpg", imgKw:"lamp shade fixing structure",
     points:"常见四类：卡扣式（免螺丝，可拆）、螺纹旋合式（防脱，需旋转空间）、螺纹紧固（最牢，需工具）、胶粘/超声（最薄，不可拆）。",
     usage:"按「是否需要用户拆装、是否要过安规防拆卸、外观是否可见螺丝」三条来定型。",
-    imgAi:"工程示意图：灯罩固定方式。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：灯罩固定方式。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"#灯罩怎么取下来#灯罩怎么安装 灯具不亮了可以通过这样的方式把灯罩取下来更换灯芯","u":"https://www.bilibili.com/video/BV1Sa28YxELW"},{"p":"YouTube","t":"lamp shade fixing structure tutorial","u":"https://www.youtube.com/results?search_query=lamp%20shade%20fixing%20structure%20tutorial"}] },
 
   /* ── 9 ── */ { cat:"struct", name:"透镜固定与卡位", lv:1, img:"images/plus09.jpg", imgKw:"LED lens holder retaining structure",
     points:"透镜的定位靠「轴向止推 + 径向限位 + 预压」三件套；只压不定位会偏心，只定位不压会松动，轴向留着装配间隙就会导致光型偏移。",
     usage:"所有带透镜/反光杯的灯具；也是「同一套物料装出来配光不一致」的最大嫌疑点。",
-    imgAi:"工程示意图：透镜固定与卡位。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：透镜固定与卡位。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"车灯升级绕不开的话题：如何固定透镜","u":"https://www.bilibili.com/video/BV1SN411N7ap"},{"p":"YouTube","t":"LED lens holder mounting tutorial","u":"https://www.youtube.com/results?search_query=LED%20lens%20holder%20mounting%20tutorial"}] },
 
   /* ── 10 ── */ { cat:"struct", name:"导线固定与线槽设计", lv:1, img:"images/plus10.jpg", imgKw:"cable routing wire channel design",
     points:"导线必须在结构内被「约束路径」，不能悬空拉直：走线槽 + 卡线扣 + 过线孔倒角 + 出线口护线套，四条缺一不可。",
     usage:"所有带电源线/排线的灯具；也是安规里「拉力测试」与「绝缘距离」能否通过的结构基础。",
-    imgAi:"工程示意图：导线固定与线槽。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：导线固定与线槽。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"线束主要固定方式","u":"https://www.bilibili.com/video/BV1mHY1zrEiQ"},{"p":"YouTube","t":"wire harness routing fixing tutorial","u":"https://www.youtube.com/results?search_query=wire%20harness%20routing%20fixing%20tutorial"}] },
 
   /* ── 11 ── */ { cat:"struct", name:"防水透气膜（ePTFE）", lv:2, img:"images/plus11.jpg", imgKw:"ePTFE waterproof breathable vent",
     points:"利用膨体聚四氟乙烯的微孔（孔径约 0.2~5μm，远小于水滴、远大于水汽分子），实现「防水但透气」，平衡内外压差、防止结露与密封失效。",
     usage:"户外灯具、需要 IP65 以上又不希望内部结雾的产品；贴在壳体高处、避开水直冲位置。",
-    imgAi:"工程示意图：防水透气膜。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：防水透气膜。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"防水透气膜是什么材料#防水透气膜材料","u":"https://www.bilibili.com/video/BV19W4y1M7wU"},{"p":"YouTube","t":"ePTFE waterproof vent membrane tutorial","u":"https://www.youtube.com/results?search_query=ePTFE%20waterproof%20vent%20membrane%20tutorial"}] },
 
   /* ── 12 ── */ { cat:"struct", name:"螺钉柱防滑牙设计", lv:2, img:"images/plus12.jpg", imgKw:"boss screw stripped thread design",
     points:"滑牙的三大原因：柱外径太薄被撑裂、底孔太大牙高不足、拧入次数过多牙纹剪切破坏；本质是「螺纹啮合长度与柱壁强度」不匹配。",
     usage:"所有自攻螺丝柱；返修率高的产品必须按「首次拧入扭矩 + 三次拆装后扭矩衰减」来验收。",
-    imgAi:"工程示意图：螺钉柱防滑牙。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：螺钉柱防滑牙。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"【不合理结构14】creo结构评审—螺丝柱狗窝结构与防水","u":"https://www.bilibili.com/video/BV1uYLgzvEu4"},{"p":"YouTube","t":"plastic boss stripped thread design tutorial","u":"https://www.youtube.com/results?search_query=plastic%20boss%20stripped%20thread%20design%20tutorial"}] },
 
   /* ── 13 ── */ { cat:"fasten", name:"线束固定与热缩管", lv:2, img:"images/plus13.jpg", imgKw:"cable tie heat shrink tubing wire harness",
     points:"扎带（固定线束走向）、线扣（粘接底座）、热缩管（绝缘与耐磨）、自卷管（保护与收束）是线束四件套；焊点必须用热缩管包覆。",
     usage:"灯具内部线束整理、穿壳过孔保护、焊点绝缘；安规检查的常规项。",
-    imgAi:"工程示意图：线束固定与热缩管。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：线束固定与热缩管。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"线束世界小课堂—热缩管（上）","u":"https://www.bilibili.com/video/BV1ZM4y117qf"},{"p":"YouTube","t":"heat shrink tubing wire harness tutorial","u":"https://www.youtube.com/results?search_query=heat%20shrink%20tubing%20wire%20harness%20tutorial"}] },
 
   /* ── 14 ── */ { cat:"mold", name:"多腔模具与流道平衡", lv:2, img:"images/plus14.jpg", imgKw:"multi cavity mold runner balance",
     points:"一模多腔不是简单复制：流道长度/截面不等会导致各腔充填不均，尺寸与外观出现系统性差异；平衡靠「自然平衡」或「人工平衡（调截面）」实现。",
     usage:"小件灯具（透光片、小外壳、按键）一模 4~32 腔；决定「同一模出来的零件能不能互换」。",
-    imgAi:"工程示意图：多腔模具与流道平衡。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：多腔模具与流道平衡。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"流道平衡原理！","u":"https://www.bilibili.com/video/BV1S14y1k7CD"},{"p":"YouTube","t":"multi cavity mold runner balance tutorial","u":"https://www.youtube.com/results?search_query=multi%20cavity%20mold%20runner%20balance%20tutorial"}] },
 
   /* ── 15 ── */ { cat:"mold", name:"模具钢热处理与表面强化", lv:3, img:"images/plus15.jpg", imgKw:"mold steel heat treatment nitriding",
     points:"淬火提高整体硬度、氮化/渗碳提高表面硬度与耐磨、TD 处理形成碳化钒层适用于高磨损；但对透明件而言，抛光性往往比硬度更关键。",
     usage:"高产量、含玻纤材料、透明件模具；决定模具寿命与后期维护成本。",
-    imgAi:"工程示意图：模具钢热处理。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：模具钢热处理。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"为什么要对模具钢材进行淬火热处理？","u":"https://www.bilibili.com/video/BV1MA411L7rR"},{"p":"YouTube","t":"mold steel heat treatment tutorial","u":"https://www.youtube.com/results?search_query=mold%20steel%20heat%20treatment%20tutorial"}] },
 
   /* ── 16 ── */ { cat:"optic", name:"灯具配光测试", lv:2, img:"images/plus16.jpg", imgKw:"goniophotometer light distribution test",
     points:"用分布光度计在球面各方向测光强，得到配光曲线（IES/LDT 文件）与总光通量；积分球测的是总量，分布光度计测的是「往哪儿去」。",
     usage:"产品定型、客户要配光曲线、做安规与能效申报时的必测项；也是核对「实际光型与设计光型」的唯一手段。",
-    imgAi:"工程示意图：灯具配光测试。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：灯具配光测试。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"分布光度计、LED配光测试、分布式光度计、光强测试仪以及配光曲线测试等专业光度测试设备。","u":"https://www.bilibili.com/video/BV1gP411t7Ty"},{"p":"YouTube","t":"goniophotometer light distribution test tutorial","u":"https://www.youtube.com/results?search_query=goniophotometer%20light%20distribution%20test%20tutorial"}] },
 
   /* ── 17 ── */ { cat:"safety", name:"灼热丝与球压测试", lv:2, img:"images/plus17.jpg", imgKw:"glow wire test ball pressure test",
     points:"灼热丝试验（Glow Wire）考核材料抗引燃能力，模拟过载发热元件接触；球压试验（Ball Pressure）考核材料在高温下的抗形变能力，考核的是支撑带电部件的塑料。",
     usage:"靠近发热元件、支撑带电部件的塑料件必须选用符合要求的材料并留存测试记录。",
-    imgAi:"工程示意图：灼热丝与球压测试。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：灼热丝与球压测试。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"家电安规测试小课堂——非金属材料的灼热丝防火测试","u":"https://www.bilibili.com/video/BV1NQ4y1t7EF"},{"p":"YouTube","t":"glow wire test IEC 60695 tutorial","u":"https://www.youtube.com/results?search_query=glow%20wire%20test%20IEC%2060695%20tutorial"}] },
 
   /* ── 18 ── */ { cat:"test", name:"恒温恒湿与冷热冲击", lv:2, img:"images/plus18.jpg", imgKw:"humidity chamber thermal shock test",
     points:"恒温恒湿（恒定湿热）考察长期吸湿与材料老化；冷热冲击（温度骤变）考察热膨胀系数不匹配带来的应力——两者常被混为一谈，失效机理完全不同。",
     usage:"含金属嵌件、双色件、胶粘件、密封件的灯具必须做温度骤变测试，比高低温循环更严苛。",
-    imgAi:"工程示意图：恒温恒湿与冷热冲击。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：恒温恒湿与冷热冲击。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"两箱式冷热冲击试验箱 高低温冷热冲击箱 冷热循环测试设备 操作说明","u":"https://www.bilibili.com/video/BV1Nm4y1i71i"},{"p":"YouTube","t":"thermal shock test chamber tutorial","u":"https://www.youtube.com/results?search_query=thermal%20shock%20test%20chamber%20tutorial"}] },
 
   /* ── 19 ── */ { cat:"cost", name:"供应商评估与选点", lv:1, img:"images/plus19.jpg", imgKw:"supplier audit evaluation factory",
     points:"选供应商是选「风险」，不只是选价格：技术能力、产能匹配、质量体系、财务健康、配合度五项缺一不可；单一供应商依赖是最大的隐性风险。",
     usage:"新项目定点、老供应商出问题需备选时；也用于解释「为什么不能只选报价最低的那家」。",
-    imgAi:"工程示意图：供应商评估与选点。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] },
+    imgAi:"工程示意图：供应商评估与选点。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"如何评估供应商的资质？","u":"https://www.bilibili.com/video/BV1vb2oYVEkT"},{"p":"YouTube","t":"supplier audit evaluation factory tutorial","u":"https://www.youtube.com/results?search_query=supplier%20audit%20evaluation%20factory%20tutorial"}] },
 
   /* ── 20 ── */ { cat:"cost", name:"样品承认流程", lv:2, img:"images/plus20.jpg", imgKw:"sample approval first article inspection",
     points:"承认书 = 样品 + 全尺寸报告 + 材料证明 + 外观限度样 + 测试报告；签样是量产前的最后一道防线，也是后续判定的唯一依据。",
     usage:"新供应商导入、换料、换模、设变后必须重新承认；量产争议时靠它定责。",
-    imgAi:"工程示意图：样品承认流程。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[] }
+    imgAi:"工程示意图：样品承认流程。线条简洁、轴侧视角、白底，关键部件引出标注，比例合理，无人物场景，工程师参考图风格。", videos:[{"p":"B站","t":"首件检验规范流程","u":"https://www.bilibili.com/video/BV1es4y1g7Zn"},{"p":"YouTube","t":"first article inspection FAI tutorial","u":"https://www.youtube.com/results?search_query=first%20article%20inspection%20FAI%20tutorial"}] }
 ];
 
 /* ══════════════ 深度解析（5 节） ══════════════ */
