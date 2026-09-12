@@ -396,6 +396,29 @@
   .task-box .tb-k li{font-size:12px; line-height:1.75; color:#047857; padding-left:19px; position:relative; margin-bottom:3px;}
   .task-box .tb-k li::before{content:"✓"; position:absolute; left:0; font-weight:bold;}
 
+  /* ══════ 参考图集 ══════ */
+  .ref-cnt{font-size:11px; background:var(--primary-weak); color:var(--primary); padding:1px 8px; border-radius:8px; margin-left:6px; font-weight:normal;}
+  .ref-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:9px;}
+  .ref-mini{display:inline-block; font-size:10.5px; background:#ecfdf5; color:#059669; border-radius:7px; padding:1px 6px; margin-left:4px; font-weight:bold;}
+  .ref-card{border:1px solid var(--border); border-radius:10px; overflow:hidden; background:#fff; cursor:zoom-in; transition:all .15s;}
+  .ref-card:hover{border-color:var(--primary); transform:translateY(-2px); box-shadow:0 6px 16px rgba(16,24,40,.12);}
+  .ref-card .rc-img{width:100%; aspect-ratio:4/3; background:#f3f5fa; overflow:hidden;}
+  .ref-card .rc-img img{width:100%; height:100%; object-fit:cover; display:block;}
+  .ref-card .rc-cap{font-size:11px; line-height:1.5; color:#475569; padding:6px 8px 0; max-height:50px; overflow:hidden;}
+  .ref-card .rc-src{font-size:10px; color:#94a3b8; padding:3px 8px 7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  /* ══════ 参考图库（浏览模式） ══════ */
+  .gw-tools{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
+  .gw-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;}
+  .gw-card{border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--card); cursor:pointer; transition:all .15s; box-shadow:var(--shadow);}
+  .gw-card:hover{border-color:var(--primary); transform:translateY(-3px); box-shadow:0 10px 24px rgba(16,24,40,.13);}
+  .gw-card .gc-img{width:100%; aspect-ratio:4/3; background:#f3f5fa; overflow:hidden;}
+  .gw-card .gc-img img{width:100%; height:100%; object-fit:cover; display:block;}
+  .gw-card .gc-body{padding:8px 11px 10px;}
+  .gw-card .gc-item{font-size:11.5px; font-weight:bold; color:var(--primary); margin-bottom:3px; display:flex; align-items:center; gap:5px;}
+  .gw-card .gc-cap{font-size:11px; line-height:1.5; color:var(--sub); max-height:32px; overflow:hidden;}
+  .gw-stat{font-size:12px; color:var(--sub); margin-bottom:12px;}
+
   @media print{
     .topbar,.navbar,.detail-panel,.detail-backdrop,#watermark,#site-stats,.no-print{display:none !important;}
     body{background:#fff; padding:0;}
@@ -456,6 +479,7 @@
       <button class="nav-tab" data-mod="check">✅ 检查清单<span class="nb" id="nbCheck"></span></button>
       <button class="nav-tab" data-mod="case">🧩 整机案例<span class="nb" id="nbCase"></span></button>
       <button class="nav-tab" data-mod="gloss">📖 术语词典<span class="nb" id="nbGloss"></span></button>
+      <button class="nav-tab" data-mod="gallery">🖼️ 参考图库<span class="nb" id="nbGallery"></span></button>
       <button class="nav-tab" data-mod="field">💼 实战宝典<span class="nb" id="nbField"></span></button>
     </div>
   </div>
@@ -499,6 +523,23 @@
       </div>
     </div>
     <div class="calc-grid" id="calcBody"></div>
+  </div>
+
+  <!-- 参考图库 -->
+  <div id="galleryView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">🖼️</div>
+      <div>
+        <h2>参考图库<span class="mcnt" id="gwCount"></span></h2>
+        <div class="mtg">全部知识点的<strong>实景参考图</strong>汇总在一起，点图片放大看细节，点蓝色标题直接跳进对应知识点</div>
+      </div>
+      <div class="mod-tools">
+        <select id="gwCat" class="mini-input"></select>
+        <input class="mini-input" id="gwSearch" placeholder="搜索图注：模具、卡扣、散热…">
+      </div>
+    </div>
+    <div class="gw-stat" id="gwStat"></div>
+    <div class="gw-grid" id="gwBody"></div>
   </div>
 
   <!-- 实战宝典 -->
@@ -708,11 +749,18 @@
       <div id="dpVideos"></div>
     </div>
     <div class="dp-sec">
-      <h4>🖼️ 图片解说</h4>
+      <h4>🖼️ 主图（视频封面）</h4>
       <div class="img-block">
         <div class="img-preview" id="dpImg"></div>
         <div class="img-kw">搜索关键词：<b id="dpKw"></b></div>
         <div class="img-btns" id="dpImgBtns"></div>
+      </div>
+    </div>
+    <div class="dp-sec" id="dpRefSec" style="display:none">
+      <h4>📷 参考图集<span class="ref-cnt" id="dpRefCount"></span></h4>
+      <div class="ref-grid" id="dpRefGrid"></div>
+      <div style="font-size:11px; color:var(--sub); margin-top:8px; line-height:1.65;">
+        💡 点击任意图片可放大查看；图注为原图标题，来源标注在图注下方
       </div>
     </div>
   </div>
@@ -753,6 +801,7 @@
 <script src="kb-task-1.js"></script>
 <script src="kb-task-2.js"></script>
 <script src="kb-task-3.js"></script>
+<script src="kb-img.js"></script>
 <script>
 const DC = {
   material:     {c:"#d97706", s:"#b45309", w:"#fff7ed"},
@@ -800,9 +849,10 @@ const mapView = document.getElementById("mapView");
 const quizView = document.getElementById("quizView");
 const calcView = document.getElementById("calcView");
 const fieldView = document.getElementById("fieldView");
+const galleryView = document.getElementById("galleryView");
 const KB_VIEWS = [homeView, domainView, searchView];
 const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossView, path:pathView,
-                   map:mapView, quiz:quizView, calc:calcView, field:fieldView};
+                   map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -980,7 +1030,24 @@ function openDetail(it){
     document.getElementById("aiPromptText").textContent = it.imgAi || `工程示意图：${it.name}。线条简洁、白底、轴侧视角，关键部件引出标注。`;
     document.getElementById("aiModal").classList.add("open");
   };
+  // 参考图集
+  renderRef(it);
   document.body.classList.add("detail-open");
+}
+
+// 参考图集渲染
+function refCount(name){ const a=(window.KB_IMG||{})[name]; return a? a.length : 0; }
+function renderRef(it){
+  const sec = document.getElementById("dpRefSec"), grid = document.getElementById("dpRefGrid"), cnt = document.getElementById("dpRefCount");
+  const arr = (window.KB_IMG || {})[it.name] || [];
+  if(!arr.length){ sec.style.display = "none"; return; }
+  sec.style.display = "";
+  cnt.textContent = arr.length + " 张";
+  grid.innerHTML = arr.map(x=>`<div class="ref-card" data-ref="${esc(x.f)}" data-cap="${esc(x.t)}" data-src="${esc(x.s||"")}">
+    <div class="rc-img"><img src="${esc(x.f)}" alt="${esc(x.t)}" loading="lazy"></div>
+    <div class="rc-cap">${esc(x.t)}</div>
+    <div class="rc-src">来源：${esc(x.s||"—")}</div>
+  </div>`).join("");
 }
 
 function closeDetail(){
@@ -1071,9 +1138,10 @@ function buildChips(d){
 }
 function rowHTML(it, i, q, catLabel, catStyle){
   const stv = getSt(it.name);
-  const imgCell = it.img
+  const rc = refCount(it.name);
+  const imgCell = (it.img
     ? `<button class="img-btn" data-img="${esc(it.img)}" data-name="${esc(it.name)}"><img src="${esc(it.img)}" alt=""></button>`
-    : `<button class="img-btn none" data-name="${esc(it.name)}">＋ 配图</button>`;
+    : `<button class="img-btn none" data-name="${esc(it.name)}">＋ 配图</button>`) + (rc ? `<span class="ref-mini" title="另有 ${rc} 张参考图，点开行查看">＋${rc}</span>` : "");
   const videos = it.videos || [];
   const vidCell = videos.slice(0,2).map(v=>{
     const c = (v.p === "YouTube") ? "yt" : "";
@@ -1543,6 +1611,39 @@ function renderField(){
   }
 }
 
+/* ══════════════ 模块十：参考图库 ══════════════ */
+function renderGallery(){
+  const sel = document.getElementById("gwCat");
+  if(!sel.dataset.init){
+    sel.innerHTML = '<option value="">全部领域</option>' +
+      KB_DOMAINS.map(d=>`<option value="${d.id}">${d.icon} ${esc(d.name)}</option>`).join("");
+    sel.dataset.init = "1";
+  }
+  const q = (document.getElementById("gwSearch").value||"").trim().toLowerCase();
+  const cat = sel.value;
+  const cards = [];
+  KB_ITEMS.forEach(it=>{
+    const d = CAT_DOMAIN[it.cat]; if(!d) return;
+    if(cat && d.id !== cat) return;
+    ((window.KB_IMG||{})[it.name] || []).forEach(x=>{
+      if(q && !(x.t+" "+it.name).toLowerCase().includes(q)) return;
+      cards.push({it, x, d});
+    });
+  });
+  document.getElementById("gwCount").textContent = cards.length + " 张";
+  document.getElementById("gwStat").innerHTML =
+    `共 <b>${cards.length}</b> 张参考图，覆盖 <b>${new Set(cards.map(c=>c.it.name)).size}</b> 个知识点` +
+    (q||cat ? `（已筛选）` : `　·　点图片放大，点标题进入知识点`);
+  document.getElementById("gwBody").innerHTML = cards.length ? cards.map(c=>`
+    <div class="gw-card" data-ref="${esc(c.x.f)}" data-cap="${esc(c.x.t)}" data-src="${esc(c.x.s||"")}">
+      <div class="gc-img"><img src="${esc(c.x.f)}" alt="${esc(c.x.t)}" loading="lazy"></div>
+      <div class="gc-body">
+        <div class="gc-item" data-rel="${esc(c.it.name)}">${c.d.icon} ${esc(c.it.name)} →</div>
+        <div class="gc-cap">${esc(c.x.t)}</div>
+      </div>
+    </div>`).join("") : `<div class="empty" style="grid-column:1/-1">没有匹配的图片，换个关键词试试～</div>`;
+}
+
 function renderAll(){
   navbar.querySelectorAll(".nav-tab").forEach(b=>b.classList.toggle("active", b.dataset.mod===activeModule));
   const isKB = activeModule === "kb";
@@ -1563,6 +1664,7 @@ function renderAll(){
     else if(activeModule==="quiz") renderQuiz();
     else if(activeModule==="calc") renderCalc();
     else if(activeModule==="field") renderField();
+    else if(activeModule==="gallery") renderGallery();
     return;
   }
   const q = kw.value.trim();
@@ -1629,17 +1731,28 @@ document.getElementById("aiCopyBtn").onclick = function(){
 };
 document.getElementById("aiCloseBtn").onclick = ()=> document.getElementById("aiModal").classList.remove("open");
 
-// 图片放大
+// 图片放大（主图 / 参考图集 / 图库通用）
 document.addEventListener("click", e=>{
-  const im = e.target.closest(".img-preview img, .img-btn[data-img] img");
-  if(im){
-    e.stopPropagation();
-    const btn = im.closest(".img-btn[data-img]");
-    const src = im.src;
-    document.getElementById("imgModalSrc").src = src;
-    document.getElementById("imgModalCap").textContent = btn ? btn.dataset.name : "";
-    document.getElementById("imgModal").classList.add("open");
+  // 图库卡片上的知识点标题 → 跳详情
+  const gi = e.target.closest(".gc-item[data-rel]");
+  if(gi){ e.preventDefault(); e.stopPropagation(); openItemByName(gi.dataset.rel); return; }
+  const tgt = e.target.closest(".ref-card[data-ref], .gw-card[data-ref], .img-preview img, .img-btn[data-img] img");
+  if(!tgt) return;
+  e.stopPropagation();
+  const card = e.target.closest(".ref-card[data-ref], .gw-card[data-ref]");
+  let src = "", cap = "";
+  if(card){
+    src = card.dataset.ref; cap = card.dataset.cap + (card.dataset.src ? "　|　来源：" + card.dataset.src : "");
+  }else{
+    const im = e.target.closest("img");
+    const btn = e.target.closest(".img-btn[data-img]");
+    src = im ? im.src : "";
+    cap = btn ? btn.dataset.name : "";
   }
+  if(!src) return;
+  document.getElementById("imgModalSrc").src = src;
+  document.getElementById("imgModalCap").textContent = cap;
+  document.getElementById("imgModal").classList.add("open");
 });
 document.getElementById("imgModalClose").onclick = ()=> document.getElementById("imgModal").classList.remove("open");
 document.getElementById("imgModal").addEventListener("click", e=>{
@@ -1659,7 +1772,12 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbQuiz", (window.KB_QUIZ||[]).reduce((a,p)=>a+p.questions.length,0) + " 题");
   set("nbCalc", (typeof CALCS!=="undefined" ? CALCS.length : 0) + " 个");
   set("nbField", ((window.KB_TROUBLE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_INTERVIEW||[]).reduce((a,x)=>a+x.items.length,0)) + " 条");
+  set("nbGallery", Object.values(window.KB_IMG||{}).reduce((a,b)=>a+b.length,0) + " 张");
 })();
+
+// 参考图库筛选
+document.getElementById("gwCat").addEventListener("change", renderGallery);
+document.getElementById("gwSearch").addEventListener("input", renderGallery);
 
 // 学习地图
 document.getElementById("mapTabs").addEventListener("click", e=>{
