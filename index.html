@@ -646,12 +646,218 @@
   .dfm-row.res .dfm-k{color:#047857;}
   .dfm-row.res .dfm-v{color:#065f46;}
 
+  /* ══════════════════════ 深色主题 ══════════════════════ */
+  html[data-theme="dark"]{
+    --bg:#0f1523; --card:#1a2138; --border:#2b3448;
+    --text:#e7ecf6; --sub:#93a1ba; --primary:#60a5fa; --primary-weak:#1d2a4d;
+    --lv1:#f87171; --lv1-bg:#3a1e1e; --lv2:#fbbf24; --lv2-bg:#3a2e12; --lv3:#22d3ee; --lv3-bg:#0f2f38;
+    --st0:#94a3b8; --st0-bg:#252d3f; --st1:#60a5fa; --st1-bg:#1d2a4d; --st2:#34d399; --st2-bg:#132e26;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  html[data-theme="dark"] body{background:var(--bg); color:var(--text);}
+  html[data-theme="dark"] .topbar{background:rgba(15,21,35,.94);}
+  html[data-theme="dark"] .brand .t1{color:var(--text);}
+  html[data-theme="dark"] .hero{background:linear-gradient(120deg,#152a62 0%,#1e3f8f 45%,#4c1d95 100%);}
+  html[data-theme="dark"] .nav-tab{color:var(--sub);}
+  html[data-theme="dark"] .nav-tab:hover{background:#232d47; color:var(--primary);}
+  html[data-theme="dark"] .nav-tab .nb{background:rgba(255,255,255,.1); color:var(--sub);}
+  html[data-theme="dark"] #watermark span{color:#93a7c8;}
+  html[data-theme="dark"] .d-bar{background:#131a2c;}
+  html[data-theme="dark"] tbody tr:hover, html[data-theme="dark"] table.mini tbody tr:hover{background:#202a42;}
+  html[data-theme="dark"] .nav-cap{background:#252d3f; color:var(--sub);}
+  html[data-theme="dark"] .detail-panel{background:var(--bg);}
+  html[data-theme="dark"] .dp-anchors{background:#131a2c; border-color:var(--border);}
+  html[data-theme="dark"] .dp-sec .text,
+  html[data-theme="dark"] .deep-items .d-item,
+  html[data-theme="dark"] .num-items .n-item,
+  html[data-theme="dark"] .vid-card,
+  html[data-theme="dark"] .img-block,
+  html[data-theme="dark"] .img-preview,
+  html[data-theme="dark"] .task-box,
+  html[data-theme="dark"] .map-item,
+  html[data-theme="dark"] .ref-card,
+  html[data-theme="dark"] .stat-item,
+  html[data-theme="dark"] .mk-item,
+  html[data-theme="dark"] .fm-item,
+  html[data-theme="dark"] .dfm-item,
+  html[data-theme="dark"] .tpl-card,
+  html[data-theme="dark"] .ch-card{background:#151d31; border-color:var(--border);}
+  html[data-theme="dark"] .dp-anchors button,
+  html[data-theme="dark"] .modal button,
+  html[data-theme="dark"] .img-btns a, html[data-theme="dark"] .img-btns button,
+  html[data-theme="dark"] .rel-chip.sm,
+  html[data-theme="dark"] .gl-tag,
+  html[data-theme="dark"] .qq-tp,
+  html[data-theme="dark"] .lvf,
+  html[data-theme="dark"] .sel-btn,
+  html[data-theme="dark"] .sel-opt,
+  html[data-theme="dark"] .fm-unit{background:#242d42; border-color:var(--border); color:#cbd5e1;}
+  html[data-theme="dark"] .q-opt{background:#182135; border-color:var(--border);}
+  html[data-theme="dark"] .q-opt .ol{background:#2b3448; color:#cbd5e1;}
+  html[data-theme="dark"] .q-exp{background:#3a2e12; border-color:#5c4a1c; color:#f3e3bd;}
+  html[data-theme="dark"] .q-exp b{color:#fbbf24;}
+  html[data-theme="dark"] .q-why{background:#131a2c; border-color:var(--border);}
+  html[data-theme="dark"] .qv-note{background:#3a2e12; border-color:#5c4a1c; color:#f3e3bd;}
+  html[data-theme="dark"] .next-step{background:#1d2a4d; border-color:#2f4b8a;}
+  html[data-theme="dark"] .prog-bar{background:#242d42;}
+  html[data-theme="dark"] .calc-formula,
+  html[data-theme="dark"] .cf input,
+  html[data-theme="dark"] .modal .prompt-box{background:#131a2c; border-color:var(--border);}
+  html[data-theme="dark"] .modal .box{background:#1a2138;}
+  html[data-theme="dark"] .dp-head .lv-mini.lv1{background:var(--lv1-bg);}
+  html[data-theme="dark"] .dp-head .lv-mini.lv2{background:var(--lv2-bg);}
+  html[data-theme="dark"] .dp-head .lv-mini.lv3{background:var(--lv3-bg);}
+  html[data-theme="dark"] .lev-stat{background:#242d42;}
+  html[data-theme="dark"] .lev-stat.lev-2{background:#1d2a4d;}
+  html[data-theme="dark"] .deep-empty, html[data-theme="dark"] .dg-map-g{background:#131a2c;}
+  html[data-theme="dark"] .ref-card .rc-img, html[data-theme="dark"] .gw-card .gc-img{background:#131a2c;}
+  /* 深色下的文字 */
+  html[data-theme="dark"] .ab-list li, html[data-theme="dark"] thead th, html[data-theme="dark"] table.mini th,
+  html[data-theme="dark"] table.mini td:first-child, html[data-theme="dark"] .deep-items .d-item li,
+  html[data-theme="dark"] .deep-items .d-item li b, html[data-theme="dark"] .spec-grp li,
+  html[data-theme="dark"] .iss .ia, html[data-theme="dark"] .step .st2, html[data-theme="dark"] .step .st2 b,
+  html[data-theme="dark"] .gl-cn, html[data-theme="dark"] .pd .pdt, html[data-theme="dark"] .pd li,
+  html[data-theme="dark"] .map-goal, html[data-theme="dark"] .map-item .mn,
+  html[data-theme="dark"] .lev-stat, html[data-theme="dark"] .lev-stat b, html[data-theme="dark"] .qw-w,
+  html[data-theme="dark"] .tr-row .trv, html[data-theme="dark"] .iv-a li,
+  html[data-theme="dark"] .task-box .tb-t, html[data-theme="dark"] .task-box .tb-d,
+  html[data-theme="dark"] .ref-card .rc-cap, html[data-theme="dark"] .prog-row .pl,
+  html[data-theme="dark"] .gs-t, html[data-theme="dark"] .dg-p, html[data-theme="dark"] .dg-map-t,
+  html[data-theme="dark"] .sel-q, html[data-theme="dark"] .sr-block li,
+  html[data-theme="dark"] .mk-t, html[data-theme="dark"] .mk-v, html[data-theme="dark"] .fm-name,
+  html[data-theme="dark"] .fv-d, html[data-theme="dark"] .fm-when, html[data-theme="dark"] .dfm-q,
+  html[data-theme="dark"] .dfm-v, html[data-theme="dark"] .img-preview .ph b, html[data-theme="dark"] .img-kw b{color:#cbd5e1;}
+  html[data-theme="dark"] .iss, html[data-theme="dark"] .step, html[data-theme="dark"] .pd,
+  html[data-theme="dark"] .tr-item, html[data-theme="dark"] .iv-item, html[data-theme="dark"] .gs-item{border-color:var(--border);}
+  html[data-theme="dark"] .fm-eg, html[data-theme="dark"] .gs-d code, html[data-theme="dark"] .fm-eg code{background:rgba(96,165,250,.14); color:#cbd5e1;}
+  html[data-theme="dark"] .theme-btn{background:#242d42; border-color:var(--border); color:#cbd5e1;}
+  html[data-theme="dark"] .qw-t{background:#1a2138;}
+  html[data-theme="dark"] .sel-path{background:#131a2c; border-color:var(--border); color:#cbd5e1;}
+  html[data-theme="dark"] .iv-tag{background:var(--lv1-bg); color:var(--lv1);}
+  html[data-theme="dark"] .iv-tag.mid{background:var(--lv2-bg); color:var(--lv2);}
+  html[data-theme="dark"] .calc-res .cr-extra{border-top-color:var(--border);}
+  html[data-theme="dark"] .calc-res .cr-extra div{color:#cbd5e1;}
+  html[data-theme="dark"] .calc-res .cr-extra b{color:var(--text);}
+
+  /* ── 主题切换按钮 ── */
+  .theme-btn{width:38px; height:38px; border-radius:12px; border:1px solid var(--border); background:var(--card);
+    cursor:pointer; font-size:16px; line-height:1; box-shadow:var(--shadow); transition:all .15s; flex-shrink:0;}
+  .theme-btn:hover{border-color:var(--primary); transform:translateY(-1px);}
+
+  /* ══════════════════════ 错题本 ══════════════════════ */
+  .wrong-sum{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:18px;}
+  .ws-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);}
+  .ws-card b{font-size:26px; font-weight:800; display:block; line-height:1.2;}
+  .ws-card span{font-size:12px; color:var(--sub);}
+  .weak-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px dashed var(--border);}
+  .weak-row:last-child{border-bottom:none;}
+  .weak-row .wn{flex:0 0 96px; font-size:13px; font-weight:bold;}
+  .weak-row .wb{flex:1; height:9px; border-radius:5px; background:var(--st0-bg); overflow:hidden;}
+  .weak-row .wb i{display:block; height:100%; border-radius:5px;}
+  .weak-row .wv{flex:0 0 108px; text-align:right; font-size:12px; color:var(--sub);}
+  .wq-item{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:12px; box-shadow:var(--shadow);}
+  .wq-tag{display:inline-block; font-size:11px; padding:2px 9px; border-radius:7px; background:var(--primary-weak); color:var(--primary); margin-right:8px; font-weight:bold;}
+  .wq-q{font-size:13.5px; font-weight:bold; line-height:1.7; margin:8px 0 10px;}
+  .wq-opt{display:flex; gap:9px; padding:8px 11px; border-radius:9px; border:1px solid var(--border); margin-bottom:6px; font-size:12.5px; line-height:1.6; align-items:flex-start;}
+  .wq-opt .ol{width:22px; height:22px; flex-shrink:0; border-radius:6px; background:var(--st0-bg); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:bold;}
+  .wq-opt.right{background:var(--st2-bg); border-color:#a7f3d0;}
+  .wq-opt.right .ol{background:var(--st2); color:#fff;}
+  .wq-opt.wrong{background:var(--lv1-bg); border-color:#fecaca;}
+  .wq-opt.wrong .ol{background:var(--lv1); color:#fff;}
+
+  /* ══════════════════════ 学习数据（图表） ══════════════════════ */
+  .ch-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; margin-bottom:16px;}
+  .ch-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow);}
+  .ch-card h3{font-size:14.5px; margin-bottom:4px;}
+  .ch-card .chd{font-size:11.5px; color:var(--sub); margin-bottom:14px; line-height:1.6;}
+  .ch-svg{width:100%; height:auto; display:block; overflow:visible;}
+  .ch-legend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:11.5px; color:var(--sub);}
+  .ch-legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+
+  /* ══════════════════════ 实战模板 ══════════════════════ */
+  .tpl-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; box-shadow:var(--shadow); margin-bottom:16px;}
+  .tpl-info{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px 18px; margin-bottom:16px;}
+  .tpl-field{display:flex; align-items:center; gap:8px;}
+  .tpl-field label{font-size:12.5px; color:var(--sub); flex:0 0 104px; text-align:right;}
+  .tpl-field input{flex:1; min-width:0; padding:8px 11px; border:1px solid var(--border); border-radius:9px; font-size:12.5px; background:var(--bg); color:var(--text); outline:none; font-family:inherit;}
+  .tpl-field input:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+  table.tpl-fill{border-collapse:collapse; width:100%; font-size:12.5px;}
+  table.tpl-fill th, table.tpl-fill td{border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top; line-height:1.6;}
+  table.tpl-fill th{background:var(--primary-weak); color:var(--primary); font-size:12px; white-space:nowrap;}
+  table.tpl-fill td[contenteditable]{background:var(--bg); cursor:text; min-width:78px;}
+  table.tpl-fill td[contenteditable]:focus{outline:2px solid var(--primary); outline-offset:-2px;}
+  table.tpl-fill td.lbl{background:var(--st0-bg); color:var(--text); font-weight:bold;}
+  .tpl-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;}
+  .tpl-note{font-size:12px; color:var(--sub); line-height:1.75; background:var(--bg); border-left:3px solid var(--primary); border-radius:0 9px 9px 0; padding:11px 14px; margin-top:14px;}
+
+  /* ══════════════════════ 收藏与笔记 ══════════════════════ */
+  .dp-actions{display:flex; gap:9px; flex-wrap:wrap; margin:12px 0 2px;}
+  .dp-actions button{padding:7px 14px; border-radius:9px; border:1px solid var(--border); background:var(--card);
+    font-size:12.5px; cursor:pointer; color:var(--sub); font-family:inherit; transition:all .15s;}
+  .dp-actions button:hover{border-color:var(--primary); color:var(--primary);}
+  .dp-actions button.on{background:#fef3c7; border-color:#fbbf24; color:#92400e; font-weight:bold;}
+  html[data-theme="dark"] .dp-actions button.on{background:#3a2e12; color:#fbbf24;}
+  .note-area{width:100%; min-height:74px; padding:11px 13px; border:1px solid var(--border); border-radius:10px;
+    font-size:12.5px; line-height:1.75; font-family:inherit; background:var(--bg); color:var(--text); outline:none; resize:vertical;}
+  .note-area:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+  .note-hint{font-size:11px; color:var(--sub); margin-top:6px;}
+  .fav-item{display:flex; align-items:center; gap:11px; padding:12px 15px; background:var(--card); border:1px solid var(--border);
+    border-radius:11px; margin-bottom:9px; cursor:pointer; transition:all .15s; box-shadow:var(--shadow);}
+  .fav-item:hover{border-color:var(--primary); transform:translateX(3px);}
+  .fav-item .fi-ic{font-size:16px; flex-shrink:0;}
+  .fav-item .fi-n{font-weight:bold; font-size:13.5px;}
+  .fav-item .fi-d{font-size:11.5px; color:var(--sub); margin-top:3px;}
+  .fav-item .fi-t{margin-left:auto; font-size:11px; color:var(--sub); white-space:nowrap;}
+
+  /* ── 快捷键提示 ── */
+  .kbd-hint{position:fixed; right:22px; bottom:78px; z-index:50; background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:12px 15px; font-size:12px; box-shadow:0 8px 24px rgba(16,24,40,.14); display:none; line-height:2;}
+  .kbd-hint.on{display:block;}
+  .kbd-hint kbd{display:inline-block; min-width:20px; text-align:center; padding:1px 6px; border:1px solid var(--border);
+    border-bottom-width:2px; border-radius:5px; font-family:ui-monospace,Consolas,monospace; font-size:11px; background:var(--bg); margin-right:6px;}
+
   @media print{
-    .topbar,.navbar,.detail-panel,.detail-backdrop,#watermark,#site-stats,.no-print{display:none !important;}
-    body{background:#fff; padding:0;}
-    .wrap{max-width:100%;}
-    .chk-card{border:none; box-shadow:none;}
+    @page{margin:12mm 10mm;}
+    .topbar,.navbar,.detail-panel,.detail-backdrop,#watermark,#site-stats,#toTop,
+    .kbd-hint,.no-print,.tpl-actions,.dp-actions,.hero-actions,.mod-tools,.field-search,
+    .back-btn,.modal{display:none !important;}
+    html,body{background:#fff !important; color:#111 !important; padding:0 !important;}
+    .wrap{max-width:100% !important;}
+    body.detail-open .wrap{padding-right:0 !important;}
+    .card,.tpl-card,.ch-card,.ws-card,.wq-item,.fav-item,.stat-item{box-shadow:none !important; border-color:#bbb !important;
+      background:#fff !important; break-inside:avoid;}
+    table.mini, table.tpl-fill{border-collapse:collapse; width:100%; font-size:10.5px;}
+    table.mini th, table.mini td, table.tpl-fill th, table.tpl-fill td{border:1px solid #999 !important; padding:5px 7px;}
+    table.mini thead, table.tpl-fill thead{display:table-header-group;}
+    table.mini tr, table.tpl-fill tr{break-inside:avoid;}
+    .card, h2, h3{break-after:avoid;}
+    .chk-card{border:none !important; box-shadow:none !important;}
     .chk-item .bx{border-color:#666 !important;}
+    /* 详情面板单独打印（点「打印 / 导出」时） */
+    body.printing-detail .wrap{display:none !important;}
+    body.printing-detail .detail-panel{display:block !important; position:static !important; left:auto !important; right:auto !important;
+      width:100% !important; max-width:none !important; height:auto !important; border:none !important; box-shadow:none !important;
+      padding:0 !important; overflow:visible !important; background:#fff !important;}
+    body.printing-detail .detail-backdrop,
+    body.printing-detail .dp-anchors,
+    body.printing-detail .dp-actions,
+    body.printing-detail .dp-nav,
+    body.printing-detail .dp-close,
+    body.printing-detail .close-x,
+    body.printing-detail #secNote,
+    body.printing-detail #secImage,
+    body.printing-detail #dpRefSec{display:none !important;}
+    body.printing-detail .dp-body{overflow:visible !important; max-height:none !important; padding:0 !important; background:#fff !important;}
+    body.printing-detail .dp-head{position:static !important; background:#fff !important; border:none !important; padding:0 0 10px !important;}
+    body.printing-detail .deep-items .d-item,
+    body.printing-detail .num-items .n-item,
+    body.printing-detail .task-box,
+    body.printing-detail .dp-sec .text{background:#fff !important; border:1px solid #bbb !important; color:#111 !important;}
+    .tpl-field input, td[contenteditable]{background:#fff !important; border:1px solid #999 !important; color:#111 !important;}
+    .qv-tabs{display:none !important;}
+    a{color:#111 !important; text-decoration:none;}
+    mark{background:#fff2a8 !important; color:#111 !important;}
+    .ch-svg text{fill:#111 !important;}
   }
   @media (max-width:760px){
     body.detail-open .wrap{padding-right:0;}
@@ -730,6 +936,8 @@
       <option value="1">学习中</option>
       <option value="2">已掌握</option>
     </select>
+    <button class="theme-btn" id="themeBtn" title="切换深色 / 浅色主题（快捷键 D）">🌙</button>
+    <button class="theme-btn" id="kbdBtn" title="键盘快捷键（?）">⌨</button>
   </div>
 
   <div class="navbar" id="navbar">
@@ -738,6 +946,8 @@
       <button class="nav-tab active" data-mod="kb">📚 知识库<span class="nb" id="nbKb"></span></button>
       <button class="nav-tab" data-mod="map">🧭 学习地图<span class="nb" id="nbMap"></span></button>
       <button class="nav-tab" data-mod="quiz">🎯 自测题库<span class="nb" id="nbQuiz"></span></button>
+      <button class="nav-tab" data-mod="wrong">❌ 错题本<span class="nb" id="nbWrong"></span></button>
+      <button class="nav-tab" data-mod="stats">📈 学习数据<span class="nb" id="nbStats"></span></button>
       <button class="nav-tab" data-mod="calc">🛠️ 计算器<span class="nb" id="nbCalc"></span></button>
       <button class="nav-tab" data-mod="path">🎓 30天路径<span class="nb" id="nbPath"></span></button>
     </div>
@@ -747,10 +957,15 @@
       <button class="nav-tab" data-mod="formula">📐 公式速查<span class="nb" id="nbFormula"></span></button>
       <button class="nav-tab" data-mod="quick">📊 速查手册<span class="nb" id="nbQuick"></span></button>
       <button class="nav-tab" data-mod="check">✅ 检查清单<span class="nb" id="nbCheck"></span></button>
+      <button class="nav-tab" data-mod="tpl">📋 实战模板<span class="nb" id="nbTpl"></span></button>
       <button class="nav-tab" data-mod="case">🧩 整机案例<span class="nb" id="nbCase"></span></button>
       <button class="nav-tab" data-mod="gloss">📖 术语词典<span class="nb" id="nbGloss"></span></button>
       <button class="nav-tab" data-mod="gallery">🖼️ 参考图库<span class="nb" id="nbGallery"></span></button>
       <button class="nav-tab" data-mod="field">💼 实战宝典<span class="nb" id="nbField"></span></button>
+    </div>
+    <div class="nav-row">
+      <span class="nav-cap">我的</span>
+      <button class="nav-tab" data-mod="fav">⭐ 我的收藏<span class="nb" id="nbFav"></span></button>
     </div>
   </div>
 
@@ -1004,11 +1219,70 @@
     <div id="gsGroups"></div>
   </div>
 
+  <!-- 错题本 -->
+  <div id="wrongView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">❌</div>
+      <div>
+        <h2>错题本与薄弱点</h2>
+        <div class="mtg">把 360 道题里答错的题集中起来，按领域算出薄弱度并排好复习顺序——错题重做答对后自动移出</div>
+      </div>
+    </div>
+    <div class="wrong-sum" id="wrongSum"></div>
+    <div class="card">
+      <h3>📉 各领域薄弱度</h3>
+      <div class="qv-desc">只统计已作答的题；条越长说明这一块越需要补</div>
+      <div id="weakList"></div>
+    </div>
+    <div class="tpl-actions" id="wrongActions"></div>
+    <div class="qv-tabs" id="wrongTabs"></div>
+    <div id="wrongBody"></div>
+  </div>
+
+  <!-- 学习数据 -->
+  <div id="statsView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">📈</div>
+      <div>
+        <h2>学习数据</h2>
+        <div class="mtg">把学习进度、答题正确率、题型强弱用图表摊开——看清自己到底卡在哪一环</div>
+      </div>
+    </div>
+    <div id="statsBody"></div>
+  </div>
+
+  <!-- 实战模板 -->
+  <div id="tplView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">📋</div>
+      <div>
+        <h2>项目实战模板</h2>
+        <div class="mtg">可直接在网页上填写、可一键打印带走的实战表格——NPI 流程、DFM 检讨、报价对比、打样需求</div>
+      </div>
+    </div>
+    <div class="qv-tabs" id="tplTabs"></div>
+    <div id="tplBody"></div>
+  </div>
+
+  <!-- 我的收藏 -->
+  <div id="favView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">⭐</div>
+      <div>
+        <h2>我的收藏与笔记</h2>
+        <div class="mtg">收藏重点知识点、写下自己的理解——数据存在本机浏览器，随时回看</div>
+      </div>
+    </div>
+    <div class="qv-tabs" id="favTabs"></div>
+    <div id="favBody"></div>
+  </div>
+
   <div class="foot">
-    内容与页面分离：<b>data.js</b>（166 条知识点）· <b>deep.js</b>（深度解析）· <b>kb-extra-1~4.js</b>（经验数值/关联）·
-    <b>kb-tools.js</b>（速查表/清单）· <b>kb-cases.js</b>（案例/术语/路径）· <b>kb-quiz.js</b>（题库）· <b>kb-map.js</b>（地图）·
-    <b>kb-field.js</b>（排查/面试/标准）· <b>kb-task-1~3.js</b>（动手练习）· <b>kb-img.js</b>（参考图索引）<br>
-    学习进度 / 清单勾选 / 答题记录保存在浏览器 localStorage，换电脑或清缓存会重置
+    内容与页面分离：<b>data.js</b>（主数据）+ <b>kb-plus.js</b>（新增知识点）· <b>deep.js</b>（深度解析）· <b>kb-extra-1~4.js</b>（经验数值/关联）·
+    <b>kb-tools.js</b>（速查表/清单）· <b>kb-cases.js</b>（案例/术语/路径）· <b>kb-quiz*.js</b>（题库）· <b>kb-map*.js</b>（地图）·
+    <b>kb-field.js</b>（排查/面试/标准）· <b>kb-task-1~3.js</b>（动手练习）· <b>kb-img.js</b>（参考图索引）·
+    <b>kb-syn.js</b>（同义词表）· <b>kb-template.js</b>（实战模板）<br>
+    学习进度 / 清单勾选 / 答题记录 / 收藏 / 笔记 / 模板填写 / 深浅色偏好 全部保存在本机浏览器，换电脑或清缓存会重置
   </div>
 </div>
 
@@ -1029,6 +1303,11 @@
     <div class="dp-nav">
       <button id="dpPrev" title="上一条">‹ 上一条</button>
       <button id="dpNext" title="下一条">下一条 ›</button>
+    </div>
+    <div class="dp-actions" id="dpActions">
+      <button id="dpFavBtn">☆ 收藏</button>
+      <button id="dpNoteJump">📝 写笔记</button>
+      <button id="dpPrintBtn">🖨️ 打印 / 导出</button>
     </div>
   </div>
   <div class="dp-anchors" id="dpAnchors"></div>
@@ -1080,6 +1359,11 @@
         💡 点击任意图片可放大查看；图注为原图标题，来源标注在图注下方
       </div>
     </div>
+    <div class="dp-sec" id="secNote">
+      <h4>📝 我的笔记</h4>
+      <textarea class="note-area" id="dpNote" placeholder="写下你自己的理解、项目里的实际数值、踩过的坑……内容保存在本机浏览器，随时回看。"></textarea>
+      <div class="note-hint" id="dpNoteHint">自动保存 · 只存在你自己的电脑上</div>
+    </div>
   </div>
 </aside>
 
@@ -1105,6 +1389,13 @@
 </div>
 
 <button id="toTop" title="回到顶部" aria-label="回到顶部">↑</button>
+
+<!-- 快捷键提示 -->
+<div class="kbd-hint no-print" id="kbdHint">
+  <div><kbd>/</kbd> 或 <kbd>Ctrl</kbd>+<kbd>K</kbd> 聚焦搜索　　<kbd>Esc</kbd> 关闭详情</div>
+  <div><kbd>←</kbd> <kbd>→</kbd> 详情上一条 / 下一条　　<kbd>Shift</kbd>+<kbd>D</kbd> 切换深浅色</div>
+  <div><kbd>1</kbd>…<kbd>9</kbd> 快速切换模块　　<kbd>?</kbd> 显示 / 隐藏本提示</div>
+</div>
 
 <script src="data.js"></script>
 <script src="deep.js"></script>
@@ -1141,7 +1432,44 @@
 <script src="kb-quick-add.js"></script>
 <script src="kb-map-cap.js"></script>
 <script src="kb-case-dfm.js"></script>
+<script src="kb-syn.js"></script>
+<script src="kb-template.js"></script>
+<script src="kb-plus.js"></script>
 <script>
+/* ══════════ 把新增知识点合并进主库（不改 data.js / deep.js） ══════════ */
+(function(){
+  try{
+    const P = window.KB_ITEMS_PLUS || [];
+    if(P.length){
+      const has = new Set(KB_ITEMS.map(x=>x.name));
+      P.forEach(it=>{ if(!has.has(it.name)){ KB_ITEMS.push(it); has.add(it.name); } });
+    }
+    const merge = (t, s)=>{ if(!t || !s) return; Object.keys(s).forEach(k=>{ if(t[k]===undefined) t[k]=s[k]; }); };
+    merge(window.KB_DEEP, window.KB_DEEP_PLUS);
+    merge(window.KB_NUM,  window.KB_NUM_PLUS);
+    merge(window.KB_REL,  window.KB_REL_PLUS);
+    merge(window.KB_MEMO, window.KB_MEMO_PLUS);
+    merge(window.KB_TASK, window.KB_TASK_PLUS);
+    const MP = window.KB_MAP_PLUS || {};
+    Object.keys(MP).forEach(key=>{
+      const p = key.split("|"), d = (window.KB_MAP||[]).find(x=>x.id===p[0]);
+      if(!d || !d.layers[+p[1]]) return;
+      const items = d.layers[+p[1]].items;
+      MP[key].forEach(x=>{ if(!items.some(y=>y.n===x.n)) items.push(x); });
+    });
+    /* 把术语词典的 英文↔中文 并入同义词表，让英文检索也能命中 */
+    const syn = window.KB_SYN = window.KB_SYN || [];
+    const seenPair = new Set(syn.map(g=>g.join("|")));
+    (window.KB_GLOSS||[]).forEach(g=>{
+      if(!g.en || !g.cn) return;
+      const pair = g.en + "|" + g.cn;
+      if(seenPair.has(pair)) return;
+      syn.push([g.en, g.cn]);
+      seenPair.add(pair);
+    });
+  }catch(e){ console.warn("合并新增数据失败：", e); }
+})();
+
 const DC = {
   material:     {c:"#d97706", s:"#b45309", w:"#fff7ed"},
   manufacturing:{c:"#7c3aed", s:"#6d28d9", w:"#f5f3ff"},
@@ -1191,10 +1519,15 @@ const fieldView = document.getElementById("fieldView");
 const galleryView = document.getElementById("galleryView");
 const selectView = document.getElementById("selectView");
 const formulaView = document.getElementById("formulaView");
+const wrongView = document.getElementById("wrongView");
+const statsView = document.getElementById("statsView");
+const tplView = document.getElementById("tplView");
+const favView = document.getElementById("favView");
 const KB_VIEWS = [homeView, domainView, searchView];
 const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossView, path:pathView,
                    map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView,
-                   select:selectView, formula:formulaView};
+                   select:selectView, formula:formulaView, wrong:wrongView, stats:statsView,
+                   tpl:tplView, fav:favView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -1211,6 +1544,10 @@ let activeDomain = null;
 let activeSub = "all";
 let browseAll = false;
 let currentList = null;   // 详情面板上/下一条所依据的列表
+let activeTpl = (window.KB_TEMPLATE && KB_TEMPLATE[0] ? KB_TEMPLATE[0].id : "");
+let wrongDom = "all";
+let favTab = "fav";
+let curDetail = null;     // 当前详情面板打开的知识点
 
 const CAT_NAME = Object.fromEntries(KB_CATS.map(c=>[c.id,c.name]));
 const CAT_DOMAIN = {};
@@ -1223,25 +1560,82 @@ function getSt(name){ return progress[name] || 0; }
 function setSt(name, v){ progress[name] = v; localStorage.setItem(LS_KEY, JSON.stringify(progress)); }
 function cycleSt(name){ setSt(name, (getSt(name)+1) % 3); renderAll(); }
 
+/* ── 本机存储：主题 / 收藏 / 笔记 / 模板草稿 ── */
+const LS_THEME = "kb-theme-v1", LS_FAV = "kb-fav-v1", LS_NOTE = "kb-note-v1", LS_TPL = "kb-tpl-v1";
+function lsGet(k, dft){ try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v === null ? dft : v; }catch(e){ return dft; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+let theme = lsGet(LS_THEME, "light");
+let favs = lsGet(LS_FAV, {});          // { 条目名: 收藏时间戳 }
+let notes = lsGet(LS_NOTE, {});        // { 条目名: 文本 }
+let tplDraft = lsGet(LS_TPL, {});      // { "模板id|块序号|行|列": "填写内容" }
+function favOn(n){ return !!favs[n]; }
+function favCount(){ return Object.keys(favs).length; }
+function noteCount(){ return Object.values(notes).filter(x => x && x.trim()).length; }
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", theme);
+  const b = document.getElementById("themeBtn");
+  if(b) b.textContent = theme === "dark" ? "☀️" : "🌙";
+}
+applyTheme();
+
 const ST_TXT = ["待学习","学习中","已掌握"];
 const LV_TXT = {1:"核心必会",2:"进阶掌握",3:"了解即可"};
 const LV_ORDER = {1:0, 2:1, 3:2};
 const LV_NAME = {1:"一级",2:"二级",3:"三级"};
 
 function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function hl(text, q){
-  if(!q) return esc(text);
-  const lower = text.toLowerCase();
-  const ql = q.toLowerCase();
-  let out = "", i = 0;
-  while(i < text.length){
-    const idx = lower.indexOf(ql, i);
-    if(idx === -1){ out += esc(text.slice(i)); break; }
-    out += esc(text.slice(i, idx));
-    out += "<mark>" + esc(text.slice(idx, idx+q.length)) + "</mark>";
-    i = idx + q.length;
+/* 高亮：支持一次高亮多个词（同义词扩展后的结果） */
+function hlm(text, terms){
+  const s = (text == null ? "" : String(text));
+  const list = [...new Set((terms || []).filter(t => t && String(t).trim()).map(String))]
+    .sort((a, b) => b.length - a.length);
+  if(!list.length) return esc(s);
+  let re;
+  try{ re = new RegExp("(" + list.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi"); }
+  catch(e){ return esc(s); }
+  return s.split(re).map((part, i) => (i % 2 ? "<mark>" + esc(part) + "</mark>" : esc(part))).join("");
+}
+/* 对已是 HTML 的片段做高亮（避开标签内部） */
+function markInHTML(html, terms){
+  if(html == null) return "";
+  const list = [...new Set((terms || []).filter(t => t && String(t).trim().length >= 2).map(String))]
+    .sort((a, b) => b.length - a.length);
+  if(!list.length) return String(html);
+  let re;
+  try{ re = new RegExp("(" + list.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")(?![^<]*>)", "gi"); }
+  catch(e){ return String(html); }
+  return String(html).replace(re, "<mark>$1</mark>");
+}
+function hl(text, q){ return hlm(text, Array.isArray(q) ? q : (q ? [q] : [])); }
+
+/* 同义词扩展：把用户输入扩展成一组等价词（含术语词典的英文↔中文） */
+function synExpand(q){
+  const s = (q || "").trim();
+  if(!s) return [];
+  const lq = s.toLowerCase();
+  const out = new Set([s]);
+  const groups = window.KB_SYN || [];
+  for(const g of groups){
+    if(out.size > 26) break;
+    let hitG = false;
+    for(const t0 of g){
+      const lt = String(t0).toLowerCase();
+      if(lt.length < 2) continue;
+      if(lt === lq || (lt.length >= 3 && lq.length >= 3 && (lt.includes(lq) || lq.includes(lt)))){ hitG = true; break; }
+    }
+    if(hitG) g.forEach(t => { if(String(t).trim().length >= 1) out.add(String(t)); });
   }
-  return out;
+  return [...out];
+}
+/* 用扩展词做「是否命中」判断 */
+function makeHit(terms){
+  const list = terms.map(t => t.toLowerCase()).filter(Boolean);
+  return s => { const t = (s == null ? "" : String(s)).toLowerCase(); return list.some(x => t.includes(x)); };
+}
+function refreshBadges(){
+  const f = document.getElementById("nbFav"); if(f) f.textContent = favCount() + " 条";
+  const w = document.getElementById("nbWrong"); if(w) w.textContent = wrongList().length + " 题";
 }
 function domainItems(d){ return KB_ITEMS.filter(it=>d.subs.includes(it.cat)); }
 function sortByLv(list){ return [...list].sort((a,b)=> LV_ORDER[a.lv]-LV_ORDER[b.lv]); }
@@ -1394,8 +1788,24 @@ function openDetail(it){
   renderRef(it);
   dpNavUpdate(it);
   updateAnchors();
+  // 收藏 / 笔记 / 打印
+  curDetail = it;
+  renderDpActions(it);
+  const ta = document.getElementById("dpNote");
+  if(ta){
+    ta.value = notes[it.name] || "";
+    ta.oninput = ()=>{
+      notes[it.name] = ta.value;
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(()=>{ lsSet(LS_NOTE, notes); refreshBadges(); }, 500);
+      const nj = document.getElementById("dpNoteJump");
+      if(nj) nj.textContent = ta.value.trim() ? `📝 笔记（${ta.value.trim().length} 字）` : "📝 写笔记";
+    };
+    ta.onblur = ()=>{ lsSet(LS_NOTE, notes); refreshBadges(); renderDpActions(it); };
+  }
   document.body.classList.add("detail-open");
 }
+let noteTimer = null;
 
 // 详情面板：上一条 / 下一条
 function dpNavUpdate(it){
@@ -1416,7 +1826,8 @@ const DP_ANCHORS = [
   {id:"secPoints", t:"📌 要点"}, {id:"secUsage", t:"💡 应用"},
   {id:"dpNumSec", t:"🔢 数值"},  {id:"dpDeepSec", t:"📖 深度"},
   {id:"dpRelSec", t:"🔗 关联"},  {id:"dpTaskSec", t:"✍️ 练习"},
-  {id:"secVideos", t:"🎬 视频"}, {id:"dpRefSec", t:"📷 图集"}
+  {id:"secVideos", t:"🎬 视频"}, {id:"dpRefSec", t:"📷 图集"},
+  {id:"secNote", t:"📝 笔记"}
 ];
 function updateAnchors(){
   const box = document.getElementById("dpAnchors");
@@ -1490,7 +1901,10 @@ function renderHome(){
     {n:ovCount((a,g)=>a+(g.items||[]).length,(window.KB_FORMULA||[])) + ovCount((a,g)=>a+(g.items||[]).length,(window.KB_UNIT||[])), l:"公式与单位", mod:"formula"},
     {n:Object.keys(window.KB_MEMO||{}).length, l:"一句话记忆", mod:"kb"},
     {n:Object.keys(window.KB_DOMAIN_GUIDE||{}).length, l:"领域导读", mod:"kb"},
-    {n:Object.keys(window.KB_TASK||{}).length, l:"动手练习", mod:"kb"}
+    {n:Object.keys(window.KB_TASK||{}).length, l:"动手练习", mod:"kb"},
+    {n:(window.KB_TEMPLATE||[]).length, l:"实战模板", mod:"tpl"},
+    {n:wrongList().length, l:"待复习错题", mod:"wrong"},
+    {n:favCount(), l:"我的收藏", mod:"fav"}
   ];
   document.getElementById("panelOverview").innerHTML = `
     <h3>📦 内容总览</h3>
@@ -1733,20 +2147,23 @@ function renderDomain(){
 // 全局浏览 / 搜索
 function renderSearch(){
   const q = kw.value.trim();
+  const terms = synExpand(q);
+  const hitQ = makeHit(terms);
   const lv = lvFilter.value, st = stFilter.value;
   let list = KB_ITEMS.filter(it=>{
     if(lv && String(it.lv)!==lv) return false;
-    if(st!=="" && st!=="-1" && String(getSt(it.name))!==st) return false;
+    if(st!=="" && st!=='-1' && String(getSt(it.name))!==st) return false;
     if(q){
       const hay = (it.name+it.points+it.usage+CAT_NAME[it.cat]).toLowerCase();
-      if(!hay.includes(q.toLowerCase())) return false;
+      if(!hitQ(hay)) return false;
     }
     return true;
   });
   list = sortByLv(list);
   const s2 = list.filter(x=>getSt(x.name)===2).length;
+  const extra = q && terms.length > 1 ? `　·　已自动扩展同义词 <b>${terms.length-1}</b> 个（${esc(terms.slice(1, 6).join("、"))}${terms.length > 6 ? "…" : ""}）` : "";
   searchStatsEl.innerHTML = q
-    ? `全局搜索「${esc(q)}」：共 <b>${list.length}</b> 条 · 已掌握 <b>${s2}</b>`
+    ? `全局搜索「${esc(q)}」：共 <b>${list.length}</b> 条 · 已掌握 <b>${s2}</b>${extra}`
     : `${browseAll && lvFilter.value==="1" ? "🔥 核心必会总览" : "📚 全部知识点"}：共 <b>${list.length}</b> 条（按优先级排序） · 已掌握 <b>${s2}</b>`;
   if(!list.length){ searchTbody.innerHTML=""; searchEmptyEl.style.display="block"; }
   else {
@@ -1754,7 +2171,7 @@ function renderSearch(){
     currentList = list.map(x=>x.name);
     searchTbody.innerHTML = list.map((it,i)=>{
       const d = CAT_DOMAIN[it.cat], col = dc(d.id);
-      return rowHTML(it, i, q, `${d.icon} ${d.name}`, `style="--tcw:${col.w};--tcs:${col.s}"`);
+      return rowHTML(it, i, terms.length > 1 ? terms : q, `${d.icon} ${d.name}`, `style="--tcw:${col.w};--tcs:${col.s}"`);
     }).join("");
   }
   renderGlobalSearch(q);
@@ -1764,7 +2181,8 @@ function renderSearch(){
 function renderGlobalSearch(q){
   const box = document.getElementById("gsGroups");
   if(!q){ box.innerHTML = ""; return; }
-  const lq = q.toLowerCase(), hit = s => (s==null?"":String(s)).toLowerCase().includes(lq);
+  const terms = synExpand(q);
+  const hit = makeHit(terms);
   const groups = [];
 
   // 术语词典
@@ -1885,7 +2303,7 @@ function renderGlobalSearch(q){
       </div>
       <div class="gs-body">
         ${g.items.slice(0,LIMIT).map(x=>`<div class="gs-item" ${attr(g,x)}>
-          <div class="gs-t">${x.t.slice(0,30)}</div><div class="gs-d">${x.d.slice(0,110)}</div></div>`).join("")}
+          <div class="gs-t">${markInHTML(String(x.t).slice(0,30), terms)}</div><div class="gs-d">${markInHTML(String(x.d).slice(0,110), terms)}</div></div>`).join("")}
         ${g.n>LIMIT?`<div class="gs-more">还有 ${g.n-LIMIT} 条，点上方标题进入模块查看全部</div>`:""}
       </div>
     </div>`).join("");
@@ -2556,6 +2974,328 @@ function renderGallery(){
 // 图库筛选变化时重置分页
 function resetGallery(keepQ){ gwLimit = 60; renderGallery(); }
 
+/* ══════════════ 模块十二：错题本与薄弱点 ══════════════ */
+function allQuizQuestions(){
+  const out = [];
+  KB_QUIZ.forEach(p=>{
+    for(let i=0;i<quizTotal(p);i++){ const q = quizAt(p,i); if(q) out.push({p, i, q}); }
+  });
+  return out;
+}
+function quizDomainStats(){
+  return KB_QUIZ.map(p=>{
+    const a = quizState[p.id] || {};
+    let done = 0, right = 0;
+    const total = quizTotal(p);
+    for(let i=0;i<total;i++){
+      const q = quizAt(p,i); if(!q) continue;
+      if(a[i] !== undefined){ done++; if(a[i] === q.a) right++; }
+    }
+    return {p, total, done, right, wrong: done - right, pct: done ? Math.round(right/done*100) : -1};
+  });
+}
+function wrongList(){
+  const out = [];
+  KB_QUIZ.forEach(p=>{
+    const a = quizState[p.id] || {};
+    for(let i=0;i<quizTotal(p);i++){
+      const q = quizAt(p,i); if(!q) continue;
+      if(a[i] !== undefined && a[i] !== q.a) out.push({p, i, q, chosen:a[i]});
+    }
+  });
+  return out;
+}
+function barBg(v){ return v >= 80 ? "linear-gradient(90deg,#059669,#10b981)" : v >= 60 ? "linear-gradient(90deg,#d97706,#f59e0b)" : "linear-gradient(90deg,#dc2626,#ef4444)"; }
+
+function renderWrong(){
+  const list = wrongList(), doms = quizDomainStats();
+  const answered = doms.reduce((a,d)=>a+d.done, 0), right = doms.reduce((a,d)=>a+d.right, 0);
+  const pct = answered ? Math.round(right/answered*100) : 0;
+  document.getElementById("wrongSum").innerHTML = `
+    <div class="ws-card"><b style="color:var(--lv1)">${list.length}</b><span>当前错题数</span></div>
+    <div class="ws-card"><b style="color:var(--primary)">${answered}<span style="font-size:14px;color:var(--sub)"> / ${allQuizQuestions().length}</span></b><span>已作答</span></div>
+    <div class="ws-card"><b style="color:#059669">${right}</b><span>累计答对</span></div>
+    <div class="ws-card"><b style="color:${pct>=80?'#059669':pct>=60?'#d97706':'#dc2626'}">${answered?pct+"%":"—"}</b><span>总正确率</span></div>`;
+
+  const weak = doms.filter(d=>d.done > 0).sort((a,b)=>a.pct - b.pct);
+  document.getElementById("weakList").innerHTML = weak.length ? weak.map(d=>`
+    <div class="weak-row">
+      <div class="wn">${d.p.icon} ${esc(d.p.name)}</div>
+      <div class="wb"><i style="width:${d.pct}%;background:${barBg(d.pct)}"></i></div>
+      <div class="wv">${d.pct}%　${d.wrong} 错</div>
+    </div>`).join("") : `<div class="empty" style="padding:18px 0">还没有作答记录，先去「🎯 自测题库」做几题～</div>`;
+
+  document.getElementById("wrongActions").innerHTML = list.length ? `
+    <button class="mini-btn" data-wact="redo">🔁 重做全部错题（清空这些题的选择）</button>
+    <button class="mini-btn" data-wact="print">🖨️ 打印错题清单</button>` :
+    `<span class="mini-btn" style="cursor:default">🎉 目前没有错题</span>`;
+
+  const ids = [...new Set(list.map(x=>x.p.id))];
+  const tabs = [{id:"all", n:"📚 全部错题", c:list.length+" 题"}].concat(
+    ids.map(id=>{ const p = KB_QUIZ.find(x=>x.id===id);
+      return {id, n:(p.icon||"")+p.name, c:list.filter(x=>x.p.id===id).length+" 题"}; }));
+  document.getElementById("wrongTabs").innerHTML = tabs.map(t=>
+    `<button class="qv-tab${t.id===wrongDom?" active":""}" data-wd="${t.id}">${esc(t.n)} <span style="opacity:.6">${t.c}</span></button>`).join("");
+
+  const show = wrongDom === "all" ? list : list.filter(x=>x.p.id === wrongDom);
+  document.getElementById("wrongBody").innerHTML = show.length ? show.map(x=>{
+    const lv = quizLvAt(x.p, x.i), tp = quizTypeOf(x.q);
+    const exp = ((window.KB_QUIZ_EXP||{})[x.p.id+"|"+x.i]||{}).e || x.q.exp || "";
+    return `<div class="wq-item">
+      <div>
+        <span class="wq-tag">${x.p.icon} ${esc(x.p.name)}</span>
+        <span class="wq-tag" style="background:var(--st0-bg);color:var(--sub)">第 ${x.i+1} 题</span>
+        ${lv?`<span class="wq-tag" style="background:var(--lv2-bg);color:var(--lv2)">${esc(lv)}</span>`:""}
+        ${tp!=="choice"?`<span class="wq-tag" style="background:var(--lv3-bg);color:var(--lv3)">${QUIZ_TYPE[tp]||tp}</span>`:""}
+      </div>
+      <div class="wq-q">${esc(x.q.q)}</div>
+      ${x.q.opts.map((o,j)=>{
+        const cls = j === x.q.a ? "right" : (j === x.chosen ? "wrong" : "");
+        const mark = j === x.q.a ? " ✓正确答案" : (j === x.chosen ? " ✗你选的" : "");
+        return `<div class="wq-opt ${cls}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}${mark}</div></div>`;
+      }).join("")}
+      <div class="q-exp" style="margin-top:10px"><b>解析</b> — ${esc(exp)}</div>
+    </div>`;
+  }).join("") : `<div class="card"><div class="empty">${list.length ? "该领域暂无错题" : "🎉 目前没有错题，保持住！"} 去「🎯 自测题库」继续练习 →</div></div>`;
+}
+
+/* ══════════════ 模块十三：学习数据（纯 SVG 图表） ══════════════ */
+function radarSVG(rows){
+  const W = 430, H = 404, cx = 215, cy = 198, R = 136, n = rows.length;
+  const ang = i => -Math.PI/2 + i*2*Math.PI/n;
+  const pt = (i, r) => [cx + r*Math.cos(ang(i)), cy + r*Math.sin(ang(i))];
+  let g = "";
+  [.25,.5,.75,1].forEach(f=>{
+    const p = rows.map((_,i)=>pt(i,R*f).map(x=>x.toFixed(1)).join(",")).join(" ");
+    g += `<polygon points="${p}" fill="none" stroke="var(--border)" stroke-width="1"/>`;
+  });
+  rows.forEach((_,i)=>{ const [x,y] = pt(i,R);
+    g += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-width="1"/>`; });
+  const dp = rows.map((r,i)=>pt(i, R*Math.max(2,r.v)/100).map(x=>x.toFixed(1)).join(",")).join(" ");
+  g += `<polygon points="${dp}" fill="rgba(37,99,235,.20)" stroke="var(--primary)" stroke-width="2"/>`;
+  rows.forEach((r,i)=>{ const [x,y] = pt(i, R*Math.max(2,r.v)/100);
+    g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--primary)"/>`; });
+  rows.forEach((r,i)=>{
+    const [x,y] = pt(i, R + 26), a = ang(i), c = Math.cos(a), s = Math.sin(a);
+    const anchor = Math.abs(c) < 0.25 ? "middle" : (c > 0 ? "start" : "end");
+    const dy = s > 0.55 ? 10 : (s < -0.55 ? -3 : 4);
+    g += `<text x="${x.toFixed(1)}" y="${(y+dy).toFixed(1)}" text-anchor="${anchor}" font-size="10.5" fill="var(--sub)" font-family="inherit">${esc(r.label)}</text>`;
+    g += `<text x="${x.toFixed(1)}" y="${(y+dy+11).toFixed(1)}" text-anchor="${anchor}" font-size="10" fill="var(--primary)" font-weight="bold" font-family="inherit">${r.v}%</text>`;
+  });
+  return `<svg class="ch-svg" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function barsSVG(rows, colorFn){
+  const W = 430, rowH = 27, padL = 104, padR = 52, maxW = W - padL - padR;
+  const H = rows.length*rowH + 8;
+  let g = "";
+  rows.forEach((r,i)=>{
+    const y = i*rowH + 4, bw = Math.max(2, maxW*Math.max(0,Math.min(100, r.v))/100);
+    g += `<text x="${padL-8}" y="${y+14}" text-anchor="end" font-size="11" fill="var(--sub)" font-family="inherit">${esc(r.label)}</text>`;
+    g += `<rect x="${padL}" y="${y+3}" width="${maxW}" height="15" rx="7" fill="var(--st0-bg)"/>`;
+    g += `<rect x="${padL}" y="${y+3}" width="${bw.toFixed(1)}" height="15" rx="7" fill="${colorFn(r.v)}"/>`;
+    g += `<text x="${padL+maxW+8}" y="${y+15}" font-size="11" fill="var(--sub)" font-family="inherit">${r.v<0 ? "未作答" : r.v+"%"}</text>`;
+  });
+  return `<svg class="ch-svg" viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function donutSVG(parts){
+  const total = parts.reduce((a,b)=>a+b.v,0) || 1, R = 62, C = 2*Math.PI*R, cx = 88, cy = 88;
+  let off = 0, g = "";
+  parts.forEach(p=>{
+    const len = C*p.v/total;
+    if(len > 0) g += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${p.color}" stroke-width="21"
+      stroke-dasharray="${len.toFixed(2)} ${(C-len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}"
+      transform="rotate(-90 ${cx} ${cy})"/>`;
+    off += len;
+  });
+  g += `<text x="${cx}" y="${cy+3}" text-anchor="middle" font-size="24" font-weight="bold" fill="var(--text)" font-family="inherit">${Math.round(parts[0].v/total*100)}%</text>`;
+  g += `<text x="${cx}" y="${cy+21}" text-anchor="middle" font-size="10.5" fill="var(--sub)" font-family="inherit">已掌握</text>`;
+  const legend = parts.map(p=>`<div><i style="background:${p.color}"></i>${esc(p.label)}　<b style="color:var(--text)">${p.v}</b></div>`).join("");
+  return `<div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap">
+    <svg viewBox="0 0 176 176" style="width:176px; height:176px; flex-shrink:0">${g}</svg>
+    <div class="ch-legend" style="flex-direction:column; gap:9px; margin:0; font-size:12.5px">${legend}</div></div>`;
+}
+function renderStats(){
+  const domRows = KB_DOMAINS.map(d=>{
+    const items = domainItems(d);
+    const m = items.filter(it=>getSt(it.name) === 2).length;
+    return {label:d.name, v: items.length ? Math.round(m/items.length*100) : 0, m, n: items.length};
+  });
+  const doms = quizDomainStats();
+  const answeredQ = doms.reduce((a,d)=>a+d.done,0), rightQ = doms.reduce((a,d)=>a+d.right,0);
+
+  const tDone = {}, tRight = {}, lvDone = {}, lvRight = {};
+  KB_QUIZ.forEach(p=>{
+    const a = quizState[p.id] || {};
+    for(let i=0;i<quizTotal(p);i++){
+      const q = quizAt(p,i); if(!q) continue;
+      const ans = a[i], tp = quizTypeOf(q), lv = quizLvAt(p,i) || "基础";
+      if(ans !== undefined){
+        tDone[tp] = (tDone[tp]||0)+1; lvDone[lv] = (lvDone[lv]||0)+1;
+        if(ans === q.a){ tRight[tp] = (tRight[tp]||0)+1; lvRight[lv] = (lvRight[lv]||0)+1; }
+      }
+    }
+  });
+  const pctOf = (r,d)=> d ? Math.round(r/d*100) : -1;
+
+  const total = KB_ITEMS.length, mastered = KB_ITEMS.filter(it=>getSt(it.name)===2).length,
+        learning = KB_ITEMS.filter(it=>getSt(it.name)===1).length;
+  let cTotal = 0, cOn = 0;
+  KB_CHECKS.forEach(c=>{ const r = chkCount(c); cTotal += r.total; cOn += r.on; });
+
+  const col = v => v < 0 ? "var(--st0)" : v >= 80 ? "#059669" : v >= 60 ? "#d97706" : "#dc2626";
+
+  document.getElementById("statsBody").innerHTML = `
+  <div class="ch-grid">
+    <div class="ch-card">
+      <h3>🎯 知识点掌握雷达</h3>
+      <div class="chd">12 个领域的「已掌握」占比（在知识库里把状态标成「已掌握」才会算进去）</div>
+      ${radarSVG(domRows)}
+    </div>
+    <div class="ch-card">
+      <h3>📊 各领域答题正确率</h3>
+      <div class="chd">按自测题库的实际作答计算；「未作答」表示这一领域还没做题</div>
+      ${barsSVG(doms.map(d=>({label:d.p.name, v:d.pct})), col)}
+    </div>
+    <div class="ch-card">
+      <h3>🧩 难度维度正确率</h3>
+      <div class="chd">基础 / 进阶 / 易错三档的答题表现——易错档偏低是正常的，但要重点补</div>
+      ${barsSVG(["基础","进阶","易错"].map(k=>({label:k, v:pctOf(lvRight[k]||0, lvDone[k]||0)})), col)}
+    </div>
+    <div class="ch-card">
+      <h3>📐 题型维度正确率</h3>
+      <div class="chd">选择题、判断题、计算题、情景题——计算题与情景题偏低说明「会背不会用」</div>
+      ${barsSVG(["choice","tf","calc","scene"].map(k=>({label:QUIZ_TYPE[k], v:pctOf(tRight[k]||0, tDone[k]||0)})), col)}
+    </div>
+    <div class="ch-card">
+      <h3>📚 知识库进度</h3>
+      <div class="chd">共 ${total} 条知识点 · 检查清单 ${cOn}/${cTotal} 项已完成</div>
+      ${donutSVG([
+        {label:"已掌握", v:mastered, color:"#059669"},
+        {label:"学习中", v:learning, color:"#2563eb"},
+        {label:"待学习", v:total-mastered-learning, color:"#94a3b8"}
+      ])}
+      <div style="margin-top:16px; font-size:12px; color:var(--sub); line-height:1.9">
+        检查清单完成度：<b style="color:var(--text)">${cTotal?Math.round(cOn/cTotal*100):0}%</b>（${cOn}/${cTotal} 项）<br>
+        自测正确率：<b style="color:var(--text)">${answeredQ?Math.round(rightQ/answeredQ*100)+"%":"未开始"}</b>（已答 ${answeredQ}/${allQuizQuestions().length} 题）
+      </div>
+    </div>
+    <div class="ch-card">
+      <h3>📈 题库作答覆盖度</h3>
+      <div class="chd">每个领域已作答的题数占比——覆盖面比正确率更优先，先做全再做好</div>
+      ${barsSVG(doms.map(d=>({label:d.p.name, v:d.total? Math.round(d.done/d.total*100):0})), v=>v>=80?"#2563eb":v>=40?"#7c3aed":"#94a3b8")}
+    </div>
+  </div>
+  <div class="next-step" id="statsAdvice"></div>`;
+
+  let advice;
+  if(answeredQ === 0) advice = `还没有做题记录。建议先去「🎯 自测题库」做一次<b>「塑料材料」</b>的 30 题，摸清自己的底子。`;
+  else if(answeredQ < allQuizQuestions().length * 0.4) advice = `目前只答了 <b>${answeredQ}/${allQuizQuestions().length}</b> 题（${Math.round(answeredQ/allQuizQuestions().length*100)}%）。建议先把覆盖面做上去，再回头攻正确率。`;
+  else if(rightQ/answeredQ < 0.8) advice = `整体正确率 <b>${Math.round(rightQ/answeredQ*100)}%</b>，离 80% 还有距离。去「❌ 错题本」看看错得最多的是哪个领域，集中补一遍。`;
+  else if(mastered < total) advice = `正确率不错（${Math.round(rightQ/answeredQ*100)}%），知识点已掌握 <b>${mastered}/${total}</b>。建议按「🧭 学习地图」把剩余条目过完，并在知识库里把学过的标成「已掌握」。`;
+  else advice = `🎉 知识库全部掌握、正确率 ${Math.round(rightQ/answeredQ*100)}%！可以去「📋 实战模板」把 NPI 流程与 DFM 检讨表用起来。`;
+  document.getElementById("statsAdvice").innerHTML = `<b>下一步建议</b>　${advice}`;
+}
+
+/* ══════════════ 模块十四：项目实战模板 ══════════════ */
+let tplSaveTimer = null;
+function renderTpl(){
+  const T = window.KB_TEMPLATE || [];
+  if(!T.length){ document.getElementById("tplBody").innerHTML = `<div class="card"><div class="empty">模板数据未加载</div></div>`; return; }
+  if(!T.some(x=>x.id===activeTpl)) activeTpl = T[0].id;
+  document.getElementById("tplTabs").innerHTML = T.map(t=>
+    `<button class="qv-tab${t.id===activeTpl?" active":""}" data-tp="${t.id}">${t.icon} ${esc(t.name)}</button>`).join("");
+  const t = T.find(x=>x.id === activeTpl) || T[0];
+  let h = `<div class="tpl-card"><h3 style="font-size:15px">${t.icon} ${esc(t.name)}</h3>
+    <div class="qv-desc" style="margin:5px 0 16px">${esc(t.desc)}</div>`;
+  t.blocks.forEach((b, bi)=>{
+    if(b.type === "info"){
+      h += `<div class="tpl-info">` + b.fields.map((f, fi)=>{
+        const key = t.id+"|"+bi+"|"+fi;
+        const v = tplDraft[key] !== undefined ? tplDraft[key] : (f.v || "");
+        return `<div class="tpl-field"><label>${esc(f.l)}</label>
+          <input data-tk="${key}" value="${esc(v)}" placeholder="${esc(f.ph||"")}"></div>`;
+      }).join("") + `</div>`;
+    } else if(b.type === "table"){
+      h += `<div class="tbl-scroll" style="margin-bottom:16px"><table class="mini">
+        <thead><tr>${b.cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
+        <tbody>${b.rows.map(r=>`<tr>${r.map((c,ci)=>`<td${ci===0?' style="font-weight:bold"':""}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    } else if(b.type === "fill"){
+      h += `<div class="tbl-scroll"><table class="tpl-fill">
+        <thead><tr>${b.cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
+        <tbody>${b.rows.map((r, ri)=>`<tr>${r.map((c, ci)=>{
+          const key = t.id+"|"+bi+"|"+ri+"|"+ci;
+          if(b.labelCol && ci === 0) return `<td class="lbl">${esc(c)}</td>`;
+          const v = tplDraft[key] !== undefined ? tplDraft[key] : c;
+          return `<td contenteditable="true" data-tk="${key}">${esc(v)}</td>`;
+        }).join("")}</tr>`).join("")}</tbody></table></div>`;
+    }
+  });
+  h += `<div class="tpl-actions">
+      <button class="mini-btn" data-tact="print">🖨️ 打印 / 存为 PDF</button>
+      <button class="mini-btn" data-tact="clear">🧹 清空填写内容</button>
+      <span class="mini-btn" style="cursor:default; color:var(--sub)">✍️ 填写内容自动保存在本机</span>
+    </div>`;
+  if(t.note) h += `<div class="tpl-note">💡 ${esc(t.note)}</div>`;
+  h += `</div>`;
+  document.getElementById("tplBody").innerHTML = h;
+}
+
+/* ══════════════ 模块十五：我的收藏与笔记 ══════════════ */
+function renderFav(){
+  const tabs = [
+    {id:"fav",  n:"⭐ 我的收藏", c:favCount()+" 条"},
+    {id:"note", n:"📝 我的笔记", c:noteCount()+" 条"}
+  ];
+  document.getElementById("favTabs").innerHTML = tabs.map(t=>
+    `<button class="qv-tab${t.id===favTab?" active":""}" data-fv="${t.id}">${t.n} <span style="opacity:.6">${t.c}</span></button>`).join("");
+  const box = document.getElementById("favBody");
+  const domOf = n => { const it = KB_ITEMS.find(x=>x.name===n); return it ? CAT_DOMAIN[it.cat] : null; };
+
+  if(favTab === "fav"){
+    const list = Object.entries(favs).sort((a,b)=>b[1]-a[1]).filter(([n])=>KB_ITEMS.some(x=>x.name===n));
+    box.innerHTML = list.length ? list.map(([n])=>{
+      const d = domOf(n), it = KB_ITEMS.find(x=>x.name===n);
+      const memo = (window.KB_MEMO||{})[n] || (it ? it.points : "");
+      return `<div class="fav-item" data-open="${esc(n)}">
+        <span class="fi-ic">${d ? d.icon : "📄"}</span>
+        <div style="min-width:0">
+          <div class="fi-n">${esc(n)}</div>
+          <div class="fi-d">${esc(String(memo).slice(0, 54))}</div>
+        </div>
+        <span class="fi-t">${d ? esc(d.name) : ""}</span>
+        <button class="mini-btn" data-unfav="${esc(n)}" style="margin-left:12px">移出</button>
+      </div>`;
+    }).join("") : `<div class="card"><div class="empty">还没有收藏。打开任意知识点，点右上角的「☆ 收藏」即可加入这里。</div></div>`;
+  } else {
+    const list = Object.entries(notes).filter(([,v])=>v && v.trim()).sort((a,b)=>(b[1].length - a[1].length));
+    box.innerHTML = list.length ? list.map(([n, v])=>{
+      const d = domOf(n);
+      return `<div class="fav-item" data-open="${esc(n)}" style="align-items:flex-start">
+        <span class="fi-ic">${d ? d.icon : "📄"}</span>
+        <div style="min-width:0; flex:1">
+          <div class="fi-n">${esc(n)}</div>
+          <div class="fi-d" style="white-space:pre-wrap; margin-top:6px; line-height:1.75; color:var(--text)">${esc(v)}</div>
+        </div>
+        <button class="mini-btn" data-unfav="${esc(n)}" data-nodelete="1" style="margin-left:12px">删除笔记</button>
+      </div>`;
+    }).join("") : `<div class="card"><div class="empty">还没有笔记。打开任意知识点，在「📝 我的笔记」里写下你的理解，就会出现在这里。</div></div>`;
+  }
+}
+
+function renderDpActions(it){
+  const btn = document.getElementById("dpFavBtn");
+  if(btn){ btn.className = favOn(it.name) ? "on" : ""; btn.textContent = favOn(it.name) ? "★ 已收藏" : "☆ 收藏"; }
+  const nj = document.getElementById("dpNoteJump");
+  if(nj){ const n = notes[it.name]; nj.textContent = (n && n.trim()) ? `📝 笔记（${n.trim().length} 字）` : "📝 写笔记"; }
+}
+function toggleFav(name){
+  if(favs[name]) delete favs[name]; else favs[name] = Date.now();
+  lsSet(LS_FAV, favs);
+  if(curDetail && curDetail.name === name) renderDpActions(curDetail);
+  refreshBadges();
+  if(activeModule === "fav") renderFav();
+}
+
 function renderAll(){
   navbar.querySelectorAll(".nav-tab").forEach(b=>b.classList.toggle("active", b.dataset.mod===activeModule));
   const isKB = activeModule === "kb";
@@ -2579,6 +3319,10 @@ function renderAll(){
     else if(activeModule==="gallery") renderGallery();
     else if(activeModule==="select") renderSelect();
     else if(activeModule==="formula") renderFormula();
+    else if(activeModule==="wrong") renderWrong();
+    else if(activeModule==="stats") renderStats();
+    else if(activeModule==="tpl") renderTpl();
+    else if(activeModule==="fav") renderFav();
     return;
   }
   const q = kw.value.trim();
@@ -2696,6 +3440,10 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbGallery", Object.values(window.KB_IMG||{}).reduce((a,b)=>a+b.length,0) + " 张");
   set("nbSelect", (window.KB_SELECT||[]).length + " 棵树");
   set("nbFormula", ((window.KB_FORMULA||[]).reduce((a,g)=>a+(g.items||[]).length,0) + (window.KB_UNIT||[]).reduce((a,g)=>a+(g.items||[]).length,0)) + " 条");
+  set("nbTpl", (window.KB_TEMPLATE||[]).length + " 份");
+  set("nbWrong", wrongList().length ? wrongList().length + " 题" : "0 题");
+  set("nbStats", "6 图");
+  set("nbFav", favCount() + " 条");
 })();
 
 // 参考图库筛选
@@ -2881,7 +3629,134 @@ document.addEventListener("keydown", e=>{
   }
 });
 
+/* ══════════ 主题切换 ══════════ */
+document.getElementById("themeBtn").addEventListener("click", ()=>{
+  theme = theme === "dark" ? "light" : "dark";
+  lsSet(LS_THEME, theme); applyTheme();
+});
+document.getElementById("kbdBtn").addEventListener("click", ()=>{
+  document.getElementById("kbdHint").classList.toggle("on");
+});
+
+/* ══════════ 详情面板：收藏 / 笔记跳转 / 打印 ══════════ */
+document.getElementById("dpFavBtn").addEventListener("click", e=>{
+  e.stopPropagation();
+  if(curDetail) toggleFav(curDetail.name);
+});
+document.getElementById("dpNoteJump").addEventListener("click", e=>{
+  e.stopPropagation();
+  const sec = document.getElementById("secNote");
+  const body = document.getElementById("dpBody");
+  if(sec && body){
+    const delta = sec.getBoundingClientRect().top - body.getBoundingClientRect().top;
+    body.scrollTo({ top: body.scrollTop + delta - 8, behavior: "smooth" });
+  }
+  const ta = document.getElementById("dpNote"); if(ta) setTimeout(()=>ta.focus(), 320);
+});
+document.getElementById("dpPrintBtn").addEventListener("click", e=>{
+  e.stopPropagation();
+  document.body.classList.add("printing-detail");
+  setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove("printing-detail"), 400); }, 80);
+});
+
+/* ══════════ 错题本交互 ══════════ */
+document.getElementById("wrongTabs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-wd]"); if(!b) return;
+  wrongDom = b.dataset.wd; renderWrong();
+});
+document.getElementById("wrongActions").addEventListener("click", e=>{
+  const b = e.target.closest("[data-wact]"); if(!b) return;
+  if(b.dataset.wact === "print"){ window.print(); return; }
+  if(!confirm("确定要清空全部错题的选择记录吗？这些题会回到「未作答」状态，可以重新做一遍。")) return;
+  KB_QUIZ.forEach(p=>{
+    const a = quizState[p.id]; if(!a) return;
+    for(let i=0;i<quizTotal(p);i++){
+      const q = quizAt(p,i); if(!q) continue;
+      if(a[i] !== undefined && a[i] !== q.a) delete a[i];
+    }
+  });
+  quizSave(); renderWrong(); refreshBadges();
+});
+
+/* ══════════ 实战模板交互 ══════════ */
+document.getElementById("tplTabs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-tp]"); if(!b) return;
+  activeTpl = b.dataset.tp; renderTpl(); window.scrollTo({ top:0, behavior:"smooth" });
+});
+function tplCollect(e){
+  const el = e.target.closest("[data-tk]"); if(!el) return;
+  const tag = (el.tagName || "").toUpperCase();
+  tplDraft[el.dataset.tk] = (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") ? el.value : el.textContent;
+  clearTimeout(tplSaveTimer);
+  tplSaveTimer = setTimeout(()=>lsSet(LS_TPL, tplDraft), 400);
+}
+document.getElementById("tplBody").addEventListener("input", tplCollect);
+document.getElementById("tplBody").addEventListener("focusout", e=>{
+  tplCollect(e);
+  clearTimeout(tplSaveTimer);
+  lsSet(LS_TPL, tplDraft);
+});
+document.getElementById("tplBody").addEventListener("click", e=>{
+  const b = e.target.closest("[data-tact]"); if(!b) return;
+  if(b.dataset.tact === "print"){ window.print(); return; }
+  if(b.dataset.tact === "clear"){
+    if(!confirm("确定清空这个模板里已填写的内容吗？（不影响模板本身的预设文字）")) return;
+    const pre = activeTpl + "|";
+    Object.keys(tplDraft).forEach(k=>{ if(k.indexOf(pre) === 0) delete tplDraft[k]; });
+    lsSet(LS_TPL, tplDraft); renderTpl();
+  }
+});
+
+/* ══════════ 我的收藏交互 ══════════ */
+document.getElementById("favTabs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-fv]"); if(!b) return;
+  favTab = b.dataset.fv; renderFav();
+});
+document.getElementById("favBody").addEventListener("click", e=>{
+  const un = e.target.closest("[data-unfav]");
+  if(un){
+    e.stopPropagation();
+    const n = un.dataset.unfav;
+    if(un.dataset.nodelete){ delete notes[n]; lsSet(LS_NOTE, notes); }
+    else { delete favs[n]; lsSet(LS_FAV, favs); }
+    refreshBadges(); renderFav();
+    return;
+  }
+  const item = e.target.closest("[data-open]");
+  if(item) openItemByName(item.dataset.open);
+});
+
+/* ══════════ 键盘快捷键 ══════════ */
+(function(){
+  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav"];
+  document.addEventListener("keydown", e=>{
+    const tag = (e.target.tagName || "").toLowerCase();
+    const typing = tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
+
+    // ? ：快捷键提示
+    if(e.key === "?" && !typing){ document.getElementById("kbdHint").classList.toggle("on"); e.preventDefault(); return; }
+    // Shift + D ：切换主题
+    if(e.shiftKey && (e.key === "D" || e.key === "d") && !typing){ document.getElementById("themeBtn").click(); e.preventDefault(); return; }
+    // Ctrl/⌘ + K 或 / ：聚焦搜索
+    if(((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) || (e.key === "/" && !typing)){
+      if(activeModule !== "kb"){ activeModule = "kb"; renderAll(); }
+      setTimeout(()=>{ kw.focus(); kw.select(); }, 40);
+      e.preventDefault(); return;
+    }
+    if(typing) return;
+    // Esc 已由其他监听处理；左右键翻详情
+    if(document.body.classList.contains("detail-open")){
+      if(e.key === "ArrowLeft"){ const b = document.getElementById("dpPrev"); if(b && !b.disabled) b.click(); }
+      else if(e.key === "ArrowRight"){ const b = document.getElementById("dpNext"); if(b && !b.disabled) b.click(); }
+      return;
+    }
+    // 数字键切模块
+    if(/^[1-9]$/.test(e.key)){ const m = MODS[+e.key - 1]; if(m){ activeModule = m; renderAll(); window.scrollTo({top:0}); } }
+  });
+})();
+
 renderAll();
+refreshBadges();
 (function(){
   const box = document.getElementById("watermark");
   if(!box) return;
