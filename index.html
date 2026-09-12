@@ -478,6 +478,114 @@
     outline:none; font-family:inherit; background:var(--card); margin-bottom:14px; box-shadow:var(--shadow);}
   .field-search:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1);}
 
+  /* ══════ 一句话记忆（详情面板） ══════ */
+  .dp-memo{display:flex; gap:10px; align-items:flex-start; margin-bottom:18px; padding:12px 14px; border-radius:12px;
+    background:linear-gradient(120deg,#fffbeb,#fef3c7); border:1px solid #fde68a;}
+  .memo-tag{flex-shrink:0; font-size:11px; font-weight:bold; color:#92400e; background:#fde68a; border-radius:8px; padding:3px 9px; white-space:nowrap;}
+  .memo-txt{font-size:13.5px; line-height:1.8; color:#78350f; font-weight:600;}
+
+  /* ══════ 领域导读卡 ══════ */
+  .dg-box{background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
+    margin-bottom:14px; overflow:hidden; border-left:4px solid var(--dc,var(--primary));}
+  .dg-bar{display:flex; align-items:center; gap:12px; padding:13px 18px; cursor:pointer; background:var(--dcw,#eff4ff);}
+  .dg-bar-t{font-size:13.5px; font-weight:bold; color:var(--dcs,var(--primary)); flex-shrink:0;}
+  .dg-bar-h{flex:1; font-size:12.5px; color:var(--sub); line-height:1.6; min-width:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dg-toggle{font-size:12px; color:var(--dcs,var(--primary)); flex-shrink:0; font-weight:600;}
+  .dg-body{display:none; padding:6px 18px 18px;}
+  .dg-box.open .dg-body{display:block;}
+  .dg-sec{padding:13px 0; border-top:1px dashed var(--border);}
+  .dg-sec:first-child{border-top:none;}
+  .dg-h{font-size:12.5px; font-weight:bold; color:var(--dcs,var(--primary)); margin-bottom:9px; display:flex; align-items:center; gap:8px;}
+  .dg-note{font-size:11px; font-weight:normal; color:var(--sub);}
+  .dg-p{font-size:13px; line-height:1.85; color:#334155;}
+  .dg-p.sub{color:var(--sub); margin-top:6px; font-size:12.5px;}
+  .dg-map{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px;}
+  .dg-map-g{background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:10px 12px;}
+  .dg-map-t{font-size:12px; font-weight:bold; color:#0f172a; margin-bottom:7px;}
+  .dg-map-i{display:flex; flex-wrap:wrap; gap:5px;}
+  .rel-chip.sm{font-size:11px; padding:2px 9px; background:#fff; border:1px solid var(--border); color:#334155;}
+  .rel-chip.sm:hover{background:var(--primary); color:#fff; border-color:var(--primary);}
+  .dg-myth{margin:0; padding-left:0; list-style:none;}
+  .dg-myth li{font-size:12.5px; line-height:1.8; color:#7f1d1d; background:#fef2f2; border:1px solid #fecaca;
+    border-radius:9px; padding:8px 12px; margin-bottom:7px; position:relative; padding-left:28px;}
+  .dg-myth li::before{content:"✕"; position:absolute; left:11px; top:8px; color:#dc2626; font-weight:bold; font-size:11px;}
+  .dg-tip{font-size:12.5px; line-height:1.85; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0;
+    border-radius:10px; padding:11px 14px; margin-top:12px;}
+
+  /* ══════ 选型决策 ══════ */
+  .sel-card{padding:20px;}
+  .sel-desc{font-size:11.5px; color:var(--sub); font-weight:normal; margin-left:4px;}
+  .sel-path{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:12px 0 16px; padding:10px 12px;
+    background:#f8fafc; border:1px dashed var(--border); border-radius:10px;}
+  .sel-ans{font-size:11.5px; padding:3px 10px; border-radius:9px; background:var(--primary-weak); color:var(--primary);}
+  .sel-ar{color:var(--sub); font-size:12px;}
+  .sel-start{font-size:11.5px; color:var(--sub);}
+  .sel-q{font-size:15px; font-weight:bold; color:#0f172a; line-height:1.7; margin-bottom:14px; display:flex; align-items:baseline; gap:10px;}
+  .sel-step{flex-shrink:0; font-size:11px; font-weight:bold; color:#fff; background:linear-gradient(135deg,#2563eb,#7c3aed);
+    border-radius:8px; padding:3px 9px;}
+  .sel-opts{display:flex; flex-direction:column; gap:8px;}
+  .sel-opt{display:flex; align-items:center; gap:11px; text-align:left; font-family:inherit; font-size:13.5px; color:#1e293b;
+    background:#fff; border:1px solid var(--border); border-radius:11px; padding:12px 15px; cursor:pointer; transition:all .15s;}
+  .sel-opt:hover{border-color:var(--primary); background:var(--primary-weak); transform:translateX(3px);}
+  .so-i{flex-shrink:0; width:22px; height:22px; border-radius:7px; background:var(--primary-weak); color:var(--primary);
+    font-size:11.5px; font-weight:bold; display:flex; align-items:center; justify-content:center;}
+  .sel-opt:hover .so-i{background:var(--primary); color:#fff;}
+  .so-t{flex:1;}
+  .so-a{color:var(--sub); font-size:14px;}
+  .sel-opt:hover .so-a{color:var(--primary);}
+  .sel-acts{display:flex; gap:9px; margin-top:16px; flex-wrap:wrap;}
+  .sel-btn{font-family:inherit; font-size:12.5px; padding:8px 16px; border-radius:9px; cursor:pointer; transition:all .15s;
+    border:1px solid var(--border); background:#fff; color:#334155;}
+  .sel-btn:hover{background:#f1f5f9;}
+  .sel-btn.reset{color:var(--sub);}
+  .sel-result{border:1px solid var(--border); border-radius:13px; overflow:hidden;}
+  .sr-head{font-size:11.5px; font-weight:bold; letter-spacing:1px; color:#fff; padding:8px 15px;
+    background:linear-gradient(135deg,#059669,#0d9488);}
+  .sr-title{font-size:16px; font-weight:bold; color:#065f46; padding:15px 15px 12px; background:#ecfdf5;}
+  .sr-block{padding:13px 15px; border-top:1px solid var(--border);}
+  .sr-block .sr-k{font-size:12px; font-weight:bold; margin-bottom:7px;}
+  .sr-block.why .sr-k{color:#047857;}
+  .sr-block.avoid .sr-k{color:#b45309;}
+  .sr-block ul{margin:0; padding-left:19px;}
+  .sr-block li{font-size:12.5px; line-height:1.8; color:#334155; margin-bottom:3px;}
+  .sr-note{font-size:12.5px; line-height:1.8; color:#1e40af; background:#eff6ff; border-top:1px solid var(--border); padding:12px 15px;}
+  .sr-rel{font-size:12px; color:var(--sub); padding:12px 15px; border-top:1px solid var(--border);
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px;}
+
+  /* ══════ 设计避坑 ══════ */
+  .mk-key{display:none;}
+  .mk-item{border:1px solid var(--border); border-radius:12px; padding:13px 15px; margin-top:11px; background:#fff;}
+  .mk-t{font-size:13.5px; font-weight:bold; color:#0f172a; line-height:1.7; margin-bottom:10px;
+    padding-left:12px; border-left:3px solid #dc2626;}
+  .mk-row{display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-top:1px dashed var(--border);}
+  .mk-row:first-of-type{border-top:none;}
+  .mk-k{flex-shrink:0; width:82px; font-size:11.5px; font-weight:bold; line-height:1.7;}
+  .mk-k.mk-b{color:#b91c1c;} .mk-k.mk-c{color:#c2410c;} .mk-k.mk-g{color:#047857;} .mk-k.mk-h{color:#1d4ed8;}
+  .mk-v{flex:1; font-size:12.5px; line-height:1.8; color:#334155; min-width:0;}
+  .mk-rel{margin-top:9px; padding-top:9px; border-top:1px dashed var(--border); font-size:11.5px; color:var(--sub);
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px;}
+
+  /* ══════ 公式速查 ══════ */
+  .fm-item{border:1px solid var(--border); border-radius:12px; padding:13px 15px; margin-top:11px; background:#fff;}
+  .fm-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; margin-bottom:9px;}
+  .fm-name{font-size:13.5px; font-weight:bold; color:#0f172a;}
+  .fm-unit{font-size:11px; color:var(--sub); background:#f1f5f9; border-radius:7px; padding:2px 8px;}
+  .fm-expr{font-family:ui-monospace,Consolas,"Courier New",monospace; font-size:14px; font-weight:bold; color:#1e40af;
+    background:linear-gradient(120deg,#eff6ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:10px;
+    padding:11px 14px; overflow-x:auto; white-space:nowrap; letter-spacing:.3px;}
+  .fm-vars{margin-top:10px;}
+  .fm-var{display:flex; gap:10px; font-size:12px; line-height:1.75; padding:2px 0;}
+  .fv-s{flex-shrink:0; min-width:74px; font-family:ui-monospace,Consolas,monospace; font-weight:bold; color:#7c3aed;}
+  .fv-d{flex:1; color:#334155; min-width:0;}
+  .fm-when{font-size:12.5px; line-height:1.8; color:#334155; margin-top:10px; padding-top:9px; border-top:1px dashed var(--border);}
+  .fm-when b{color:#1d4ed8;}
+  .fm-eg{font-size:12px; line-height:1.8; color:#78350f; background:#fffbeb; border:1px solid #fde68a;
+    border-radius:9px; padding:9px 12px; margin-top:9px;}
+  .fm-eg b{color:#92400e;}
+  .fm-eg code, .gs-d code{font-family:ui-monospace,Consolas,monospace; background:rgba(37,99,235,.08);
+    padding:1px 5px; border-radius:4px; font-size:11.5px;}
+
   @media print{
     .topbar,.navbar,.detail-panel,.detail-backdrop,#watermark,#site-stats,.no-print{display:none !important;}
     body{background:#fff; padding:0;}
@@ -503,6 +611,17 @@
     .dp-anchors{padding:9px 14px 0;}
     .dp-anchors button{font-size:11px; padding:4px 9px; margin-bottom:8px;}
     .tr-item{flex-direction:column; gap:6px;}
+    .dg-bar{flex-wrap:wrap; gap:6px; padding:11px 14px;}
+    .dg-bar-h{white-space:normal; flex-basis:100%;}
+    .dg-body{padding:4px 14px 15px;}
+    .dg-map{grid-template-columns:1fr;}
+    .sel-card{padding:15px;}
+    .sel-q{font-size:14px;}
+    .mk-row{flex-direction:column; gap:3px;}
+    .mk-k{width:auto;}
+    .fm-expr{font-size:12.5px;}
+    .fv-s{min-width:64px;}
+    .dp-memo{flex-direction:column; gap:7px;}
     .tr-sym{flex:none;}
     .iss{flex-direction:column; gap:5px;}
     .iss .iq{min-width:0;}
@@ -555,6 +674,8 @@
     </div>
     <div class="nav-row">
       <span class="nav-cap">参考</span>
+      <button class="nav-tab" data-mod="select">🎛️ 选型决策<span class="nb" id="nbSelect"></span></button>
+      <button class="nav-tab" data-mod="formula">📐 公式速查<span class="nb" id="nbFormula"></span></button>
       <button class="nav-tab" data-mod="quick">📊 速查手册<span class="nb" id="nbQuick"></span></button>
       <button class="nav-tab" data-mod="check">✅ 检查清单<span class="nb" id="nbCheck"></span></button>
       <button class="nav-tab" data-mod="case">🧩 整机案例<span class="nb" id="nbCase"></span></button>
@@ -628,12 +749,39 @@
       <div class="mic">💼</div>
       <div>
         <h2>实战宝典</h2>
-        <div class="mtg">缺陷排查表、面试题库、标准清单——遇到具体问题直接翻这里</div>
+        <div class="mtg">设计避坑、缺陷排查、面试题库、标准清单——遇到具体问题直接翻这里</div>
       </div>
     </div>
     <div class="qv-tabs" id="fieldTabs"></div>
     <input class="field-search" id="fieldSearch" placeholder="搜索当前分类：现象、原因、标准号、关键词…">
     <div id="fieldBody"></div>
+  </div>
+
+  <!-- 选型决策 -->
+  <div id="selectView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">🎛️</div>
+      <div>
+        <h2>选型决策助手</h2>
+        <div class="mtg">回答「怎么选」：选材料、选成型工艺、选表面处理、选紧固方式、选散热方案——一步步问下去，给出推荐结论与依据</div>
+      </div>
+    </div>
+    <div class="qv-tabs" id="selTabs"></div>
+    <div id="selBody"></div>
+  </div>
+
+  <!-- 公式速查 -->
+  <div id="formulaView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">📐</div>
+      <div>
+        <h2>公式与单位速查</h2>
+        <div class="mtg">把散落各处的公式汇总成卡片：结构强度、注塑模具、散热、光学、成本、包装公差，每条带变量说明、单位与算例</div>
+      </div>
+      <div class="mod-tools"><input class="mini-input" id="fmSearch" placeholder="搜索公式：热阻、锁模力、脱落…"></div>
+    </div>
+    <div class="qv-tabs" id="fmTabs"></div>
+    <div id="fmBody"></div>
   </div>
 
   <!-- 速查手册 -->
@@ -728,6 +876,7 @@
   <!-- 领域详情 -->
   <div id="domainView" style="display:none">
     <div class="domain-head" id="domainHead"></div>
+    <div id="domGuide"></div>
     <div class="ab-box">
       <h3>🎯 该领域需要掌握的能力</h3>
       <ul class="ab-list" id="abList"></ul>
@@ -814,6 +963,10 @@
   </div>
   <div class="dp-anchors" id="dpAnchors"></div>
   <div class="dp-body" id="dpBody">
+    <div class="dp-memo" id="dpMemoSec" style="display:none">
+      <span class="memo-tag">一句话记住</span>
+      <span class="memo-txt" id="dpMemo"></span>
+    </div>
     <div class="dp-sec" id="secPoints">
       <h4>📌 核心要点</h4>
       <div class="text" id="dpPoints"></div>
@@ -898,6 +1051,12 @@
 <script src="kb-task-2.js"></script>
 <script src="kb-task-3.js"></script>
 <script src="kb-img.js"></script>
+<script src="kb-memo-1.js"></script>
+<script src="kb-memo-2.js"></script>
+<script src="kb-domain.js"></script>
+<script src="kb-select.js"></script>
+<script src="kb-mistake.js"></script>
+<script src="kb-formula.js"></script>
 <script>
 const DC = {
   material:     {c:"#d97706", s:"#b45309", w:"#fff7ed"},
@@ -946,9 +1105,12 @@ const quizView = document.getElementById("quizView");
 const calcView = document.getElementById("calcView");
 const fieldView = document.getElementById("fieldView");
 const galleryView = document.getElementById("galleryView");
+const selectView = document.getElementById("selectView");
+const formulaView = document.getElementById("formulaView");
 const KB_VIEWS = [homeView, domainView, searchView];
 const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossView, path:pathView,
-                   map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView};
+                   map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView,
+                   select:selectView, formula:formulaView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -956,8 +1118,10 @@ let activeCase  = (window.KB_CASES && KB_CASES[0] ? KB_CASES[0].id : "");
 let activeChk   = (window.KB_CHECKS && KB_CHECKS[0] ? KB_CHECKS[0].id : "");
 let activeMap   = (window.KB_MAP && KB_MAP[0] ? KB_MAP[0].id : "");
 let activeQuiz  = (window.KB_QUIZ && KB_QUIZ[0] ? KB_QUIZ[0].id : "");
-let activeField = "trouble";
+let activeField = "mistake";
 let glCat = "全部";
+let activeSel   = (window.KB_SELECT && KB_SELECT[0] ? KB_SELECT[0].id : "");
+let activeFm    = (window.KB_FORMULA && KB_FORMULA[0] ? KB_FORMULA[0].cat : "");
 
 let activeDomain = null;
 let activeSub = "all";
@@ -1105,6 +1269,11 @@ function openDetail(it){
   document.getElementById("dpExtra").textContent = `共 ${(it.videos||[]).length} 个视频源 · ${it.img? "已配置示意图" : "暂未配图"}`;
   document.getElementById("dpPoints").textContent = it.points;
   document.getElementById("dpUsage").textContent = it.usage;
+  // 一句话记忆
+  const memo = (window.KB_MEMO || {})[it.name];
+  const memoSec = document.getElementById("dpMemoSec");
+  if(memo){ memoSec.style.display = ""; document.getElementById("dpMemo").textContent = memo; }
+  else { memoSec.style.display = "none"; }
   renderDeep(it);
   renderNumRel(it);
   // 视频列表
@@ -1230,8 +1399,13 @@ function renderHome(){
     {n:KB_CASES.length, l:"整机案例", mod:"case"},
     {n:KB_GLOSS.length, l:"术语", mod:"gloss"},
     {n:ovCount((a,x)=>a+x.items.length, KB_TROUBLE), l:"缺陷排查", mod:"field", f:"trouble"},
+    {n:ovCount((a,x)=>a+x.items.length, (window.KB_MISTAKE||[])), l:"设计避坑", mod:"field", f:"mistake"},
     {n:ovCount((a,x)=>a+x.items.length, KB_INTERVIEW), l:"面试题", mod:"field", f:"interview"},
     {n:ovCount((a,x)=>a+x.items.length, KB_STD), l:"标准", mod:"field", f:"std"},
+    {n:(window.KB_SELECT||[]).length, l:"选型决策树", mod:"select"},
+    {n:ovCount((a,g)=>a+(g.items||[]).length,(window.KB_FORMULA||[])) + ovCount((a,g)=>a+(g.items||[]).length,(window.KB_UNIT||[])), l:"公式与单位", mod:"formula"},
+    {n:Object.keys(window.KB_MEMO||{}).length, l:"一句话记忆", mod:"kb"},
+    {n:Object.keys(window.KB_DOMAIN_GUIDE||{}).length, l:"领域导读", mod:"kb"},
     {n:Object.keys(window.KB_TASK||{}).length, l:"动手练习", mod:"kb"}
   ];
   document.getElementById("panelOverview").innerHTML = `
@@ -1332,6 +1506,53 @@ function renderHome(){
 }
 
 // 领域详情
+/* ══════════════ 领域导读卡 ══════════════ */
+let guideOpen = true;
+function renderDomainGuide(d){
+  const el = document.getElementById("domGuide");
+  const g = (window.KB_DOMAIN_GUIDE || {})[d.id];
+  if(!g){ el.innerHTML = ""; return; }
+  const mapHtml = (g.map||[]).map(gr=>`
+    <div class="dg-map-g">
+      <div class="dg-map-t">${esc(gr.g)}</div>
+      <div class="dg-map-i">${(gr.items||[]).map(n=>`<button class="rel-chip sm" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+    </div>`).join("");
+  el.innerHTML = `
+    <div class="dg-box${guideOpen?" open":""}" id="dgBox">
+      <div class="dg-bar" id="dgBar">
+        <span class="dg-bar-t">📘 领域导读</span>
+        <span class="dg-bar-h">${esc(g.pos)}</span>
+        <span class="dg-toggle" id="dgToggle">${guideOpen?"收起 ▲":"展开 ▼"}</span>
+      </div>
+      <div class="dg-body" id="dgBody">
+        <div class="dg-sec">
+          <div class="dg-h">🎯 这个领域解决什么问题</div>
+          <div class="dg-p">${esc(g.pos)}</div>
+          <div class="dg-p sub">${esc(g.why)}</div>
+        </div>
+        <div class="dg-sec">
+          <div class="dg-h">🗺️ 核心概念地图<span class="dg-note">点任意概念直接打开</span></div>
+          <div class="dg-map">${mapHtml}</div>
+        </div>
+        <div class="dg-sec">
+          <div class="dg-h">🔗 在整机开发链条中的位置</div>
+          <div class="dg-p">${esc(g.link)}</div>
+        </div>
+        <div class="dg-sec">
+          <div class="dg-h">⚠️ 常见误区 Top${(g.myth||[]).length}</div>
+          <ul class="dg-myth">${(g.myth||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+        </div>
+        <div class="dg-tip">💡 <b>学习建议：</b>${esc(g.tips)}</div>
+      </div>
+    </div>`;
+  document.getElementById("dgToggle").onclick = ()=>{
+    guideOpen = !guideOpen;
+    document.getElementById("dgBox").classList.toggle("open", guideOpen);
+    document.getElementById("dgToggle").textContent = guideOpen ? "收起 ▲" : "展开 ▼";
+  };
+  document.getElementById("dgBar").onclick = (e)=>{ if(e.target.id!=="dgToggle") document.getElementById("dgToggle").click(); };
+}
+
 function openDomain(){
   const d = KB_DOMAINS.find(x=>x.id===activeDomain);
   const col = dc(d.id);
@@ -1346,6 +1567,7 @@ function openDomain(){
       <div class="tg">${d.tagline} · ${d.subs.length} 个子类</div>
     </div>`;
   abListEl.innerHTML = d.abilities.map(a=>`<li>${a}</li>`).join("");
+  renderDomainGuide(d);
   buildChips(d);
   renderDomain();
   lvFilter.style.display=""; stFilter.style.display=""; backBtn.style.display="";
@@ -1503,16 +1725,71 @@ function renderGlobalSearch(q){
   });
   if(cs.length) groups.push({icon:"🧩", name:"整机案例", n:cs.length, jump:"case", items: cs});
 
+  // 一句话记忆
+  const mm = [];
+  Object.entries(window.KB_MEMO||{}).forEach(([k,v])=>{
+    if(hit(k)||hit(v)) mm.push({t:k, d:`<b>${esc(v)}</b>`, openName:k});
+  });
+  if(mm.length) groups.push({icon:"🧠", name:"一句话记忆", n:mm.length, jump:"kb", items: mm.slice(0,8)});
+
+  // 设计避坑
+  const mk = [];
+  (window.KB_MISTAKE||[]).forEach(g=>g.items.forEach(x=>{
+    if(hit(x.t)||hit(x.bad)||hit(x.cost)||hit(x.good)||hit(x.how))
+      mk.push({t:x.t, d:`<b>✗</b> ${esc(x.bad)}　<b>✓</b> ${esc(x.good)}`});
+  }));
+  if(mk.length) groups.push({icon:"⚠️", name:"设计避坑", n:mk.length, jump:"field", f:"mistake", items: mk});
+
+  // 选型决策
+  const sl = [];
+  (window.KB_SELECT||[]).forEach(t=>{
+    if(hit(t.name)||hit(t.desc)) sl.push({t:t.icon+" "+t.name, d:esc(t.desc), jumpSel:t.id});
+    Object.values(t.nodes||{}).forEach(nd=>{
+      if(nd.r && (hit(nd.r.title)||hit((nd.r.why||[]).join(" "))||hit((nd.r.avoid||[]).join(" "))||hit(nd.r.note)))
+        sl.push({t:nd.r.title, d:`选型结论 · ${esc(t.name)}　${esc(nd.r.note)}`, jumpSel:t.id});
+      else if(nd.q && hit(nd.q)) sl.push({t:nd.q, d:`决策问题 · ${esc(t.name)}`, jumpSel:t.id});
+    });
+  });
+  if(sl.length) groups.push({icon:"🎛️", name:"选型决策", n:sl.length, jump:"select", items: sl.slice(0,8)});
+
+  // 公式与单位
+  const fg = [];
+  (window.KB_FORMULA||[]).forEach(g=>(g.items||[]).forEach(x=>{
+    if(hit(x.name)||hit(x.expr)||hit(x.unit)||hit(x.when)||hit(x.eg)||hit((x.vars||[]).map(v=>v.s+" "+v.d).join(" ")))
+      fg.push({t:x.name, d:`<code>${esc(x.expr)}</code>　${esc(x.when).slice(0,70)}`, jumpFm:g.cat});
+  }));
+  (window.KB_UNIT||[]).forEach(g=>(g.items||[]).forEach(x=>{
+    if(hit(x.a)||hit(x.b)||hit(x.note)) fg.push({t:x.a, d:`= ${esc(x.b)}　${esc(x.note||"")}`, jumpFm:"__unit"});
+  }));
+  if(fg.length) groups.push({icon:"📐", name:"公式与单位", n:fg.length, jump:"formula", items: fg.slice(0,8)});
+
+  // 领域导读
+  const dg = [];
+  Object.entries(window.KB_DOMAIN_GUIDE||{}).forEach(([id,g])=>{
+    const d = KB_DOMAINS.find(x=>x.id===id); if(!d) return;
+    if(hit(d.name)||hit(g.pos)||hit(g.why)||hit((g.myth||[]).join(" "))||hit(g.tips)){
+      const m = (g.myth||[]).find(x=>hit(x));
+      dg.push({t:`${d.icon} ${d.name} · 领域导读`, d:m?`常见误区：${esc(m)}`:esc(g.pos), jumpDom:id});
+    }
+  });
+  if(dg.length) groups.push({icon:"📘", name:"领域导读", n:dg.length, jump:"kb", items: dg});
+
   if(!groups.length){ box.innerHTML = ""; return; }
   const LIMIT = 6;
+  const attr = (g,x)=>`data-jump="${g.jump}" ${g.f?`data-field="${g.f}"`:""}` +
+    (x && x.pid?` data-quiz="${x.pid}"`:"") +
+    (x && x.jumpSel?` data-sel="${x.jumpSel}"`:"") +
+    (x && x.jumpFm?` data-fm="${esc(x.jumpFm)}"`:"") +
+    (x && x.openName?` data-open="${esc(x.openName)}"`:"") +
+    (x && x.jumpDom?` data-dom="${x.jumpDom}"`:"");
   box.innerHTML = groups.map(g=>`
     <div class="gs-group">
-      <div class="gs-head" data-jump="${g.jump}" ${g.f?`data-field="${g.f}"`:""}>
+      <div class="gs-head" ${attr(g)}>
         <h4>${g.icon} ${esc(g.name)}</h4><span class="gsc">${g.n} 条命中</span>
         <span class="gsj">进入模块查看全部 →</span>
       </div>
       <div class="gs-body">
-        ${g.items.slice(0,LIMIT).map(x=>`<div class="gs-item" ${x.pid?`data-quiz="${x.pid}"`:""} data-jump="${g.jump}" ${g.f?`data-field="${g.f}"`:""}>
+        ${g.items.slice(0,LIMIT).map(x=>`<div class="gs-item" ${attr(g,x)}>
           <div class="gs-t">${x.t.slice(0,30)}</div><div class="gs-d">${x.d.slice(0,110)}</div></div>`).join("")}
         ${g.n>LIMIT?`<div class="gs-more">还有 ${g.n-LIMIT} 条，点上方标题进入模块查看全部</div>`:""}
       </div>
@@ -1865,7 +2142,10 @@ function renderCalc(){
 
 /* ══════════════ 模块九：实战宝典 ══════════════ */
 function renderField(){
+  const MIS = window.KB_MISTAKE || [];
+  const misN = MIS.reduce((a,x)=>a+x.items.length,0);
   const TABS = [
+    {id:"mistake", n:"⚠️ 设计避坑", c:misN+" 个"},
     {id:"trouble", n:"🔎 缺陷排查", c:KB_TROUBLE.reduce((a,x)=>a+x.items.length,0)+" 条"},
     {id:"interview", n:"💼 面试题库", c:KB_INTERVIEW.reduce((a,x)=>a+x.items.length,0)+" 题"},
     {id:"std", n:"📋 标准清单", c:KB_STD.reduce((a,x)=>a+x.items.length,0)+" 项"}
@@ -1876,7 +2156,33 @@ function renderField(){
   const q = (document.getElementById("fieldSearch").value||"").trim().toLowerCase();
   const hit = s => (s==null?"":String(s)).toLowerCase().includes(q);
   const noHit = `<div class="card"><div class="empty">没有匹配的内容，换个关键词试试～</div></div>`;
-  if(activeField === "trouble"){
+  if(activeField === "mistake"){
+    const groups = MIS.map(g=>({g, items: g.items.filter(x=>!q || hit(x.t)||hit(x.bad)||hit(x.cost)||hit(x.good)||hit(x.how)||hit((x.ref||[]).join(" ")))}))
+                      .filter(x=>x.items.length);
+    box.innerHTML = groups.length ? `
+      <div class="card">
+        <h3>⚠️ 开模前评审：设计阶段的坑</h3>
+        <div class="qv-desc">这里的每一条都是<strong>在设计阶段就能避免</strong>的错误。和「缺陷排查」的区别：排查表对付的是量产后出现的现象，这里防的是还没开模就埋下的隐患。</div>
+        <div class="mk-key">
+          <span><b class="mk-b">错误做法</b></span>
+          <span><b class="mk-c">后果</b></span>
+          <span><b class="mk-g">正确做法</b></span>
+          <span><b class="mk-h">怎么自查</b></span>
+        </div>
+      </div>` + groups.map(({g,items})=>`
+      <div class="card">
+        <h3>${g.icon} ${esc(g.name)} <span style="font-size:11px;color:var(--sub);font-weight:normal">${esc(g.desc)}${q?`　·　筛出 ${items.length} 个`:""}</span></h3>
+        ${items.map(it=>`
+          <div class="mk-item">
+            <div class="mk-t">${esc(it.t)}</div>
+            <div class="mk-row"><span class="mk-k mk-b">✗ 错误做法</span><div class="mk-v">${esc(it.bad)}</div></div>
+            <div class="mk-row"><span class="mk-k mk-c">⚠ 后果</span><div class="mk-v">${esc(it.cost)}</div></div>
+            <div class="mk-row"><span class="mk-k mk-g">✓ 正确做法</span><div class="mk-v">${esc(it.good)}</div></div>
+            <div class="mk-row"><span class="mk-k mk-h">🔍 怎么自查</span><div class="mk-v">${esc(it.how)}</div></div>
+            ${(it.ref||[]).length?`<div class="mk-rel">关联：${it.ref.map(n=>`<button class="rel-chip" data-rel="${esc(n)}">${esc(n)} →</button>`).join("")}</div>`:""}
+          </div>`).join("")}
+      </div>`).join("") : noHit;
+  }else if(activeField === "trouble"){
     const groups = KB_TROUBLE.map(g=>({g, items: g.items.filter(x=>!q || hit(x.s)||hit(x.c.join(" "))||hit(x.f.join(" "))||hit(x.v))}))
                             .filter(x=>x.items.length);
     box.innerHTML = groups.length ? groups.map(({g,items})=>`
@@ -1920,6 +2226,92 @@ function renderField(){
         </table></div>
       </div>`).join("") + (q?`<div class="qv-stat" style="font-size:12px;color:var(--sub);margin-top:4px;">共筛出 ${total} 项标准</div>`:"") : noHit;
   }
+}
+
+/* ══════════════ 模块十一：选型决策 ══════════════ */
+let selCur = null;         // 当前节点 id
+let selPath = [];          // [{nodeId, ans}] 走过的路
+
+function selTree(){ return (window.KB_SELECT||[]).find(x=>x.id===activeSel) || (window.KB_SELECT||[])[0]; }
+
+function renderSelect(){
+  const T = window.KB_SELECT || [];
+  if(!T.length) return;
+  const tabsEl = document.getElementById("selTabs");
+  tabsEl.innerHTML = T.map(t=>`<button class="qv-tab${t.id===activeSel?" active":""}" data-sel="${t.id}">${t.icon} ${esc(t.name)}</button>`).join("");
+  const tree = selTree();
+  if(!selCur || !tree.nodes[selCur]){ selCur = tree.start; selPath = []; }
+  const node = tree.nodes[selCur];
+  const pathHtml = selPath.length
+    ? `<div class="sel-path">${selPath.map(p=>`<span class="sel-ans">${esc(p.ans)}</span>`).join('<span class="sel-ar">›</span>')}</div>`
+    : `<div class="sel-path"><span class="sel-start">从这里开始 ↓</span></div>`;
+  const acts = `<div class="sel-acts">${selPath.length?`<button class="sel-btn back" id="selBack">‹ 返回上一步</button>`:""}<button class="sel-btn reset" id="selReset">↺ 重新开始</button></div>`;
+  let body;
+  if(node.r){
+    const r = node.r;
+    body = `<div class="sel-result">
+      <div class="sr-head">推荐结论</div>
+      <div class="sr-title">${esc(r.title)}</div>
+      <div class="sr-block why"><div class="sr-k">为什么推荐它</div><ul>${(r.why||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="sr-block avoid"><div class="sr-k">要特别注意</div><ul>${(r.avoid||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="sr-note">💡 ${esc(r.note)}</div>
+      ${(r.ref||[]).length?`<div class="sr-rel">深入看这些知识点：${r.ref.map(n=>`<button class="rel-chip" data-rel="${esc(n)}">${esc(n)} →</button>`).join("")}</div>`:""}
+      ${acts}
+    </div>`;
+  } else {
+    const n = selPath.length;
+    body = `<div class="sel-q"><span class="sel-step">第 ${n+1} 步</span>${esc(node.q)}</div>
+      <div class="sel-opts">${node.opts.map((o,i)=>`<button class="sel-opt" data-opt="${i}"><span class="so-i">${i+1}</span><span class="so-t">${esc(o.t)}</span><span class="so-a">→</span></button>`).join("")}</div>
+      ${acts}`;
+  }
+  document.getElementById("selBody").innerHTML = `
+    <div class="card sel-card">
+      <h3>${tree.icon} ${esc(tree.name)} <span class="sel-desc">${esc(tree.desc)}</span></h3>
+      ${pathHtml}
+      ${body}
+    </div>`;
+}
+
+/* ══════════════ 模块十二：公式速查 ══════════════ */
+function renderFormula(){
+  const FM = window.KB_FORMULA || [], UN = window.KB_UNIT || [];
+  const tabs = FM.map(g=>({ id:g.cat, n:g.icon+" "+g.cat,
+    c:(g.items||[]).length+" 条" }));
+  tabs.push({ id:"__unit", n:"📏 单位换算", c:UN.reduce((a,x)=>a+(x.items||[]).length,0)+" 条" });
+  if(activeFm !== "__unit" && !FM.some(g=>g.cat===activeFm)) activeFm = tabs[0].id;
+  document.getElementById("fmTabs").innerHTML = tabs.map(t=>
+    `<button class="qv-tab${t.id===activeFm?" active":""}" data-fm="${esc(t.id)}">${t.n} <span style="opacity:.65">${t.c}</span></button>`).join("");
+  const q = (document.getElementById("fmSearch").value||"").trim().toLowerCase();
+  const hit = s => (s==null?"":String(s)).toLowerCase().includes(q);
+  const box = document.getElementById("fmBody");
+  const noHit = `<div class="card"><div class="empty">没有匹配的内容，换个关键词试试～</div></div>`;
+
+  if(activeFm === "__unit"){
+    const groups = UN.map(g=>({ g, items:(g.items||[]).filter(x=>!q || hit(x.a)||hit(x.b)||hit(x.note)) })).filter(x=>x.items.length);
+    box.innerHTML = groups.length ? groups.map(({g,items})=>`
+      <div class="card">
+        <h3>${g.icon} ${esc(g.cat)}</h3>
+        <div class="tbl-scroll"><table class="mini">
+          <thead><tr><th style="width:250px">这个单位</th><th style="width:250px">等于</th><th>备注 / 使用场景</th></tr></thead>
+          <tbody>${items.map(x=>`<tr><td><b>${esc(x.a)}</b></td><td>${esc(x.b)}</td><td>${esc(x.note||"")}</td></tr>`).join("")}</tbody>
+        </table></div>
+      </div>`).join("") : noHit;
+    return;
+  }
+
+  const groups = FM.map(g=>({ g, items:(g.items||[]).filter(x=>!q || hit(x.name)||hit(x.expr)||hit(x.when)||hit(x.eg)||hit(x.unit)||hit((x.vars||[]).map(v=>v.s+" "+v.d).join(" "))) })).filter(x=>x.items.length);
+  box.innerHTML = groups.length ? groups.map(({g,items})=>`
+    <div class="card">
+      <h3>${g.icon} ${esc(g.cat)} <span class="sel-desc">${esc(g.desc||"")}${q?`　·　筛出 ${items.length} 条`:""}</span></h3>
+      ${items.map(it=>`
+        <div class="fm-item">
+          <div class="fm-head"><span class="fm-name">${esc(it.name)}</span><span class="fm-unit">单位：${esc(it.unit)}</span></div>
+          <div class="fm-expr">${esc(it.expr)}</div>
+          <div class="fm-vars">${(it.vars||[]).map(v=>`<div class="fm-var"><span class="fv-s">${esc(v.s)}</span><span class="fv-d">${esc(v.d)}</span></div>`).join("")}</div>
+          <div class="fm-when"><b>什么时候用：</b>${esc(it.when)}</div>
+          ${it.eg?`<div class="fm-eg"><b>算例：</b>${esc(it.eg)}</div>`:""}
+        </div>`).join("")}
+    </div>`).join("") : noHit;
 }
 
 /* ══════════════ 模块十：参考图库 ══════════════ */
@@ -1986,6 +2378,8 @@ function renderAll(){
     else if(activeModule==="calc") renderCalc();
     else if(activeModule==="field") renderField();
     else if(activeModule==="gallery") renderGallery();
+    else if(activeModule==="select") renderSelect();
+    else if(activeModule==="formula") renderFormula();
     return;
   }
   const q = kw.value.trim();
@@ -2099,8 +2493,10 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbMap", (window.KB_MAP||[]).length + " 领域");
   set("nbQuiz", (window.KB_QUIZ||[]).reduce((a,p)=>a+p.questions.length,0) + " 题");
   set("nbCalc", (typeof CALCS!=="undefined" ? CALCS.length : 0) + " 个");
-  set("nbField", ((window.KB_TROUBLE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_INTERVIEW||[]).reduce((a,x)=>a+x.items.length,0)) + " 条");
+  set("nbField", ((window.KB_MISTAKE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_TROUBLE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_INTERVIEW||[]).reduce((a,x)=>a+x.items.length,0)) + " 条");
   set("nbGallery", Object.values(window.KB_IMG||{}).reduce((a,b)=>a+b.length,0) + " 张");
+  set("nbSelect", (window.KB_SELECT||[]).length + " 棵树");
+  set("nbFormula", ((window.KB_FORMULA||[]).reduce((a,g)=>a+(g.items||[]).length,0) + (window.KB_UNIT||[]).reduce((a,g)=>a+(g.items||[]).length,0)) + " 条");
 })();
 
 // 参考图库筛选
@@ -2133,10 +2529,15 @@ document.getElementById("gsGroups").addEventListener("click", e=>{
   activeModule = el.dataset.jump;
   if(el.dataset.field) activeField = el.dataset.field;
   if(el.dataset.quiz) activeQuiz = el.dataset.quiz;
+  if(el.dataset.sel){ activeSel = el.dataset.sel; selCur = null; selPath = []; }
+  if(el.dataset.fm) activeFm = el.dataset.fm;
+  if(el.dataset.dom){ activeDomain = el.dataset.dom; browseAll = false; kw.value = ""; }
   if(activeModule === "gloss"){ glCat = "全部"; document.getElementById("glSearch").value = q; }
   else if(activeModule === "quick"){ document.getElementById("qvSearch").value = q; }
   else if(activeModule === "field"){ document.getElementById("fieldSearch").value = q; }
+  else if(activeModule === "formula"){ document.getElementById("fmSearch").value = q; }
   renderAll();
+  if(el.dataset.open){ const it = KB_ITEMS.find(x=>x.name===el.dataset.open); kw.value=""; renderAll(); if(it) openDetail(it); }
   window.scrollTo({top:0, behavior:"smooth"});
 });
 
@@ -2189,6 +2590,34 @@ document.getElementById("fieldTabs").addEventListener("click", e=>{
   const b = e.target.closest("[data-field]"); if(!b) return;
   activeField = b.dataset.field; renderField(); window.scrollTo({top:0, behavior:"smooth"});
 });
+
+// 选型决策
+document.getElementById("selTabs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-sel]"); if(!b) return;
+  activeSel = b.dataset.sel; selCur = null; selPath = [];
+  renderSelect(); window.scrollTo({top:0, behavior:"smooth"});
+});
+document.getElementById("selBody").addEventListener("click", e=>{
+  const tree = selTree(); if(!tree) return;
+  if(e.target.closest("#selReset")){ selCur = tree.start; selPath = []; renderSelect(); return; }
+  if(e.target.closest("#selBack")){
+    const p = selPath.pop(); if(p){ selCur = p.nodeId; renderSelect(); }
+    return;
+  }
+  const ob = e.target.closest("[data-opt]"); if(!ob) return;
+  const node = tree.nodes[selCur]; if(!node || !node.opts) return;
+  const o = node.opts[+ob.dataset.opt]; if(!o) return;
+  selPath.push({ nodeId: selCur, ans: o.t });
+  selCur = o.go;
+  renderSelect();
+});
+
+// 公式速查
+document.getElementById("fmTabs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-fm]"); if(!b) return;
+  activeFm = b.dataset.fm; renderFormula();
+});
+document.getElementById("fmSearch").addEventListener("input", ()=>{ renderFormula(); });
 
 navbar.addEventListener("click", e=>{
   const b = e.target.closest(".nav-tab"); if(!b) return;
