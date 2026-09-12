@@ -805,5 +805,29 @@ renderAll();
   window.addEventListener("resize", ()=>{ clearTimeout(t); t = setTimeout(fill, 200); });
 })();
 </script>
+
+<!-- 访问统计：不蒜子 -->
+<div id="site-stats" style="position:fixed; left:12px; bottom:8px; z-index:9997; font-size:11px; color:rgba(100,116,139,.55); font-family:inherit; pointer-events:none; display:none;">
+  本站累计访客 <b id="busuanzi_value_site_uv" style="font-weight:600;">–</b> 人 · 浏览 <b id="busuanzi_value_site_pv" style="font-weight:600;">–</b> 次
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+// 不蒜子加载成功后再显示统计角标（加载失败则自动隐藏，不影响使用）
+(function(){
+  var box = document.getElementById("site-stats");
+  var tries = 0;
+  var timer = setInterval(function(){
+    tries++;
+    var uv = document.getElementById("busuanzi_value_site_uv");
+    var pv = document.getElementById("busuanzi_value_site_pv");
+    if(uv && pv && uv.textContent && uv.textContent !== "–"){
+      box.style.display = "block";
+      clearInterval(timer);
+    } else if(tries > 30){ // 约15秒仍失败则放弃
+      clearInterval(timer);
+    }
+  }, 500);
+})();
+</script>
 </body>
 </html>
