@@ -333,8 +333,31 @@
   .qs span{font-size:11px; color:var(--sub);}
   .quiz-actions{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
   .quiz-q{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:15px 20px; margin-bottom:11px; box-shadow:var(--shadow);}
-  .qq-title{font-size:13.5px; font-weight:bold; line-height:1.7; margin-bottom:12px; display:flex; gap:9px; align-items:flex-start;}
+  .qq-title{font-size:13.5px; font-weight:bold; line-height:1.7; margin-bottom:12px; display:flex; gap:9px; align-items:flex-start; flex-wrap:wrap;}
   .qq-no{width:23px; height:23px; border-radius:7px; background:var(--primary-weak); color:var(--primary); font-size:11.5px; font-weight:bold; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .qq-main{flex:1; min-width:0;}
+  .qq-tags{display:flex; gap:5px; align-items:center; flex-shrink:0;}
+  .qq-lv{font-size:10.5px; font-weight:bold; border-radius:6px; padding:2px 7px; color:#fff;}
+  .qq-lv.l-0{background:#0ea5e9;}
+  .qq-lv.l-1{background:#8b5cf6;}
+  .qq-lv.l-2{background:#f43f5e;}
+  .qq-tp{font-size:10.5px; border-radius:6px; padding:2px 7px; background:#f1f5f9; color:#475569; border:1px solid var(--border);}
+
+  /* 题库难度 / 题型筛选 */
+  .quiz-lev{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:12px;}
+  .lvf-cap{font-size:11.5px; color:var(--sub); font-weight:bold;}
+  .lvf{font-family:inherit; font-size:12px; padding:5px 11px; border-radius:9px; border:1px solid var(--border);
+    background:#fff; color:#475569; cursor:pointer; transition:all .15s;}
+  .lvf b{font-weight:normal; opacity:.6; font-size:11px;}
+  .lvf:hover{border-color:var(--primary); color:var(--primary);}
+  .lvf.active{background:linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; border-color:transparent; font-weight:bold;}
+  .lvf.active b{opacity:.85;}
+  .lev-row{display:flex; flex-wrap:wrap; gap:7px; margin-top:7px;}
+  .lev-stat{font-size:11.5px; padding:3px 9px; border-radius:8px; border:1px solid var(--border); color:#475569; background:#f8fafc;}
+  .lev-stat b{font-weight:bold; color:#0f172a;}
+  .lev-stat.lev-0{border-color:#bae6fd; background:#f0f9ff;}
+  .lev-stat.lev-1{border-color:#ddd6fe; background:#f5f3ff;}
+  .lev-stat.lev-2{border-color:#fecdd3; background:#fff1f2;}
   .q-opt{display:flex; gap:9px; padding:9px 13px; border:1px solid var(--border); border-radius:10px; margin-bottom:7px; cursor:pointer; font-size:13px; line-height:1.6; transition:all .15s; background:#fff; align-items:flex-start;}
   .q-opt:last-child{margin-bottom:0;}
   .q-opt:hover{border-color:var(--primary); background:var(--primary-weak);}
@@ -664,6 +687,10 @@
     .layer-cap{margin:10px 14px 0;}
     .dfm-row{flex-direction:column; gap:2px;}
     .dfm-k{width:auto;}
+    .qq-tags{width:100%; margin-left:32px;}
+    .quiz-lev{gap:5px;}
+    .lvf{font-size:11.5px; padding:4px 9px;}
+    .lev-row{gap:5px;}
     .tr-sym{flex:none;}
     .iss{flex-direction:column; gap:5px;}
     .iss .iq{min-width:0;}
@@ -747,10 +774,11 @@
       <div class="mic">🎯</div>
       <div>
         <h2>自测题库</h2>
-        <div class="mtg">12 个领域各 10 题，选完立即显示对错与解析。错题可以重做，答对了才算真会</div>
+        <div class="mtg">12 个领域各 30 题，共 360 题。每题都有深度解析，选择题还会逐项说明其他选项为什么不对；可按「基础 / 进阶 / 易错」筛选</div>
       </div>
     </div>
     <div class="qv-tabs" id="quizTabs"></div>
+    <div class="quiz-lev" id="quizLev"></div>
     <div class="quiz-head" id="quizHead"></div>
     <div class="quiz-actions" id="quizActions"></div>
     <div id="quizBody"></div>
@@ -1101,6 +1129,13 @@
 <script src="kb-formula.js"></script>
 <script src="kb-quiz-exp-1.js"></script>
 <script src="kb-quiz-exp-2.js"></script>
+<script src="kb-quiz-add-1.js"></script>
+<script src="kb-quiz-add-2.js"></script>
+<script src="kb-quiz-add-3.js"></script>
+<script src="kb-quiz-add-4.js"></script>
+<script src="kb-quiz-add-5.js"></script>
+<script src="kb-quiz-add-6.js"></script>
+<script src="kb-quiz-lv.js"></script>
 <script src="kb-gloss-1.js"></script>
 <script src="kb-gloss-2.js"></script>
 <script src="kb-quick-add.js"></script>
@@ -1439,7 +1474,7 @@ function renderHome(){
   const OVERVIEW = [
     {n:total, l:"知识点", mod:"kb"},
     {n:ovCount((a,b)=>a+b.length, Object.values(window.KB_IMG||{})), l:"参考图", mod:"gallery"},
-    {n:ovCount((a,p)=>a+p.questions.length, KB_QUIZ), l:"自测题", mod:"quiz"},
+    {n:ovCount((a,p)=>a+quizTotal(p), KB_QUIZ), l:"自测题", mod:"quiz"},
     {n:(typeof CALCS!=="undefined"?CALCS.length:0), l:"计算器", mod:"calc"},
     {n:ovCount((a,d)=>a+d.layers.reduce((x,l)=>x+l.items.length,0), KB_MAP), l:"地图条目", mod:"map"},
     {n:ovCount((a,w)=>a+w.days.length, KB_PATH), l:"天学习计划", mod:"path"},
@@ -1477,7 +1512,10 @@ function renderHome(){
   let qTotal=0, qDone=0, qRight=0;
   KB_QUIZ.forEach(p=>{
     const a = quizState[p.id] || {};
-    p.questions.forEach((q,i)=>{ qTotal++; if(a[i]!==undefined){ qDone++; if(a[i]===q.a) qRight++; } });
+    for(let i=0;i<quizTotal(p);i++){
+      const q = quizAt(p,i); if(!q) continue;
+      qTotal++; if(a[i]!==undefined){ qDone++; if(a[i]===q.a) qRight++; }
+    }
   });
   let cTotal=0, cOn=0;
   KB_CHECKS.forEach(c=>{ const r = chkCount(c); cTotal += r.total; cOn += r.on; });
@@ -1493,7 +1531,10 @@ function renderHome(){
   const weak = KB_QUIZ.map(p=>{
     const a = quizState[p.id] || {};
     let dn=0, rt=0;
-    p.questions.forEach((q,i)=>{ if(a[i]!==undefined){ dn++; if(a[i]===q.a) rt++; } });
+    for(let i=0;i<quizTotal(p);i++){
+      const q = quizAt(p,i); if(!q) continue;
+      if(a[i]!==undefined){ dn++; if(a[i]===q.a) rt++; }
+    }
     return {p, dn, pct: dn? Math.round(rt/dn*100):-1};
   }).filter(x=>x.dn>=5).sort((a,b)=>a.pct-b.pct)[0];
   const zeroDom = domRows.filter(r=>r.pct===0)[0];
@@ -1512,7 +1553,7 @@ function renderHome(){
       <span class="pv">${mastered}/${total}</span></div>
     <div class="prog-row"><span class="pl">自测正确率</span>
       <div class="prog-bar"><i style="width:${qPct}%;background:${barColor(qPct)}"></i></div>
-      <span class="pv">${qDone?qRight+"/"+qDone+" 题":"未开始"}</span></div>
+      <span class="pv">${qDone?qRight+"/"+qDone+" 题":"未开始"}<span style="opacity:.55"> / 共 ${qTotal}</span></span></div>
     <div class="prog-row"><span class="pl">清单完成度</span>
       <div class="prog-bar"><i style="width:${cPct}%;background:${barColor(cPct)}"></i></div>
       <span class="pv">${cOn}/${cTotal} 项</span></div>
@@ -1760,10 +1801,15 @@ function renderGlobalSearch(q){
 
   // 自测题库
   const qz = [];
-  KB_QUIZ.forEach(p=>p.questions.forEach((qq,i)=>{
-    if(hit(qq.q)||hit(qq.exp)||hit(qq.opts.join(" ")))
-      qz.push({t:p.name+" 第"+(i+1)+"题", d:esc(qq.q), pid:p.id});
-  }));
+  KB_QUIZ.forEach(p=>{
+    for(let i=0;i<quizTotal(p);i++){
+      const qq = quizAt(p,i); if(!qq) continue;
+      const lv = quizLvAt(p,i), tp = quizTypeOf(qq);
+      const extra = ((window.KB_QUIZ_EXP||{})[p.id+"|"+i]||{}).e || "";
+      if(hit(qq.q)||hit(qq.exp)||hit(extra)||hit(qq.opts.join(" "))||hit((qq.w||[]).join(" ")))
+        qz.push({t:p.name+" 第"+(i+1)+"题"+(lv?" · "+lv:""), d:esc(qq.q)+(tp!=="choice"?`　[${QUIZ_TYPE[tp]||tp}]`:""), pid:p.id});
+    }
+  });
   if(qz.length) groups.push({icon:"🎯", name:"自测题库", n:qz.length, jump:"quiz", items: qz.slice(0,8)});
 
   // 整机案例
@@ -2054,16 +2100,35 @@ try{ quizState = JSON.parse(localStorage.getItem(QUIZ_KEY) || "{}"); }catch(e){ 
 function quizSave(){ try{ localStorage.setItem(QUIZ_KEY, JSON.stringify(quizState)); }catch(e){} }
 function quizAnsOf(pid){ if(!quizState[pid]) quizState[pid] = {}; return quizState[pid]; }
 
-/* ══════════════ 深度解析加厚：题库 / 术语 / 速查 / 地图 / 案例 ══════════════ */
-// 题库：优先用加厚解析，并逐项说明干扰项为什么不对
+/* ══════════════ 题库：原 120 题 + 追加 240 题合并 ══════════════ */
+const QUIZ_LEV = ["基础", "进阶", "易错"];
+const QUIZ_TYPE = { choice:"选择题", tf:"判断题", calc:"计算题", scene:"情景题" };
+let quizLevFilter = "全部";
+let quizTypeFilter = "全部";
+
+function quizExtra(p){ return (window.KB_QUIZ_ADD || {})[p.id] || []; }
+function quizTotal(p){ return p.questions.length + quizExtra(p).length; }
+function quizAt(p, i){
+  if(i < p.questions.length) return p.questions[i];
+  return quizExtra(p)[i - p.questions.length] || null;
+}
+function quizLvAt(p, i){
+  if(i < p.questions.length) return ((window.KB_QUIZ_LV || {})[p.id] || [])[i] || "";
+  const q = quizExtra(p)[i - p.questions.length];
+  return q ? (q.lv || "") : "";
+}
+function quizTypeOf(q){ return q.t || "choice"; }
+
+// 深度解析：追加题自带长解析与干扰项说明；原 120 题用 KB_QUIZ_EXP 加厚层
 function quizExpHTML(pid, q, i, chosen){
   const x = (window.KB_QUIZ_EXP || {})[pid + "|" + i];
   const e = (x && x.e) ? x.e : q.exp;
+  const wArr = (x && Array.isArray(x.w)) ? x.w : (Array.isArray(q.w) ? q.w : null);
   const head = chosen === q.a ? "✓ 回答正确" : "✗ 正确答案是 " + "ABCD"[q.a];
   let w = "";
-  if(x && Array.isArray(x.w) && q.opts.length > 2){
-    const rows = q.opts.map((o,j)=> (j !== q.a && x.w[j])
-      ? `<div class="qw-row"><span class="qw-l">${"ABCD"[j]}</span><span class="qw-o">${esc(o)}</span><span class="qw-w">${esc(x.w[j])}</span></div>` : "").join("");
+  if(wArr && q.opts.length > 2){
+    const rows = q.opts.map((o,j)=> (j !== q.a && wArr[j])
+      ? `<div class="qw-row"><span class="qw-l">${"ABCD"[j]}</span><span class="qw-o">${esc(o)}</span><span class="qw-w">${esc(wArr[j])}</span></div>` : "").join("");
     if(rows) w = `<div class="q-why"><div class="qw-t">其他选项为什么不对</div>${rows}</div>`;
   }
   return `<div class="q-exp"><b>${head}</b> — ${esc(e)}</div>${w}`;
@@ -2072,31 +2137,78 @@ function quizExpHTML(pid, q, i, chosen){
 function renderQuiz(){
   document.getElementById("quizTabs").innerHTML = KB_QUIZ.map(p=>{
     const a = quizState[p.id] || {};
-    const done = Object.keys(a).length;
-    return `<button class="qv-tab${p.id===activeQuiz?" active":""}" data-quiz="${p.id}">${p.icon} ${esc(p.name)}${done?` ${done}/${p.questions.length}`:""}</button>`;
+    const tot = quizTotal(p);
+    const done = Object.keys(a).filter(k=>+k < tot).length;
+    return `<button class="qv-tab${p.id===activeQuiz?" active":""}" data-quiz="${p.id}">${p.icon} ${esc(p.name)}${done?` ${done}/${tot}`:""}</button>`;
   }).join("");
   const p = KB_QUIZ.find(x=>x.id===activeQuiz) || KB_QUIZ[0];
   const ans = quizAnsOf(p.id);
+  const tot = quizTotal(p);
   let done = 0, right = 0;
-  p.questions.forEach((q,i)=>{ if(ans[i]!==undefined){ done++; if(ans[i]===q.a) right++; } });
+  const lvStat = { "基础":{n:0,dn:0,rt:0}, "进阶":{n:0,dn:0,rt:0}, "易错":{n:0,dn:0,rt:0} };
+  const tpStat = {};
+  for(let i=0;i<tot;i++){
+    const q = quizAt(p, i); if(!q) continue;
+    const lv = quizLvAt(p, i), tp = quizTypeOf(q);
+    if(lvStat[lv]) lvStat[lv].n++;
+    tpStat[tp] = (tpStat[tp]||0) + 1;
+    if(ans[i]!==undefined){
+      done++;
+      const ok = ans[i]===q.a;
+      if(ok) right++;
+      if(lvStat[lv]){ lvStat[lv].dn++; if(ok) lvStat[lv].rt++; }
+    }
+  }
   const pct = done ? Math.round(right/done*100) : 0;
+  const lvTag = (k)=>{
+    const s = lvStat[k];
+    const r = s.dn ? Math.round(s.rt/s.dn*100) : -1;
+    return `<span class="lev-stat lev-${QUIZ_LEV.indexOf(k)}">${k} <b>${s.n}</b> 题${s.dn?`　已答 ${s.dn}　正确 ${r}%`:""}</span>`;
+  };
   document.getElementById("quizHead").innerHTML = `
     <div><h3>${p.icon} ${esc(p.name)}自测</h3>
-      <div class="qd">共 ${p.questions.length} 题 · 选完立即出对错与解析 · 进度自动保存在本机</div></div>
+      <div class="qd">共 ${tot} 题（${QUIZ_LEV.map(k=>k+" "+lvStat[k].n).join(" · ")}）· 题型的分布：${Object.entries(tpStat).map(([k,v])=>QUIZ_TYPE[k]+" "+v).join(" · ")}</div>
+      <div class="lev-row">${QUIZ_LEV.map(lvTag).join("")}</div></div>
     <div class="quiz-score">
-      <div class="qs"><b style="color:var(--primary)">${done}/${p.questions.length}</b><span>已作答</span></div>
+      <div class="qs"><b style="color:var(--primary)">${done}/${tot}</b><span>已作答</span></div>
       <div class="qs"><b style="color:#059669">${right}</b><span>答对</span></div>
       <div class="qs"><b style="color:${pct>=80?'#059669':pct>=60?'#d97706':'#dc2626'}">${pct}%</b><span>正确率</span></div>
     </div>`;
+  // 难度 / 题型筛选
+  const levCount = k => {
+    let n = 0;
+    for(let i=0;i<tot;i++){ if(!quizAt(p,i)) continue;
+      if(k==="全部" || quizLvAt(p,i)===k) n++; }
+    return n;
+  };
+  const typeCount = k => {
+    let n = 0;
+    for(let i=0;i<tot;i++){ const q=quizAt(p,i); if(!q) continue;
+      if(k==="全部" || quizTypeOf(q)===k) n++; }
+    return n;
+  };
+  document.getElementById("quizLev").innerHTML =
+    `<span class="lvf-cap">难度</span>` +
+    ["全部"].concat(QUIZ_LEV).map(k=>
+      `<button class="lvf${k===quizLevFilter?" active":""}" data-qlv="${esc(k)}">${esc(k)} <b>${levCount(k)}</b></button>`).join("") +
+    `<span class="lvf-cap" style="margin-left:10px">题型</span>` +
+    ["全部","choice","tf","calc","scene"].filter(k=>k==="全部"||tpStat[k]).map(k=>
+      `<button class="lvf${k===quizTypeFilter?" active":""}" data-qtype="${k}">${k==="全部"?"全部":QUIZ_TYPE[k]} <b>${typeCount(k)}</b></button>`).join("");
   document.getElementById("quizActions").innerHTML = `
     <button class="mini-btn" data-qact="wrong">🔁 重做错题</button>
     <button class="mini-btn" data-qact="reset">清空本卷</button>
-    ${done===p.questions.length ? `<span class="mini-btn ${pct>=80?'ok':''}" style="cursor:default">${
+    ${done===tot && tot ? `<span class="mini-btn ${pct>=80?'ok':''}" style="cursor:default">${
       pct>=80 ? '🎉 掌握良好，可以进入下一领域'
       : pct>=60 ? '📖 基本掌握，建议把错题再过一遍'
       : '⚠️ 建议回知识库重读「'+p.name+'」相关条目'}</span>` : ''}`;
-  document.getElementById("quizBody").innerHTML = p.questions.map((q,i)=>{
-    const chosen = ans[i], answered = chosen !== undefined;
+  const idxs = [];
+  for(let i=0;i<tot;i++){ const q = quizAt(p,i); if(!q) continue;
+    if(quizLevFilter!=="全部" && quizLvAt(p,i)!==quizLevFilter) continue;
+    if(quizTypeFilter!=="全部" && quizTypeOf(q)!==quizTypeFilter) continue;
+    idxs.push(i);
+  }
+  document.getElementById("quizBody").innerHTML = idxs.length ? idxs.map(i=>{
+    const q = quizAt(p,i), chosen = ans[i], answered = chosen !== undefined;
     const opts = q.opts.map((o,j)=>{
       let cls = "q-opt";
       if(answered){
@@ -2106,13 +2218,17 @@ function renderQuiz(){
       }
       return `<div class="${cls}" data-q="${i}" data-o="${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`;
     }).join("");
+    const lv = quizLvAt(p,i), tp = quizTypeOf(q);
     return `<div class="quiz-q">
       <div class="qq-title"><div class="qq-no">${i+1}</div>
-        <div>${esc(q.q)}${q.t==="tf"?' <span style="font-size:11px;color:var(--sub);font-weight:normal">（判断题）</span>':''}</div></div>
+        <div class="qq-main">${esc(q.q)}</div>
+        <div class="qq-tags">${lv?`<span class="qq-lv l-${QUIZ_LEV.indexOf(lv)}">${lv}</span>`:""}${
+          tp!=="choice"?`<span class="qq-tp">${QUIZ_TYPE[tp]||tp}</span>`:""}</div>
+      </div>
       ${opts}
       ${answered?quizExpHTML(p.id, q, i, chosen):""}
     </div>`;
-  }).join("");
+  }).join("") : `<div class="card"><div class="empty">当前筛选条件下没有题目，换个难度或题型试试～</div></div>`;
 }
 
 /* ══════════════ 模块八：工程计算器 ══════════════ */
@@ -2574,7 +2690,7 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbGloss", (window.KB_GLOSS||[]).length + " 条");
   set("nbPath", (window.KB_PATH||[]).length + " 周");
   set("nbMap", (window.KB_MAP||[]).length + " 领域");
-  set("nbQuiz", (window.KB_QUIZ||[]).reduce((a,p)=>a+p.questions.length,0) + " 题");
+  set("nbQuiz", (window.KB_QUIZ||[]).reduce((a,p)=>a+quizTotal(p),0) + " 题");
   set("nbCalc", (typeof CALCS!=="undefined" ? CALCS.length : 0) + " 个");
   set("nbField", ((window.KB_MISTAKE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_TROUBLE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_INTERVIEW||[]).reduce((a,x)=>a+x.items.length,0)) + " 条");
   set("nbGallery", Object.values(window.KB_IMG||{}).reduce((a,b)=>a+b.length,0) + " 张");
@@ -2642,7 +2758,13 @@ document.getElementById("mapTabs").addEventListener("click", e=>{
 // 自测题库
 document.getElementById("quizTabs").addEventListener("click", e=>{
   const b = e.target.closest("[data-quiz]"); if(!b) return;
-  activeQuiz = b.dataset.quiz; renderQuiz(); window.scrollTo({top:0, behavior:"smooth"});
+  activeQuiz = b.dataset.quiz; quizLevFilter = "全部"; quizTypeFilter = "全部";
+  renderQuiz(); window.scrollTo({top:0, behavior:"smooth"});
+});
+document.getElementById("quizLev").addEventListener("click", e=>{
+  const l = e.target.closest("[data-qlv]"), t = e.target.closest("[data-qtype]");
+  if(l){ quizLevFilter = l.dataset.qlv; renderQuiz(); }
+  else if(t){ quizTypeFilter = t.dataset.qtype; renderQuiz(); }
 });
 document.getElementById("quizBody").addEventListener("click", e=>{
   const o = e.target.closest(".q-opt[data-q]"); if(!o) return;
@@ -2657,7 +2779,7 @@ document.getElementById("quizActions").addEventListener("click", e=>{
   if(b.dataset.qact === "reset"){ quizState[p.id] = {}; }
   else{
     const a = quizAnsOf(p.id);
-    p.questions.forEach((q,i)=>{ if(a[i]!==undefined && a[i]!==q.a) delete a[i]; });
+    for(let i=0;i<quizTotal(p);i++){ const q = quizAt(p,i); if(q && a[i]!==undefined && a[i]!==q.a) delete a[i]; }
   }
   quizSave(); renderQuiz();
 });
