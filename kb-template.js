@@ -10,7 +10,7 @@ window.KB_TEMPLATE = [
 
   /* ══════════════ 1. NPI 新品开发流程 ══════════════ */
   {
-    id: "npi", icon: "🚀", name: "NPI 新品开发流程",
+    id: "npi", icon: "<svg class=ic aria-hidden=true><use href=#i-rocket /></svg>", name: "NPI 新品开发流程",
     desc: "从 ID 概念到量产的 8 个阶段：每阶段做什么、交什么、在哪卡口、最容易翻车的地方",
     note: "阶段划分各公司略有差异（有的叫 EVT/DVT/PVT），本质一样：先验证「能不能做」，再验证「做出来对不对」，最后验证「能量产吗」。任何一阶段没过就往下走，问题会在量产时加倍暴露。",
     blocks: [
@@ -58,7 +58,7 @@ window.KB_TEMPLATE = [
 
   /* ══════════════ 2. DFM 检讨报告 ══════════════ */
   {
-    id: "dfm", icon: "🏭", name: "DFM 检讨报告模板",
+    id: "dfm", icon: "<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name: "DFM 检讨报告模板",
     desc: "与模具厂当面检讨时逐项填写，会后直接打印双方签字——避免「当时说过了」的扯皮",
     note: "检讨会的价值不在「开了会」，而在「每条都有结论、有责任人、有截止日」。建议把结构、模具、注塑、品质四方都拉上，一次把问题问完。",
     blocks: [
@@ -113,7 +113,7 @@ window.KB_TEMPLATE = [
 
   /* ══════════════ 3. 供应商报价对比表 ══════════════ */
   {
-    id: "quote", icon: "💰", name: "供应商报价对比表",
+    id: "quote", icon: "<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name: "供应商报价对比表",
     desc: "把报价拆成料工费逐项对比——只看总价永远选不出真正便宜的供应商",
     note: "对比报价时最容易犯的错：只看单价。要看「料重 × 料价」是否合理（料价可查）、「工时 × 工价」是否可信、模具费与摊销怎么算、损耗与包装是否含在内。单价最低的那家，往往在模具费或损耗上把钱找回来。",
     blocks: [
@@ -159,7 +159,7 @@ window.KB_TEMPLATE = [
 
   /* ══════════════ 4. 手板 / 打样需求单 ══════════════ */
   {
-    id: "proto", icon: "🧪", name: "手板 / 打样需求单",
+    id: "proto", icon: "<svg class=ic aria-hidden=true><use href=#i-flask /></svg>", name: "手板 / 打样需求单",
     desc: "发给手板厂或供应商的需求单——把工艺、颜色、后处理、验收写清楚，避免来回返工",
     note: "手板最容易出问题的不是「做不出来」，而是「做出来的不是你要的」：颜色不对、纹面不同、装配公差宽松。需求单写细一点，能省掉一轮往返。",
     blocks: [

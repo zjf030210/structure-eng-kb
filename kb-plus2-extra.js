@@ -33,7 +33,7 @@
   const P = window.KB_PATH;
   if (!P || P.some(w => w.week === 6)) return;
   P.push({
-    week: 6, icon: "⚡", title: "第 6 周：电气 · 人机 · 合规专题",
+    week: 6, icon: "<svg class=ic aria-hidden=true><use href=#i-zap /></svg>", title: "第 6 周：电气 · 人机 · 合规专题",
     goal: "补齐「灯具特有」的结构内容：驱动与接线的电气结构、磁吸/轨道/触摸这类功能机构、密封灌胶的可靠性做法，以及认证送样与常见不合格项的实战应对",
     days: [
       {

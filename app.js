@@ -410,9 +410,9 @@ function openDetail(it){
   const kwTxt = (it.imgKw || it.name).split("/").map(s=>s.trim()).filter(Boolean);
   document.getElementById("dpKw").textContent = kwTxt.join(" · ");
   document.getElementById("dpImgBtns").innerHTML = `
-    <a href="https://pixabay.com/zh/images/search/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener">🔍 Pixabay 搜图</a>
-    <a href="https://www.pexels.com/zh-cn/search/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener">🔍 Pexels 搜图</a>
-    <a href="https://huaban.com/search/?q=${encodeURIComponent(it.name)}" target="_blank" rel="noopener">🔍 花瓣 搜图</a>
+    <a href="https://pixabay.com/zh/images/search/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener"><svg class=ic aria-hidden=true><use href=#i-search /></svg>Pixabay 搜图</a>
+    <a href="https://www.pexels.com/zh-cn/search/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener"><svg class=ic aria-hidden=true><use href=#i-search /></svg>Pexels 搜图</a>
+    <a href="https://huaban.com/search/?q=${encodeURIComponent(it.name)}" target="_blank" rel="noopener"><svg class=ic aria-hidden=true><use href=#i-search /></svg>花瓣 搜图</a>
     <button class="ai" id="aiGenBtn"><svg class=ic aria-hidden=true><use href=#i-cpu /></svg>AI 提示词</button>`;
   document.getElementById("aiGenBtn").onclick = () => {
     document.getElementById("aiPromptText").textContent = it.imgAi || `工程示意图：${it.name}。线条简洁、白底、轴侧视角，关键部件引出标注。`;
@@ -435,7 +435,7 @@ function openDetail(it){
       clearTimeout(noteTimer);
       noteTimer = setTimeout(()=>{ lsSet(LS_NOTE, notes); refreshBadges(); }, 500);
       const nj = document.getElementById("dpNoteJump");
-      if(nj) nj.textContent = ta.value.trim() ? `📝 笔记（${ta.value.trim().length} 字）` : "📝 写笔记";
+      if(nj) nj.textContent = ta.value.trim() ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${ta.value.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记";
     };
     ta.onblur = ()=>{ lsSet(LS_NOTE, notes); refreshBadges(); renderDpActions(it); };
   }
@@ -662,7 +662,7 @@ function renderChangelog(){
   box.classList.toggle("open", chlogOpen);
   box.innerHTML = `
     <div class="clog-bar" id="clogBar">
-      <span class="clog-t">🆕 最近更新</span>
+      <span class="clog-t"><svg class=ic aria-hidden=true><use href=#i-refresh /></svg>最近更新</span>
       <span class="clog-h"><b>${esc(latest.d)}</b> ${esc(latest.t)}</span>
       <span class="clog-cnt">共 ${all.length} 条</span>
       <span class="clog-tg" id="clogToggle">${chlogOpen ? "收起 ▲" : "展开 ▼"}</span>
@@ -699,7 +699,7 @@ function renderDomainGuide(d){
   el.innerHTML = `
     <div class="dg-box${guideOpen?" open":""}" id="dgBox">
       <div class="dg-bar" id="dgBar">
-        <span class="dg-bar-t">📘 领域导读</span>
+        <span class="dg-bar-t"><svg class=ic aria-hidden=true><use href=#i-book-open /></svg>领域导读</span>
         <span class="dg-bar-h">${esc(g.pos)}</span>
         <span class="dg-toggle" id="dgToggle">${guideOpen?"收起 ▲":"展开 ▼"}</span>
       </div>
@@ -860,7 +860,7 @@ function renderSearch(){
   const extra = q && terms.length > 1 ? `　·　已自动扩展同义词 <b>${terms.length-1}</b> 个（${esc(terms.slice(1, 6).join("、"))}${terms.length > 6 ? "…" : ""}）` : "";
   searchStatsEl.innerHTML = q
     ? `全局搜索「${esc(q)}」：共 <b>${list.length}</b> 条 · 已掌握 <b>${s2}</b>${extra}`
-    : `${browseAll && lvFilter.value==="1" ? "🔥 核心必会总览" : "📚 全部知识点"}：共 <b>${list.length}</b> 条（按优先级排序） · 已掌握 <b>${s2}</b>`;
+    : `${browseAll && lvFilter.value==="1" ? "<svg class=ic aria-hidden=true><use href=#i-flame /></svg>核心必会总览" : "<svg class=ic aria-hidden=true><use href=#i-book /></svg>全部知识点"}：共 <b>${list.length}</b> 条（按优先级排序） · 已掌握 <b>${s2}</b>`;
   if(!list.length){ searchTbody.innerHTML=""; searchEmptyEl.style.display="block"; searchEmptyEl.innerHTML = noHitHTML(q); }
   else {
     searchEmptyEl.style.display="none";
@@ -1096,7 +1096,7 @@ function renderCases(){
       <div class="case-meta">${c.meta.map(m=>`<div class="cm"><b>${esc(m.k)}</b><span>${esc(m.v)}</span></div>`).join("")}</div>
     </div>
     <div class="card">
-      <h3>🧱 结构构成与选材</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-layers /></svg>结构构成与选材</h3>
       <div class="tbl-scroll"><table class="mini">
         <thead><tr><th style="width:150px">部件</th><th style="width:190px">材料</th><th style="width:130px">工艺</th><th>设计要点</th></tr></thead>
         <tbody>${c.composition.map(x=>`<tr><td>${esc(x.part)}</td><td>${esc(x.material)}</td><td>${esc(x.process)}</td><td>${esc(x.note)}</td></tr>`).join("")}</tbody>
@@ -1124,7 +1124,7 @@ function renderCases(){
       </div>`).join("")}
     </div>`:""}
     <div class="card">
-      <h3>💰 成本构成估算</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-tag /></svg>成本构成估算</h3>
       <table class="mini">
         <thead><tr><th style="width:260px">成本项</th><th>估算区间</th></tr></thead>
         <tbody>${c.cost.map(x=>`<tr><td>${esc(x.k)}</td><td>${esc(x.v)}</td></tr>`).join("")}</tbody>
@@ -1163,7 +1163,7 @@ function renderPath(){
     <div class="wk-card">
       <div class="wk-head">
         <div class="wi">${w.icon}</div>
-        <div><h3>${esc(w.title)}</h3><div class="wg">🎯 ${esc(w.goal)}</div></div>
+        <div><h3>${esc(w.title)}</h3><div class="wg"><svg class=ic aria-hidden=true><use href=#i-target /></svg>${esc(w.goal)}</div></div>
       </div>
       <div class="wk-body">
         ${w.days.map(d=>`
@@ -1187,7 +1187,7 @@ function renderMap(){
   const d = KB_MAP.find(x=>x.id===activeMap) || KB_MAP[0];
   const total = d.layers.reduce((a,l)=>a+l.items.length,0);
   document.getElementById("mapHead").innerHTML = `
-    <div class="map-goal">🎯 <b>学完这个领域你应该能做到：</b>${esc(d.goal)}<br>
+    <div class="map-goal"><svg class=ic aria-hidden=true><use href=#i-target /></svg><b>学完这个领域你应该能做到：</b>${esc(d.goal)}<br>
       <span style="color:var(--sub); font-size:12px;">共 ${d.layers.length} 层 · ${total} 个知识点 · 建议按层顺序学，不要跳层。点任意知识点直接打开详情</span>
     </div>`;
   document.getElementById("mapBody").innerHTML = d.layers.map((l,i)=>{
@@ -1508,7 +1508,7 @@ function renderCalc(){
         <label>${esc(f.l)}</label>
         <input type="number" step="any" data-calc="${c.id}" data-k="${f.k}" value="${f.v}"></div>`).join("")}</div>
       <div class="calc-res" id="res-${c.id}"></div>
-      <div class="calc-formula">📐 ${esc(c.formula)}</div>
+      <div class="calc-formula"><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>${esc(c.formula)}</div>
     </div>`).join("");
   CALCS.forEach(c=>runCalc(c));
 }
@@ -1519,7 +1519,7 @@ function renderField(){
   const misN = MIS.reduce((a,x)=>a+x.items.length,0);
   const TABS = [
     {id:"mistake", n:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>设计避坑", c:misN+" 个"},
-    {id:"trouble", n:"🔎 缺陷排查", c:KB_TROUBLE.reduce((a,x)=>a+x.items.length,0)+" 条"},
+    {id:"trouble", n:"<svg class=ic aria-hidden=true><use href=#i-search /></svg>缺陷排查", c:KB_TROUBLE.reduce((a,x)=>a+x.items.length,0)+" 条"},
     {id:"interview", n:"<svg class=ic aria-hidden=true><use href=#i-briefcase /></svg>面试题库", c:KB_INTERVIEW.reduce((a,x)=>a+x.items.length,0)+" 题"},
     {id:"std", n:"<svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>标准清单", c:KB_STD.reduce((a,x)=>a+x.items.length,0)+" 项"}
   ];
@@ -1551,7 +1551,7 @@ function renderField(){
             <div class="mk-row"><span class="mk-k mk-b">✗ 错误做法</span><div class="mk-v">${esc(it.bad)}</div></div>
             <div class="mk-row"><span class="mk-k mk-c">⚠ 后果</span><div class="mk-v">${esc(it.cost)}</div></div>
             <div class="mk-row"><span class="mk-k mk-g">✓ 正确做法</span><div class="mk-v">${esc(it.good)}</div></div>
-            <div class="mk-row"><span class="mk-k mk-h">🔍 怎么自查</span><div class="mk-v">${esc(it.how)}</div></div>
+            <div class="mk-row"><span class="mk-k mk-h"><svg class=ic aria-hidden=true><use href=#i-search /></svg>怎么自查</span><div class="mk-v">${esc(it.how)}</div></div>
             ${(it.ref||[]).length?`<div class="mk-rel">关联：${it.ref.map(n=>`<button class="rel-chip" data-rel="${esc(n)}">${esc(n)} →</button>`).join("")}</div>`:""}
           </div>`).join("")}
       </div>`).join("") : noHit;
@@ -1564,7 +1564,7 @@ function renderField(){
         <div class="qv-desc">${esc(g.desc)}${q?`　·　筛出 ${items.length} 条`:""}</div>
         ${items.map(it=>`
           <div class="tr-item">
-            <div class="tr-sym">❗ ${esc(it.s)}</div>
+            <div class="tr-sym"><svg class=ic aria-hidden=true><use href=#i-alert /></svg>${esc(it.s)}</div>
             <div class="tr-bd">
               <div class="tr-row"><div class="trk">可能原因</div><div class="trv">${it.c.map(esc).join("；")}</div></div>
               <div class="tr-row fix"><div class="trk">对策</div><div class="trv">${it.f.map((x,i)=>(i+1)+". "+esc(x)).join("　")}</div></div>
@@ -1650,7 +1650,7 @@ function renderFormula(){
   const FM = window.KB_FORMULA || [], UN = window.KB_UNIT || [];
   const tabs = FM.map(g=>({ id:g.cat, n:g.icon+" "+g.cat,
     c:(g.items||[]).length+" 条" }));
-  tabs.push({ id:"__unit", n:"📏 单位换算", c:UN.reduce((a,x)=>a+(x.items||[]).length,0)+" 条" });
+  tabs.push({ id:"__unit", n:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>单位换算", c:UN.reduce((a,x)=>a+(x.items||[]).length,0)+" 条" });
   if(activeFm !== "__unit" && !FM.some(g=>g.cat===activeFm)) activeFm = tabs[0].id;
   document.getElementById("fmTabs").innerHTML = tabs.map(t=>
     `<button class="qv-tab${t.id===activeFm?" active":""}" data-fm="${esc(t.id)}">${t.n} <span style="opacity:.65">${t.c}</span></button>`).join("");
@@ -1960,9 +1960,9 @@ function renderStats(){
         浏览记录 <b>${recents.length}</b> 条　·　搜索历史 <b>${searchHist.length}</b> 条　·　打卡 <b>${streakTotal()}</b> 天
       </div>
       <div class="data-actions">
-        <button class="mini-btn" data-data="export">⬇️ 导出备份</button>
-        <button class="mini-btn" data-data="import">⬆️ 导入恢复</button>
-        <button class="mini-btn" data-data="clear">🧹 清空全部记录</button>
+        <button class="mini-btn" data-data="export"><svg class=ic aria-hidden=true><use href=#i-download /></svg>导出备份</button>
+        <button class="mini-btn" data-data="import"><svg class=ic aria-hidden=true><use href=#i-upload /></svg>导入恢复</button>
+        <button class="mini-btn" data-data="clear"><svg class=ic aria-hidden=true><use href=#i-trash /></svg>清空全部记录</button>
       </div>
       <div class="data-note">导出文件为 JSON，包含：学习进度、清单勾选、答题记录、收藏、笔记、模板草稿、深浅色偏好、浏览记录、搜索历史与打卡记录。<br>导入时会覆盖同名的现有记录，建议先导出一次再导入。</div>
     </div>
@@ -2014,7 +2014,7 @@ function renderTpl(){
   });
   h += `<div class="tpl-actions">
       <button class="mini-btn" data-tact="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印 / 存为 PDF</button>
-      <button class="mini-btn" data-tact="clear">🧹 清空填写内容</button>
+      <button class="mini-btn" data-tact="clear"><svg class=ic aria-hidden=true><use href=#i-trash /></svg>清空填写内容</button>
       <span class="mini-btn" style="cursor:default; color:var(--sub)"><svg class=ic aria-hidden=true><use href=#i-edit /></svg> 填写内容自动保存在本机</span>
     </div>`;
   if(t.note) h += `<div class="tpl-note">💡 ${esc(t.note)}</div>`;
@@ -2025,7 +2025,7 @@ function renderTpl(){
 /* ══════════════ 模块十五：我的收藏与笔记 ══════════════ */
 function renderFav(){
   const tabs = [
-    {id:"fav",  n:"⭐ 我的收藏", c:favCount()+" 条"},
+    {id:"fav",  n:"<svg class=ic aria-hidden=true><use href=#i-star /></svg>我的收藏", c:favCount()+" 条"},
     {id:"note", n:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>我的笔记", c:noteCount()+" 条"}
   ];
   document.getElementById("favTabs").innerHTML = tabs.map(t=>
@@ -2039,7 +2039,7 @@ function renderFav(){
       const d = domOf(n), it = KB_ITEMS.find(x=>x.name===n);
       const memo = (window.KB_MEMO||{})[n] || (it ? it.points : "");
       return `<div class="fav-item" data-open="${esc(n)}">
-        <span class="fi-ic">${d ? d.icon : "📄"}</span>
+        <span class="fi-ic">${d ? d.icon : "<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>"}</span>
         <div style="min-width:0">
           <div class="fi-n">${esc(n)}</div>
           <div class="fi-d">${esc(String(memo).slice(0, 54))}</div>
@@ -2053,7 +2053,7 @@ function renderFav(){
     box.innerHTML = list.length ? list.map(([n, v])=>{
       const d = domOf(n);
       return `<div class="fav-item" data-open="${esc(n)}" style="align-items:flex-start">
-        <span class="fi-ic">${d ? d.icon : "📄"}</span>
+        <span class="fi-ic">${d ? d.icon : "<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>"}</span>
         <div style="min-width:0; flex:1">
           <div class="fi-n">${esc(n)}</div>
           <div class="fi-d" style="white-space:pre-wrap; margin-top:6px; line-height:1.75; color:var(--text)">${esc(v)}</div>
@@ -2068,7 +2068,7 @@ function renderDpActions(it){
   const btn = document.getElementById("dpFavBtn");
   if(btn){ btn.className = favOn(it.name) ? "on" : ""; btn.textContent = favOn(it.name) ? "★ 已收藏" : "☆ 收藏"; }
   const nj = document.getElementById("dpNoteJump");
-  if(nj){ const n = notes[it.name]; nj.textContent = (n && n.trim()) ? `📝 笔记（${n.trim().length} 字）` : "📝 写笔记"; }
+  if(nj){ const n = notes[it.name]; nj.textContent = (n && n.trim()) ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${n.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记"; }
 }
 function toggleFav(name){
   if(favs[name]) delete favs[name]; else favs[name] = Date.now();
@@ -2102,7 +2102,7 @@ function renderDaily(){
   const lv = quizLvAt(item.p, item.i), tp = quizTypeOf(q);
   const exp = ((window.KB_QUIZ_EXP||{})[item.p.id+"|"+item.i]||{}).e || q.exp || "";
   box.innerHTML = `
-    <h3>☀️ 今日一题　<span style="font-size:12px; font-weight:normal; color:var(--sub)">${date}</span></h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-sun /></svg>今日一题　<span style="font-size:12px; font-weight:normal; color:var(--sub)">${date}</span></h3>
     <div class="pdesc">每天固定一题，答完可以看解析；也可以点右上角「随机抽一题」换一道</div>
     <div class="qd-head">
       <span class="qd-badge">${item.p.icon} ${esc(item.p.name)}</span>
@@ -2292,7 +2292,7 @@ function renderDaily20(){
 
   const hist = Object.keys(d20Store).sort().reverse().slice(0, 10);
   document.getElementById("d20Hist").innerHTML = hist.length > 1 ? `
-    <h3>📆 最近记录　<span style="font-size:12px;font-weight:normal;color:var(--sub)">最多保留 30 天</span></h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-calendar /></svg>最近记录　<span style="font-size:12px;font-weight:normal;color:var(--sub)">最多保留 30 天</span></h3>
     <div class="qv-desc">每天一套卷；点任意一天可回看当天的题目与解析（历史卷只读）</div>
     <div class="d20-hist">${hist.map(dt=>{
       const s2 = d20StatOf(d20Store[dt]);
@@ -2303,7 +2303,7 @@ function renderDaily20(){
         <span class="d20-hv">${s2.done}/${D20_N}${s2.done?"　"+s2.pct+"%":"　未开始"}</span>
       </button>`;
     }).join("")}</div>` :
-    `<h3>📆 最近记录</h3>
+    `<h3><svg class=ic aria-hidden=true><use href=#i-calendar /></svg>最近记录</h3>
     <div class="qv-desc">从今天开始记录——坚持每天完成一套，这里会累积你最近 30 天的正确率。</div>`;
 }
 
@@ -2406,7 +2406,7 @@ function renderReview(){
 
   document.getElementById("rvActions").innerHTML =
     (due.length ? `<button class="mini-btn" data-rv="start">▶ 开始今日复习（${due.length} 题）</button>` : "") +
-    (due.length > rvLimit ? `<button class="mini-btn" data-rv="more">👀 显示全部 ${due.length} 题</button>` : "") +
+    (due.length > rvLimit ? `<button class="mini-btn" data-rv="more"><svg class=ic aria-hidden=true><use href=#i-eye /></svg>显示全部 ${due.length} 题</button>` : "") +
     (due.length ? `<button class="mini-btn" data-rv="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印今日复习清单</button>` : "") +
     `<span class="mini-btn ${due.length ? "" : "ok"}" style="cursor:default">${
       due.length ? "今天还有 " + due.length + " 题要复习" : "🎉 今天的复习任务已完成"}</span>`;
@@ -2523,7 +2523,7 @@ function renderCompare(){
       ${memo ? `<div class="cmp-sec memo"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-bulb /></svg>一句话记住</div><div class="cmp-b">${esc(memo)}</div></div>` : ""}
       <div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-pin /></svg>核心要点</div><div class="cmp-b"><ul>${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
       ${nums.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-hash /></svg>关键经验数值</div><div class="cmp-b"><ul class="cmp-num">${nums.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>` : ""}
-      <div class="cmp-sec"><div class="cmp-h">🏭 应用场景</div><div class="cmp-b">${esc(it.usage || "—")}</div></div>
+      <div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-factory /></svg>应用场景</div><div class="cmp-b">${esc(it.usage || "—")}</div></div>
       ${rel.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>关联条目</div><div class="cmp-b"><div class="rel-box">${rel.map(n=>`<button class="rel-chip sm" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>` : ""}
     </div>`;
   };
@@ -2556,7 +2556,7 @@ function renderRecent(){
     ${list.length ? list.map(x=>{
       const it = KB_ITEMS.find(y => y.name === x.n), d = it ? CAT_DOMAIN[it.cat] : null;
       return `<div class="recent-item" data-recent="${esc(x.n)}">
-        <span class="ri-ic">${d ? d.icon : "📄"}</span>
+        <span class="ri-ic">${d ? d.icon : "<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>"}</span>
         <span class="ri-n">${esc(x.n)}</span>
         <span class="ri-t">${relTime(x.t)}</span></div>`;
     }).join("") : `<div class="empty" style="padding:14px 0">还没有浏览记录，点开任意知识点就会出现在这里。</div>`}
@@ -2567,7 +2567,7 @@ function renderRecent(){
 function renderSearchHist(){
   const box = document.getElementById("searchHist"); if(!box) return;
   if(!searchHist.length || kw.value.trim()){ box.classList.remove("on"); box.innerHTML = ""; return; }
-  box.innerHTML = `<div class="sh-cap"><span>🕘 搜索历史</span><button data-shclear="1">清空</button></div>` +
+  box.innerHTML = `<div class="sh-cap"><span><svg class=ic aria-hidden=true><use href=#i-clock /></svg>搜索历史</span><button data-shclear="1">清空</button></div>` +
     searchHist.map(q => `<button class="sh-item" data-sh="${esc(q)}"><svg class=ic aria-hidden=true><use href=#i-search /></svg> ${esc(q)}</button>`).join("");
   box.classList.add("on");
 }

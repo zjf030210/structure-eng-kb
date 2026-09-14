@@ -6,7 +6,7 @@ window.KB_QUICK = (window.KB_QUICK || []).concat([
 
   /* ══════════════ 螺纹与底孔速查 ══════════════ */
   {
-    id: "thread", icon: "🔩", name: "螺纹与底孔速查",
+    id: "thread", icon: "<svg class=ic aria-hidden=true><use href=#i-screw /></svg>", name: "螺纹与底孔速查",
     desc: "塑料件常用的自攻牙与机牙规格、底孔、柱外径与推荐扭矩（ABS / PC 等通用工程塑料）",
     cols: ["规格", "螺距 mm", "自攻底孔 mm", "机牙底孔 mm", "柱外径 mm", "推荐扭矩 N·m", "说明"],
     rows: [
@@ -28,7 +28,7 @@ window.KB_QUICK = (window.KB_QUICK || []).concat([
 
   /* ══════════════ O 圈与密封槽速查 ══════════════ */
   {
-    id: "oring", icon: "⭕", name: "O 圈与密封槽速查",
+    id: "oring", icon: "<svg class=ic aria-hidden=true><use href=#i-ring /></svg>", name: "O 圈与密封槽速查",
     desc: "静密封沟槽尺寸推荐值（压缩率按 20~25% 计），动密封请将压缩率降至 10~20%",
     cols: ["O 圈线径 mm", "槽深 mm", "槽宽 mm", "压缩率", "适用结合面", "备注"],
     rows: [
@@ -46,7 +46,7 @@ window.KB_QUICK = (window.KB_QUICK || []).concat([
 
   /* ══════════════ 钕铁硼磁铁吸力速查 ══════════════ */
   {
-    id: "magnet", icon: "🧲", name: "钕铁硼磁铁吸力速查",
+    id: "magnet", icon: "<svg class=ic aria-hidden=true><use href=#i-magnet /></svg>", name: "钕铁硼磁铁吸力速查",
     desc: "常用圆片磁铁的参考吸力（直接吸附在 1mm 钢板上、常温条件）；隔塑料壁后按衰减系数估算",
     cols: ["规格 直径×厚度", "N35 吸力 kgf", "N42 吸力 kgf", "工作温度", "重量参考 g", "典型用途"],
     rows: [

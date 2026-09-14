@@ -7,7 +7,7 @@ window.KB_QUICK = (window.KB_QUICK || []).concat([
 
   /* ══════════════ 灯具结构件速查 ══════════════ */
   {
-    id: "lampfix", icon: "💡", name: "灯具结构件速查",
+    id: "lampfix", icon: "<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name: "灯具结构件速查",
     desc: "灯罩、透镜、导光板、电池仓、电源线等 14 类结构件的固定方式与推荐参数",
     cols: ["结构件", "常见固定方式", "推荐参数", "避坑要点"],
     rows: [
@@ -32,7 +32,7 @@ window.KB_QUICK = (window.KB_QUICK || []).concat([
 
   /* ══════════════ 塑料耐化学性速查 ══════════════ */
   {
-    id: "chemres", icon: "🧪", name: "塑料耐化学性速查",
+    id: "chemres", icon: "<svg class=ic aria-hidden=true><use href=#i-flask /></svg>", name: "塑料耐化学性速查",
     desc: "12 类常用塑料对酸、碱、溶剂、油脂的耐受性与最需警惕的介质",
     cols: ["材料", "耐酸", "耐碱", "耐溶剂 / 醇", "耐油脂", "最需警惕的介质"],
     rows: [
@@ -55,7 +55,7 @@ window.KB_QUICK = (window.KB_QUICK || []).concat([
 
   /* ══════════════ 常用塑料牌号对照 ══════════════ */
   {
-    id: "grade", icon: "🏷️", name: "常用塑料牌号对照",
+    id: "grade", icon: "<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name: "常用塑料牌号对照",
     desc: "灯具行业高频使用的 12 类材料牌号与关键物性（具体数据以供应商 TDS 为准）",
     cols: ["材料 / 类别", "常用厂牌牌号", "密度 g/cm³", "收缩率 %", "HDT ℃", "典型用途"],
     rows: [

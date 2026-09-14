@@ -9,7 +9,7 @@
   if (P.some(w => w.week === 5)) return;
 
   P.push({
-    week: 5, icon: "⭐", title: "第 5 周：进阶专题补强",
+    week: 5, icon: "<svg class=ic aria-hidden=true><use href=#i-star /></svg>", title: "第 5 周：进阶专题补强",
     goal: "把灯具结构件、连接工艺、验证与供应链这四块实战短板补齐——它们不是「进阶知识」，而是独立负责项目时最先被问到的细节",
     days: [
       {

@@ -11,7 +11,7 @@
 
   /* ══════════════════════════ 橱柜灯 ══════════════════════════ */
   add({
-    id: "cabinet", icon: "🚪", name: "橱柜感应灯条",
+    id: "cabinet", icon: "<svg class=ic aria-hidden=true><use href=#i-door /></svg>", name: "橱柜感应灯条",
     tagline: "橱柜/衣柜内照明｜手扫感应 + 磁吸安装｜结构与装配最轻量的入门款",
     meta: [
       { k: "产品定位", v: "橱柜层板灯 / 衣柜灯 / 抽屉灯（手扫或人体感应开灯）" },
@@ -70,7 +70,7 @@
 
   /* ══════════════════════ 磁吸轨道灯 ══════════════════════ */
   add({
-    id: "tracklight", icon: "🛤️", name: "磁吸轨道射灯",
+    id: "tracklight", icon: "<svg class=ic aria-hidden=true><use href=#i-track /></svg>", name: "磁吸轨道射灯",
     tagline: "无主灯系统核心件｜轨道取电 + 磁吸定位｜电气与机构耦合度最高",
     meta: [
       { k: "产品定位", v: "商用与家居磁吸轨道系统（射灯/泛光灯/线条灯模组）" },
@@ -129,7 +129,7 @@
 
   /* ══════════════════════ 户外庭院灯 ══════════════════════ */
   add({
-    id: "garden", icon: "🌿", name: "户外庭院灯",
+    id: "garden", icon: "<svg class=ic aria-hidden=true><use href=#i-leaf /></svg>", name: "户外庭院灯",
     tagline: "庭院/草坪/步道照明｜太阳能或接电｜防水、防腐蚀与寿命的综合考场",
     meta: [
       { k: "产品定位", v: "草坪灯 / 步道灯 / 庭院立柱灯（太阳能或 220V 接电）" },

@@ -8,7 +8,7 @@ window.KB_MISTAKE = [
 
 /* ═══════════ 一、材料与工艺选型 ═══════════ */
 {
-  id: "mat", icon: "🧱", name: "材料与工艺选型", desc: "选料选工艺阶段的典型错误——错了要推倒重来",
+  id: "mat", icon: "<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name: "材料与工艺选型", desc: "选料选工艺阶段的典型错误——错了要推倒重来",
   items: [
     {
       t: "户外灯具用 ABS，三个月客户投诉黄变",
@@ -63,7 +63,7 @@ window.KB_MISTAKE = [
 
 /* ═══════════ 二、结构与装配 ═══════════ */
 {
-  id: "struct", icon: "🧩", name: "结构与装配", desc: "结构设计阶段的经典坑——画的时候觉得没问题",
+  id: "struct", icon: "<svg class=ic aria-hidden=true><use href=#i-puzzle /></svg>", name: "结构与装配", desc: "结构设计阶段的经典坑——画的时候觉得没问题",
   items: [
     {
       t: "加强筋和主体一样厚，外观面出现缩痕",
@@ -126,7 +126,7 @@ window.KB_MISTAKE = [
 
 /* ═══════════ 三、模具与 DFM ═══════════ */
 {
-  id: "mold", icon: "🏭", name: "模具与 DFM", desc: "开模前后最容易扯皮的地方",
+  id: "mold", icon: "<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name: "模具与 DFM", desc: "开模前后最容易扯皮的地方",
   items: [
     {
       t: "结构全部画完才定分型面，被迫大改",
@@ -173,7 +173,7 @@ window.KB_MISTAKE = [
 
 /* ═══════════ 四、图纸与公差 ═══════════ */
 {
-  id: "drawing", icon: "📐", name: "图纸与公差", desc: "图纸是唯一的正式语言，表达错就全错",
+  id: "drawing", icon: "<svg class=ic aria-hidden=true><use href=#i-grid /></svg>", name: "图纸与公差", desc: "图纸是唯一的正式语言，表达错就全错",
   items: [
     {
       t: "标了形位公差却没标基准，供应商无法判定",
@@ -220,7 +220,7 @@ window.KB_MISTAKE = [
 
 /* ═══════════ 五、散热 / 光学 / 安规 / 包装 ═══════════ */
 {
-  id: "cross", icon: "🌡️", name: "散热 · 光学 · 安规 · 包装", desc: "跨专业的坑，一个没注意就要改模或返工",
+  id: "cross", icon: "<svg class=ic aria-hidden=true><use href=#i-thermometer /></svg>", name: "散热 · 光学 · 安规 · 包装", desc: "跨专业的坑，一个没注意就要改模或返工",
   items: [
     {
       t: "为了省成本去掉导热垫，LED 结温飙升",

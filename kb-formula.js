@@ -7,7 +7,7 @@ window.KB_FORMULA = [
 
 /* ── 一、结构与强度 ─────────────────────────────── */
 {
-  icon: "🏗️", cat: "结构与强度", desc: "判断结构够不够强、卡扣会不会断",
+  icon: "<svg class=ic aria-hidden=true><use href=#i-columns /></svg>", cat: "结构与强度", desc: "判断结构够不够强、卡扣会不会断",
   items: [
     { name: "矩形截面惯性矩", expr: "I = b · h³ / 12", unit: "mm⁴",
       vars: [ { s: "b", d: "截面宽度（mm）" }, { s: "h", d: "截面高度（垂直于受力方向，mm）" } ],
@@ -38,7 +38,7 @@ window.KB_FORMULA = [
 
 /* ── 二、注塑与模具 ─────────────────────────────── */
 {
-  icon: "🏭", cat: "注塑与模具", desc: "算收缩、算锁模力、算模穴数、算冷却",
+  icon: "<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", cat: "注塑与模具", desc: "算收缩、算锁模力、算模穴数、算冷却",
   items: [
     { name: "收缩率换算（产品 → 模具）", expr: "L模 = L制品 / (1 − S)", unit: "mm",
       vars: [ { s: "L制品", d: "产品图纸尺寸（mm）" }, { s: "S", d: "成型收缩率（小数，如 0.5% = 0.005）" } ],
@@ -73,7 +73,7 @@ window.KB_FORMULA = [
 
 /* ── 三、散热 ─────────────────────────────────── */
 {
-  icon: "🌡️", cat: "散热", desc: "算热阻链、算结温、算需要的散热面积",
+  icon: "<svg class=ic aria-hidden=true><use href=#i-thermometer /></svg>", cat: "散热", desc: "算热阻链、算结温、算需要的散热面积",
   items: [
     { name: "热阻串联（热阻链）", expr: "Rθ_ja = Rθ_jc + Rθ_cb + Rθ_ba", unit: "℃/W",
       vars: [ { s: "Rθ_jc", d: "结到壳（LED 自身，查规格书）" }, { s: "Rθ_cb", d: "壳到板（焊层 + PCB 绝缘层）" }, { s: "Rθ_ba", d: "板到环境（界面材料 + 散热器 + 空气）" } ],
@@ -104,7 +104,7 @@ window.KB_FORMULA = [
 
 /* ── 四、光学 ─────────────────────────────────── */
 {
-  icon: "💡", cat: "光学", desc: "算光效、算照度、算混光距离",
+  icon: "<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", cat: "光学", desc: "算光效、算照度、算混光距离",
   items: [
     { name: "光效", expr: "η = Φ / P", unit: "lm/W",
       vars: [ { s: "Φ", d: "光通量（lm）" }, { s: "P", d: "输入电功率（W）" } ],
@@ -135,7 +135,7 @@ window.KB_FORMULA = [
 
 /* ── 五、成本 ─────────────────────────────────── */
 {
-  icon: "💰", cat: "成本与量产", desc: "算单件成本、算摊销、算良率影响",
+  icon: "<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", cat: "成本与量产", desc: "算单件成本、算摊销、算良率影响",
   items: [
     { name: "塑料件单件成本", expr: "C = (W · P料 / 1000) / η + C加工", unit: "元/件",
       vars: [ { s: "W", d: "单件净重（g，含浇口分摊）" }, { s: "P料", d: "材料单价（元/kg）" }, { s: "η", d: "良率（小数）" }, { s: "C加工", d: "加工费（元/件，含机台工时、人工、电费）" } ],
@@ -162,7 +162,7 @@ window.KB_FORMULA = [
 
 /* ── 六、包装与公差 ────────────────────────────── */
 {
-  icon: "📦", cat: "包装与公差", desc: "算缓冲、算跌落、算公差叠加",
+  icon: "<svg class=ic aria-hidden=true><use href=#i-box /></svg>", cat: "包装与公差", desc: "算缓冲、算跌落、算公差叠加",
   items: [
     { name: "跌落冲击速度", expr: "v = √(2 · g · h)", unit: "m/s",
       vars: [ { s: "g", d: "重力加速度 9.81（m/s²）" }, { s: "h", d: "跌落高度（m）" } ],
@@ -198,7 +198,7 @@ window.KB_FORMULA = [
    ══════════════════════════════════════════════════ */
 window.KB_UNIT = [
   {
-    icon: "📏", cat: "长度与厚度",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", cat: "长度与厚度",
     items: [
       { a: "1 英寸 (in)", b: "25.4 毫米 (mm)", f: "25.4", note: "图纸出现英制尺寸时换算" },
       { a: "1 密耳 (mil)", b: "0.0254 毫米 (mm)", f: "0.0254", note: "PCB 与镀层厚度常用" },
@@ -208,7 +208,7 @@ window.KB_UNIT = [
     ]
   },
   {
-    icon: "⚖️", cat: "力与压强",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-scale /></svg>", cat: "力与压强",
     items: [
       { a: "1 千克力 (kgf)", b: "9.807 牛顿 (N)", f: "9.807", note: "拉力/推力换算" },
       { a: "1 磅力 (lbf)", b: "4.448 牛顿 (N)", f: "4.448", note: "美制拉力规格" },
@@ -219,7 +219,7 @@ window.KB_UNIT = [
     ]
   },
   {
-    icon: "🌡️", cat: "温度与热量",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-thermometer /></svg>", cat: "温度与热量",
     items: [
       { a: "开尔文 (K)", b: "摄氏度 (℃)", f: "K = ℃ + 273.15", note: "热力学计算用绝对温度" },
       { a: "1 瓦每米开尔文 W/(m·K)", b: "0.86 千卡/(小时·米·℃)", f: "0.86", note: "导热系数换算" },
@@ -229,7 +229,7 @@ window.KB_UNIT = [
     ]
   },
   {
-    icon: "💡", cat: "光学",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", cat: "光学",
     items: [
       { a: "1 流明 (lm)", b: "1 坎德拉·球面度 (cd·sr)", f: "1", note: "光通量的定义" },
       { a: "1 勒克斯 (lx)", b: "1 流明/平方米 (lm/m²)", f: "1", note: "照度定义，直观好记" },
@@ -239,7 +239,7 @@ window.KB_UNIT = [
     ]
   },
   {
-    icon: "🧱", cat: "质量与体积",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", cat: "质量与体积",
     items: [
       { a: "1 千克 (kg)", b: "1000 克 (g)", f: "1000", note: "料重常用 g" },
       { a: "1 磅 (lb)", b: "0.4536 千克 (kg)", f: "0.4536", note: "美制重量" },
@@ -249,7 +249,7 @@ window.KB_UNIT = [
     ]
   },
   {
-    icon: "🔧", cat: "其他常用",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-wrench /></svg>", cat: "其他常用",
     items: [
       { a: "1 度 (°)", b: "60 分 (′)", f: "60", note: "脱模斜度常用分表示，0.5° = 30′" },
       { a: "1 平方米 (m²)", b: "10000 平方厘米 (cm²)", f: "10000", note: "锁模力算投影面积" },

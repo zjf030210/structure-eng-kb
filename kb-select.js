@@ -12,7 +12,7 @@ window.KB_SELECT = [
 
 /* ═══════════ 一、选材料 ═══════════ */
 {
-  id: "mat", icon: "🧱", name: "选材料", desc: "塑料件该用什么料？按功能一步步问下去",
+  id: "mat", icon: "<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name: "选材料", desc: "塑料件该用什么料？按功能一步步问下去",
   start: "s1",
   nodes: {
     "s1": { q: "这个零件最核心的功能是什么？", opts: [
@@ -174,7 +174,7 @@ window.KB_SELECT = [
 
 /* ═══════════ 二、选成型工艺 ═══════════ */
 {
-  id: "proc", icon: "🏭", name: "选成型工艺", desc: "这个件该用什么工艺造？按批量与形态判断",
+  id: "proc", icon: "<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name: "选成型工艺", desc: "这个件该用什么工艺造？按批量与形态判断",
   start: "s1",
   nodes: {
     "s1": { q: "预计的年用量大概是多少？", opts: [
@@ -280,7 +280,7 @@ window.KB_SELECT = [
 
 /* ═══════════ 三、选表面处理 ═══════════ */
 {
-  id: "sf", icon: "🎨", name: "选表面处理", desc: "想要什么质感？按基材与效果选处理方式",
+  id: "sf", icon: "<svg class=ic aria-hidden=true><use href=#i-brush /></svg>", name: "选表面处理", desc: "想要什么质感？按基材与效果选处理方式",
   start: "s1",
   nodes: {
     "s1": { q: "基材是什么？", opts: [
@@ -401,7 +401,7 @@ window.KB_SELECT = [
 
 /* ═══════════ 四、选紧固方式 ═══════════ */
 {
-  id: "fasten", icon: "🔩", name: "选紧固方式", desc: "这两个件怎么连起来？按「拆不拆」快速定位",
+  id: "fasten", icon: "<svg class=ic aria-hidden=true><use href=#i-screw /></svg>", name: "选紧固方式", desc: "这两个件怎么连起来？按「拆不拆」快速定位",
   start: "s1",
   nodes: {
     "s1": { q: "这个连接将来需要拆开吗？", opts: [
@@ -492,7 +492,7 @@ window.KB_SELECT = [
 
 /* ═══════════ 五、选散热方案 ═══════════ */
 {
-  id: "thermal", icon: "🌡️", name: "选散热方案", desc: "LED 的热怎么排？按功率快速定位方案",
+  id: "thermal", icon: "<svg class=ic aria-hidden=true><use href=#i-thermometer /></svg>", name: "选散热方案", desc: "LED 的热怎么排？按功率快速定位方案",
   start: "s1",
   nodes: {
     "s1": { q: "整灯或单模块的 LED 总功率大概多少？", opts: [

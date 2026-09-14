@@ -8,7 +8,7 @@
 window.KB_FORMULA = (window.KB_FORMULA || []).concat([
 
   {
-    icon: "🔧", cat: "灯具结构件与装配",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-wrench /></svg>", cat: "灯具结构件与装配",
     desc: "卡扣回弹、线束压降、照度均匀度、堆码强度、多腔一致性——装配与落地环节的常用计算",
     items: [
       {
@@ -81,7 +81,7 @@ window.KB_FORMULA = (window.KB_FORMULA || []).concat([
 
 window.KB_UNIT = (window.KB_UNIT || []).concat([
   {
-    icon: "🌡️", cat: "散热、压力与速度",
+    icon: "<svg class=ic aria-hidden=true><use href=#i-thermometer /></svg>", cat: "散热、压力与速度",
     items: [
       { a: "瓦每米开尔文 W/(m·K)", b: "瓦每米摄氏度 W/(m·℃)", f: "1", note: "温差既可用 K 也可用 ℃，数值相同，此处换算系数为 1" },
       { a: "平方米·开尔文每瓦 (m²·K/W)", b: "平方英尺·华氏度·小时每英热单位 (ft²·°F·h/Btu)", f: "5.678", note: "热阻的英制换算，常见于进口散热器规格书" },
