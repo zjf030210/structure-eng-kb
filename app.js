@@ -647,20 +647,39 @@ function renderHome(){
   renderChangelog();
 }
 
-/* ══════════════ 首页：更新日志 ══════════════ */
+/* ══════════════ 首页：更新日志（可折叠，默认收起） ══════════════ */
+let chlogOpen = false;          // 默认收起，展开状态会保留
 function renderChangelog(){
   const box = document.getElementById("panelChangelog"); if(!box) return;
-  const list = (window.KB_CHANGELOG || []).slice(0, 5);
-  if(!list.length){ box.innerHTML = ""; return; }
-  const rest = (window.KB_CHANGELOG || []).length - list.length;
+  const all = window.KB_CHANGELOG || [];
+  if(!all.length){ box.innerHTML = ""; return; }
+  const LIMIT = 3;                       // 展开后只展示最近 3 条
+  const list = all.slice(0, LIMIT);
+  const rest = all.length - list.length;
+  const latest = all[0];
+  box.classList.toggle("open", chlogOpen);
   box.innerHTML = `
-    <h3>🆕 最近更新 <span style="font-size:11.5px; font-weight:normal; color:var(--sub)">内容一直在加，链接始终不变</span></h3>
-    <div class="pdesc">${list.length} 条最新记录${rest > 0 ? `，另有 ${rest} 条更早的历史` : ""}</div>
-    <div class="chlog">${list.map(l=>`
-      <div class="cl-item">
-        <div class="cl-head"><b>${esc(l.d)}</b><span>${esc(l.t)}</span></div>
-        <ul>${(l.items || []).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
-      </div>`).join("")}</div>`;
+    <div class="clog-bar" id="clogBar">
+      <span class="clog-t">🆕 最近更新</span>
+      <span class="clog-h"><b>${esc(latest.d)}</b> ${esc(latest.t)}</span>
+      <span class="clog-cnt">共 ${all.length} 条</span>
+      <span class="clog-tg" id="clogToggle">${chlogOpen ? "收起 ▲" : "展开 ▼"}</span>
+    </div>
+    <div class="clog-body" id="clogBody">
+      <div class="chlog">${list.map(l=>`
+        <div class="cl-item">
+          <div class="cl-head"><b>${esc(l.d)}</b><span>${esc(l.t)}</span></div>
+          <ul>${(l.items || []).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+        </div>`).join("")}</div>
+      ${rest > 0 ? `<div class="clog-more">另有 ${rest} 条更早记录</div>` : ""}
+    </div>`;
+  const bar = document.getElementById("clogBar");
+  if(bar) bar.onclick = ()=>{
+    chlogOpen = !chlogOpen;
+    box.classList.toggle("open", chlogOpen);
+    const tg = document.getElementById("clogToggle");
+    if(tg) tg.textContent = chlogOpen ? "收起 ▲" : "展开 ▼";
+  };
 }
 
 // 领域详情

@@ -993,14 +993,28 @@
   .cmp-num li{font-family:ui-monospace,Consolas,monospace; font-size:11.5px;}
   .cmp-sec.memo .cmp-b{background:#fffbeb; border:1px solid #fde68a; border-radius:9px; padding:9px 12px; color:#92400e;}
 
-  /* ══════ 更新日志 ══════ */
-  .chlog{display:flex; flex-direction:column; gap:12px;}
+  /* ══════ 更新日志（可折叠，默认收起） ══════ */
+  .chlog{display:flex; flex-direction:column; gap:10px;}
   .cl-item{border-left:2px solid var(--primary-weak); padding-left:12px;}
-  .cl-head{display:flex; gap:9px; align-items:baseline; flex-wrap:wrap; margin-bottom:5px;}
-  .cl-head b{font-size:12px; color:var(--primary); font-family:ui-monospace,Consolas,monospace;}
-  .cl-head span{font-size:13px; font-weight:bold; color:var(--text);}
-  .cl-item ul{padding-left:17px; font-size:12.5px; line-height:1.8; color:#475569;}
-  .cl-item li{margin-bottom:2px;}
+  .cl-head{display:flex; gap:9px; align-items:baseline; flex-wrap:wrap; margin-bottom:4px;}
+  .cl-head b{font-size:11.5px; color:var(--primary); font-family:ui-monospace,Consolas,monospace;}
+  .cl-head span{font-size:12.5px; font-weight:bold; color:var(--text);}
+  .cl-item ul{padding-left:16px; font-size:12px; line-height:1.75; color:#475569; margin:0;}
+  .cl-item li{margin-bottom:1px;}
+  /* 折叠条 */
+  .clog-panel{padding:10px 15px !important;}
+  .clog-panel.open{padding:14px 18px 16px !important;}
+  .clog-bar{display:flex; align-items:center; gap:9px; cursor:pointer; user-select:none; min-height:22px;}
+  .clog-t{font-size:13px; font-weight:bold; color:var(--text); flex-shrink:0;}
+  .clog-h{flex:1; min-width:0; font-size:11.5px; color:var(--sub);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .clog-h b{color:var(--primary); font-family:ui-monospace,Consolas,monospace; font-weight:600;}
+  .clog-cnt{font-size:11px; color:var(--sub); flex-shrink:0;}
+  .clog-tg{font-size:12px; font-weight:600; color:var(--primary); flex-shrink:0;}
+  .clog-bar:hover .clog-tg{text-decoration:underline;}
+  .clog-body{display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);}
+  .clog-panel.open .clog-body{display:block;}
+  .clog-more{font-size:11px; color:var(--sub); margin-top:9px; text-align:center;}
 
   @media print{
     @page{margin:12mm 10mm;}
@@ -1368,7 +1382,7 @@
       <div class="panel" id="panelProgress"></div>
       <div class="panel" id="panelRecent"></div>
     </div>
-    <div class="panel" id="panelChangelog" style="margin:0 0 16px;"></div>
+    <div class="panel clog-panel" id="panelChangelog" style="margin:0 0 16px;"></div>
     <div class="sec-title"><h3>知识领域</h3><span>点击进入领域详情</span></div>
     <div class="domains" id="domains"></div>
   </div>
