@@ -203,7 +203,9 @@ function pushSearchHist(q){
 function applyTheme(){
   document.documentElement.setAttribute("data-theme", theme);
   const b = document.getElementById("themeBtn");
-  if(b) b.textContent = theme === "dark" ? "☀️" : "🌙";
+  if(b) b.innerHTML = theme === "dark"
+    ? '<svg class=ic aria-hidden=true><use href=#i-sun /></svg>'
+    : '<svg class=ic aria-hidden=true><use href=#i-moon /></svg>';
 }
 applyTheme();
 
@@ -292,11 +294,11 @@ const PLAT = {
 
 // 深度解析小节定义与渲染
 const DEEP_DEF = {
-  p:{t:"🧭 核心原理",          c:"#2563eb", bg:"#eff4ff"},
-  k:{t:"📐 关键参数与公式",     c:"#7c3aed", bg:"#f5f3ff"},
-  e:{t:"⚙️ 实战经验值",        c:"#059669", bg:"#ecfdf5"},
-  f:{t:"⚠️ 常见错误与避坑",     c:"#dc2626", bg:"#fef2f2"},
-  s:{t:"📚 相关标准与术语",     c:"#d97706", bg:"#fffbeb"}
+  p:{t:"<svg class=ic aria-hidden=true><use href=#i-compass /></svg>13124核心原理",          c:"#2563eb", bg:"#eff4ff"},
+  k:{t:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>13179关键参数与公式",     c:"#7c3aed", bg:"#f5f3ff"},
+  e:{t:"<svg class=ic aria-hidden=true><use href=#i-settings /></svg>13232实战经验值",        c:"#059669", bg:"#ecfdf5"},
+  f:{t:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>13286常见错误与避坑",     c:"#dc2626", bg:"#fef2f2"},
+  s:{t:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>13339相关标准与术语",     c:"#d97706", bg:"#fffbeb"}
 };
 function renderDeep(it){
   const sec = document.getElementById("dpDeepSec"), box = document.getElementById("dpDeep");
@@ -403,7 +405,7 @@ function openDetail(it){
   if(it.img){
     imgEl.innerHTML = `<img src="${esc(it.img)}" alt="${esc(it.name)}" loading="lazy" decoding="async">`;
   }else{
-    imgEl.innerHTML = `<div class="ph"><b>📷 暂无示意图</b>可通过下方按钮搜索或让 AI 生成</div>`;
+    imgEl.innerHTML = `<div class="ph"><b><svg class=ic aria-hidden=true><use href=#i-camera /></svg> 暂无示意图</b>可通过下方按钮搜索或让 AI 生成</div>`;
   }
   const kwTxt = (it.imgKw || it.name).split("/").map(s=>s.trim()).filter(Boolean);
   document.getElementById("dpKw").textContent = kwTxt.join(" · ");
@@ -411,7 +413,7 @@ function openDetail(it){
     <a href="https://pixabay.com/zh/images/search/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener">🔍 Pixabay 搜图</a>
     <a href="https://www.pexels.com/zh-cn/search/${encodeURIComponent(it.name)}/" target="_blank" rel="noopener">🔍 Pexels 搜图</a>
     <a href="https://huaban.com/search/?q=${encodeURIComponent(it.name)}" target="_blank" rel="noopener">🔍 花瓣 搜图</a>
-    <button class="ai" id="aiGenBtn">🤖 AI 提示词</button>`;
+    <button class="ai" id="aiGenBtn"><svg class=ic aria-hidden=true><use href=#i-cpu /></svg>AI 提示词</button>`;
   document.getElementById("aiGenBtn").onclick = () => {
     document.getElementById("aiPromptText").textContent = it.imgAi || `工程示意图：${it.name}。线条简洁、白底、轴侧视角，关键部件引出标注。`;
     document.getElementById("aiModal").classList.add("open");
@@ -457,11 +459,11 @@ function dpNavUpdate(it){
 
 // 详情面板：区块快速跳转
 const DP_ANCHORS = [
-  {id:"secPoints", t:"📌 要点"}, {id:"secUsage", t:"💡 应用"},
-  {id:"dpNumSec", t:"🔢 数值"},  {id:"dpDeepSec", t:"📖 深度"},
-  {id:"dpRelSec", t:"🔗 关联"},  {id:"dpTaskSec", t:"✍️ 练习"},
-  {id:"secVideos", t:"🎬 视频"}, {id:"dpRefSec", t:"📷 图集"},
-  {id:"secNote", t:"📝 笔记"}
+  {id:"secPoints", t:"<svg class=ic aria-hidden=true><use href=#i-pin /></svg>20563要点"}, {id:"secUsage", t:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>20592应用"},
+  {id:"dpNumSec", t:"<svg class=ic aria-hidden=true><use href=#i-hash /></svg>20622数值"},  {id:"dpDeepSec", t:"<svg class=ic aria-hidden=true><use href=#i-book-open /></svg>20651深度"},
+  {id:"dpRelSec", t:"<svg class=ic aria-hidden=true><use href=#i-link /></svg>20682关联"},  {id:"dpTaskSec", t:"<svg class=ic aria-hidden=true><use href=#i-edit /></svg>20711练习"},
+  {id:"secVideos", t:"<svg class=ic aria-hidden=true><use href=#i-play /></svg>20742视频"}, {id:"dpRefSec", t:"<svg class=ic aria-hidden=true><use href=#i-camera /></svg>20771图集"},
+  {id:"secNote", t:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>20801笔记"}
 ];
 function updateAnchors(){
   const box = document.getElementById("dpAnchors");
@@ -542,7 +544,7 @@ function renderHome(){
     {n:favCount(), l:"我的收藏", mod:"fav"}
   ];
   document.getElementById("panelOverview").innerHTML = `
-    <h3>📦 内容总览</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-box /></svg>25600内容总览</h3>
     <div class="pdesc">点任意数字直接进入对应模块</div>
     <div class="stat-grid">${OVERVIEW.map(o=>`
       <div class="stat-item" data-mod="${o.mod}" ${o.f?`data-field="${o.f}"`:""}>
@@ -595,7 +597,7 @@ function renderHome(){
   else advice = `🎉 166 条全部掌握！去「💼 实战宝典」用 35 道面试题检验一下，再去「🎯 自测题库」冲满分。`;
   const barColor = p=> p>=80 ? "linear-gradient(90deg,#059669,#10b981)" : p>=40 ? "linear-gradient(90deg,#d97706,#f59e0b)" : "linear-gradient(90deg,#dc2626,#ef4444)";
   document.getElementById("panelProgress").innerHTML = `
-    <h3>📈 我的学习进度</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>28084我的学习进度</h3>
     <div class="pdesc">数据保存在本机浏览器，换电脑或清缓存会重置</div>
     <div class="prog-row"><span class="pl">知识掌握</span>
       <div class="prog-bar"><i style="width:${total?Math.round(mastered/total*100):0}%;background:${barColor(total?mastered/total*100:0)}"></i></div>
@@ -703,20 +705,20 @@ function renderDomainGuide(d){
       </div>
       <div class="dg-body" id="dgBody">
         <div class="dg-sec">
-          <div class="dg-h">🎯 这个领域解决什么问题</div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-target /></svg>33720这个领域解决什么问题</div>
           <div class="dg-p">${esc(g.pos)}</div>
           <div class="dg-p sub">${esc(g.why)}</div>
         </div>
         <div class="dg-sec">
-          <div class="dg-h">🗺️ 核心概念地图<span class="dg-note">点任意概念直接打开</span></div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-map /></svg>33912核心概念地图<span class="dg-note">点任意概念直接打开</span></div>
           <div class="dg-map">${mapHtml}</div>
         </div>
         <div class="dg-sec">
-          <div class="dg-h">🔗 在整机开发链条中的位置</div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>34086在整机开发链条中的位置</div>
           <div class="dg-p">${esc(g.link)}</div>
         </div>
         <div class="dg-sec">
-          <div class="dg-h">⚠️ 常见误区 Top${(g.myth||[]).length}</div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-alert /></svg>34228常见误区 Top${(g.myth||[]).length}</div>
           <ul class="dg-myth">${(g.myth||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
         </div>
         <div class="dg-tip">💡 <b>学习建议：</b>${esc(g.tips)}</div>
@@ -881,13 +883,13 @@ function renderGlobalSearch(q){
 
   // 术语词典
   const gloss = KB_GLOSS.filter(g=>hit(g.en)||hit(g.cn)||hit(g.d)||hit(g.c));
-  if(gloss.length) groups.push({icon:"📖", name:"术语词典", n:gloss.length, jump:"gloss",
+  if(gloss.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-book-open /></svg>", name:"术语词典", n:gloss.length, jump:"gloss",
     items: gloss.map(g=>({t:g.en, d:`<b>${esc(g.cn)}</b> — ${g.d}`}))});
 
   // 标准清单
   const std = [];
   KB_STD.forEach(g=>g.items.forEach(x=>{ if(hit(x.code)||hit(x.name)||hit(x.note)) std.push({t:x.code, d:`${esc(x.name)} — ${esc(x.note)}`}); }));
-  if(std.length) groups.push({icon:"📋", name:"标准清单", n:std.length, jump:"field", f:"std", items: std});
+  if(std.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>", name:"标准清单", n:std.length, jump:"field", f:"std", items: std});
 
   // 缺陷排查
   const tr = [];
@@ -902,14 +904,14 @@ function renderGlobalSearch(q){
   KB_INTERVIEW.forEach(g=>g.items.forEach(x=>{
     if(hit(x.q)||hit(x.a.join(" "))) iv.push({t:x.q, d:`${esc(x.cat)} · ${esc(x.tag)}　${esc(x.a[0])}`});
   }));
-  if(iv.length) groups.push({icon:"💼", name:"面试题库", n:iv.length, jump:"field", f:"interview", items: iv});
+  if(iv.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-briefcase /></svg>", name:"面试题库", n:iv.length, jump:"field", f:"interview", items: iv});
 
   // 速查手册
   const qk = [];
   KB_QUICK.forEach(t=>t.rows.forEach(r=>{
     if(hit(r.join(" "))) qk.push({t:t.name, d:r.slice(0,3).map(esc).join("　|　")});
   }));
-  if(qk.length) groups.push({icon:"📊", name:"速查手册", n:qk.length, jump:"quick", items: qk.slice(0,8)});
+  if(qk.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-table /></svg>", name:"速查手册", n:qk.length, jump:"quick", items: qk.slice(0,8)});
 
   // 自测题库
   const qz = [];
@@ -922,7 +924,7 @@ function renderGlobalSearch(q){
         qz.push({t:p.name+" 第"+(i+1)+"题"+(lv?" · "+lv:""), d:esc(qq.q)+(tp!=="choice"?`　[${QUIZ_TYPE[tp]||tp}]`:""), pid:p.id});
     }
   });
-  if(qz.length) groups.push({icon:"🎯", name:"自测题库", n:qz.length, jump:"quiz", items: qz.slice(0,8)});
+  if(qz.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-target /></svg>", name:"自测题库", n:qz.length, jump:"quiz", items: qz.slice(0,8)});
 
   // 整机案例
   const cs = [];
@@ -945,7 +947,7 @@ function renderGlobalSearch(q){
     if(hit(x.t)||hit(x.bad)||hit(x.cost)||hit(x.good)||hit(x.how))
       mk.push({t:x.t, d:`<b>✗</b> ${esc(x.bad)}　<b>✓</b> ${esc(x.good)}`});
   }));
-  if(mk.length) groups.push({icon:"⚠️", name:"设计避坑", n:mk.length, jump:"field", f:"mistake", items: mk});
+  if(mk.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>", name:"设计避坑", n:mk.length, jump:"field", f:"mistake", items: mk});
 
   // 选型决策
   const sl = [];
@@ -957,7 +959,7 @@ function renderGlobalSearch(q){
       else if(nd.q && hit(nd.q)) sl.push({t:nd.q, d:`决策问题 · ${esc(t.name)}`, jumpSel:t.id});
     });
   });
-  if(sl.length) groups.push({icon:"🎛️", name:"选型决策", n:sl.length, jump:"select", items: sl.slice(0,8)});
+  if(sl.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-sliders /></svg>", name:"选型决策", n:sl.length, jump:"select", items: sl.slice(0,8)});
 
   // 公式与单位
   const fg = [];
@@ -968,7 +970,7 @@ function renderGlobalSearch(q){
   (window.KB_UNIT||[]).forEach(g=>(g.items||[]).forEach(x=>{
     if(hit(x.a)||hit(x.b)||hit(x.note)) fg.push({t:x.a, d:`= ${esc(x.b)}　${esc(x.note||"")}`, jumpFm:"__unit"});
   }));
-  if(fg.length) groups.push({icon:"📐", name:"公式与单位", n:fg.length, jump:"formula", items: fg.slice(0,8)});
+  if(fg.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", name:"公式与单位", n:fg.length, jump:"formula", items: fg.slice(0,8)});
 
   // 领域导读
   const dg = [];
@@ -1101,19 +1103,19 @@ function renderCases(){
       </table></div>
     </div>
     <div class="card">
-      <h3>📐 关键设计参数</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>51816关键设计参数</h3>
       ${c.specs.map(s=>`<div class="spec-grp"><h5>${esc(s.t)}</h5><ul>${s.items.map(i=>`<li>${i}</li>`).join("")}</ul></div>`).join("")}
     </div>
     <div class="card">
-      <h3>🛠️ 开发流程与工艺路线</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-calculator /></svg>52012开发流程与工艺路线</h3>
       ${c.steps.map((s,i)=>`<div class="step"><div class="sn">${i+1}</div><div class="st2"><b>${esc(s.t)}</b> — ${esc(s.d)}</div></div>`).join("")}
     </div>
     <div class="card">
-      <h3>⚠️ 常见问题与对策</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-alert /></svg>52223常见问题与对策</h3>
       ${c.issues.map(s=>`<div class="iss"><div class="iq">${esc(s.t)}</div><div class="ia">${esc(s.d)}</div></div>`).join("")}
     </div>
     ${((window.KB_CASE_DFM||{})[c.id]||[]).length?`<div class="card">
-      <h3>🔍 DFM 检讨记录</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-search /></svg>52457DFM 检讨记录</h3>
       <div class="qv-desc">开模前评审与试模检讨的真实过程：模具厂/工艺提出的问题 → 怎么处理 → 结果是什么</div>
       ${((window.KB_CASE_DFM||{})[c.id]||[]).map((x,i)=>`<div class="dfm-item">
         <div class="dfm-q"><span class="dfm-no">Q${i+1}</span><span>${esc(x.q)}</span></div>
@@ -1307,7 +1309,7 @@ function renderQuiz(){
     ["全部","choice","tf","calc","scene"].filter(k=>k==="全部"||tpStat[k]).map(k=>
       `<button class="lvf${k===quizTypeFilter?" active":""}" data-qtype="${k}">${k==="全部"?"全部":QUIZ_TYPE[k]} <b>${typeCount(k)}</b></button>`).join("");
   document.getElementById("quizActions").innerHTML = `
-    <button class="mini-btn" data-qact="wrong">🔁 重做错题</button>
+    <button class="mini-btn" data-qact="wrong"><svg class=ic aria-hidden=true><use href=#i-repeat /></svg> 重做错题</button>
     <button class="mini-btn" data-qact="reset">清空本卷</button>
     ${done===tot && tot ? `<span class="mini-btn ${pct>=80?'ok':''}" style="cursor:default">${
       pct>=80 ? '🎉 掌握良好，可以进入下一领域'
@@ -1354,7 +1356,7 @@ function nfmt(n, d){
   return s;
 }
 const CALCS = [
-{id:"shrink", icon:"📐", name:"收缩率换算", desc:"由成品尺寸反推模具型腔尺寸，是尺寸不超差的第一步",
+{id:"shrink", icon:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", name:"收缩率换算", desc:"由成品尺寸反推模具型腔尺寸，是尺寸不超差的第一步",
  fields:[{k:"dim", l:"成品尺寸 (mm)", v:100}, {k:"sr", l:"材料收缩率 (%)", v:0.6}],
  formula:"模具尺寸 = 成品尺寸 ÷ (1 − 收缩率)　·　非结晶塑料 0.3-0.8%，结晶塑料 1.0-2.5%",
  calc:v=>{ const m = v.dim/(1-v.sr/100); return {
@@ -1368,7 +1370,7 @@ const CALCS = [
    main:{l:"所需锁模力", val:nfmt(f,1), u:"t"},
    extra:[{k:"建议机型吨位（含 20% 余量）", v:nfmt(f*1.2,0)+" t"},
           {k:"注意", v:"投影面积含流道；深腔件系数取大值"}]};}},
-{id:"cavity", icon:"🔢", name:"模穴数计算", desc:"按年需求量反推合理模穴数，避免开大模或产能不够",
+{id:"cavity", icon:"<svg class=ic aria-hidden=true><use href=#i-hash /></svg>", name:"模穴数计算", desc:"按年需求量反推合理模穴数，避免开大模或产能不够",
  fields:[{k:"annual", l:"年需求量 (件)", v:600000}, {k:"days", l:"年工作天数 (天)", v:300}, {k:"daily", l:"单机日产能 (件/天)", v:2000}],
  formula:"模穴数 = 年需求量 ÷ (年工作天数 × 单机日产能)，向上取整",
  calc:v=>{ const need = v.annual/((v.days||1)*(v.daily||1)); const cav = Math.max(1, Math.ceil(need)); return {
@@ -1405,7 +1407,7 @@ const CALCS = [
           {k:"良率损失", v:nfmt((mat+mach)*(100/(v.yield||1)-1),3)+" 元"},
           {k:"表处 + 包装", v:nfmt(v.extra,3)+" 元"},
           {k:"材料费占比", v:nfmt(total?mat/total*100:0,1)+" %"}]};}},
-{id:"drop", icon:"📦", name:"跌落缓冲厚度估算", desc:"由跌落高度与产品脆值估算缓冲材料所需厚度（简化估算）",
+{id:"drop", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"跌落缓冲厚度估算", desc:"由跌落高度与产品脆值估算缓冲材料所需厚度（简化估算）",
  fields:[{k:"h", l:"跌落高度 (mm)", v:1000}, {k:"g", l:"产品脆值 (G)", v:50}, {k:"c", l:"缓冲材料系数 C", v:3}],
  formula:"缓冲厚度 ≈ C × 跌落高度 × 脆值 ÷ 10000　·　C 参考：EPE 珍珠棉 2.5-4，EVA 2-3.5。实际需按材料动态缓冲曲线选型",
  calc:v=>{ const t = v.c*v.h*v.g/10000; return {
@@ -1435,7 +1437,7 @@ const CALCS = [
           {k:"安全裕度（允许/实际）", v:nfmt(ratio?1/ratio:0,2)+" 倍"},
           {k:"判定", v:verdict},
           {k:"调优方向", v:"加长 L 最有效（应变与 L² 成反比），其次减小 y 或 t"}]};}},
-{id:"lux", icon:"💡", name:"照度与光效换算", desc:"由光通量估算照射面平均照度，并核算整灯光效",
+{id:"lux", icon:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name:"照度与光效换算", desc:"由光通量估算照射面平均照度，并核算整灯光效",
  fields:[{k:"flux", l:"总光通量 Φ (lm)", v:800}, {k:"area", l:"照射面积 (m²)", v:6},
          {k:"cu", l:"利用系数 CU (0-1)", v:0.7}, {k:"mf", l:"维护系数 MF (0-1)", v:0.8},
          {k:"pw", l:"输入功率 (W)", v:10}],
@@ -1447,7 +1449,7 @@ const CALCS = [
    extra:[{k:"整灯光效 η", v:nfmt(eff,1)+" lm/W（"+lvl+"）"},
           {k:"阅读场景（需 ≥300 lx）", v:E>=300 ? "✅ 达标" : "❌ 不足，需提高光通量或缩小面积"},
           {k:"注意", v:"整灯光效通常比单颗 LED 低 20%-40%，损失在扩散件、透镜与驱动上"}]};}},
-{id:"stack", icon:"📦", name:"包装堆码强度", desc:"按堆码层数与仓储条件反推纸箱所需抗压强度",
+{id:"stack", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装堆码强度", desc:"按堆码层数与仓储条件反推纸箱所需抗压强度",
  fields:[{k:"w", l:"单箱重量 (kg)", v:8}, {k:"n", l:"堆码层数", v:6}, {k:"k", l:"安全系数", v:2}],
  formula:"BCT ≥ (n − 1) × W × K　·　K 取 1.6-3.0（仓储越久、湿度越高取越大；纸箱长期堆码强度会衰减到 50%-60%）",
  calc:v=>{ const need = Math.max(v.n-1,0)*v.w*v.k;
@@ -1516,10 +1518,10 @@ function renderField(){
   const MIS = window.KB_MISTAKE || [];
   const misN = MIS.reduce((a,x)=>a+x.items.length,0);
   const TABS = [
-    {id:"mistake", n:"⚠️ 设计避坑", c:misN+" 个"},
+    {id:"mistake", n:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>74671设计避坑", c:misN+" 个"},
     {id:"trouble", n:"🔎 缺陷排查", c:KB_TROUBLE.reduce((a,x)=>a+x.items.length,0)+" 条"},
-    {id:"interview", n:"💼 面试题库", c:KB_INTERVIEW.reduce((a,x)=>a+x.items.length,0)+" 题"},
-    {id:"std", n:"📋 标准清单", c:KB_STD.reduce((a,x)=>a+x.items.length,0)+" 项"}
+    {id:"interview", n:"<svg class=ic aria-hidden=true><use href=#i-briefcase /></svg>74805面试题库", c:KB_INTERVIEW.reduce((a,x)=>a+x.items.length,0)+" 题"},
+    {id:"std", n:"<svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>74889标准清单", c:KB_STD.reduce((a,x)=>a+x.items.length,0)+" 项"}
   ];
   document.getElementById("fieldTabs").innerHTML = TABS.map(t=>
     `<button class="qv-tab${t.id===activeField?" active":""}" data-field="${t.id}">${t.n} <span style="opacity:.65">${t.c}</span></button>`).join("");
@@ -1532,7 +1534,7 @@ function renderField(){
                       .filter(x=>x.items.length);
     box.innerHTML = groups.length ? `
       <div class="card">
-        <h3>⚠️ 开模前评审：设计阶段的坑</h3>
+        <h3><svg class=ic aria-hidden=true><use href=#i-alert /></svg>74573开模前评审：设计阶段的坑</h3>
         <div class="qv-desc">这里的每一条都是<strong>在设计阶段就能避免</strong>的错误。和「缺陷排查」的区别：排查表对付的是量产后出现的现象，这里防的是还没开模就埋下的隐患。</div>
         <div class="mk-key">
           <span><b class="mk-b">错误做法</b></span>
@@ -1780,12 +1782,12 @@ function renderWrong(){
     </div>`).join("") : `<div class="empty" style="padding:18px 0">还没有作答记录，先去「🎯 自测题库」做几题～</div>`;
 
   document.getElementById("wrongActions").innerHTML = list.length ? `
-    <button class="mini-btn" data-wact="redo">🔁 重做全部错题（清空这些题的选择）</button>
-    <button class="mini-btn" data-wact="print">🖨️ 打印错题清单</button>` :
+    <button class="mini-btn" data-wact="redo"><svg class=ic aria-hidden=true><use href=#i-repeat /></svg> 重做全部错题（清空这些题的选择）</button>
+    <button class="mini-btn" data-wact="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印错题清单</button>` :
     `<span class="mini-btn" style="cursor:default">🎉 目前没有错题</span>`;
 
   const ids = [...new Set(list.map(x=>x.p.id))];
-  const tabs = [{id:"all", n:"📚 全部错题", c:list.length+" 题"}].concat(
+  const tabs = [{id:"all", n:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>89664全部错题", c:list.length+" 题"}].concat(
     ids.map(id=>{ const p = KB_QUIZ.find(x=>x.id===id);
       return {id, n:(p.icon||"")+p.name, c:list.filter(x=>x.p.id===id).length+" 题"}; }));
   document.getElementById("wrongTabs").innerHTML = tabs.map(t=>
@@ -1901,27 +1903,27 @@ function renderStats(){
   document.getElementById("statsBody").innerHTML = `
   <div class="ch-grid">
     <div class="ch-card">
-      <h3>🎯 知识点掌握雷达</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-target /></svg>95313知识点掌握雷达</h3>
       <div class="chd">12 个领域的「已掌握」占比（在知识库里把状态标成「已掌握」才会算进去）</div>
       ${radarSVG(domRows)}
     </div>
     <div class="ch-card">
-      <h3>📊 各领域答题正确率</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-table /></svg>95469各领域答题正确率</h3>
       <div class="chd">按自测题库的实际作答计算；「未作答」表示这一领域还没做题</div>
       ${barsSVG(doms.map(d=>({label:d.p.name, v:d.pct})), col)}
     </div>
     <div class="ch-card">
-      <h3>🧩 难度维度正确率</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-box /></svg> 难度维度正确率</h3>
       <div class="chd">基础 / 进阶 / 易错三档的答题表现——易错档偏低是正常的，但要重点补</div>
       ${barsSVG(["基础","进阶","易错"].map(k=>({label:k, v:pctOf(lvRight[k]||0, lvDone[k]||0)})), col)}
     </div>
     <div class="ch-card">
-      <h3>📐 题型维度正确率</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>95882题型维度正确率</h3>
       <div class="chd">选择题、判断题、计算题、情景题——计算题与情景题偏低说明「会背不会用」</div>
       ${barsSVG(["choice","tf","calc","scene"].map(k=>({label:QUIZ_TYPE[k], v:pctOf(tRight[k]||0, tDone[k]||0)})), col)}
     </div>
     <div class="ch-card">
-      <h3>📚 知识库进度</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-book /></svg>96131知识库进度</h3>
       <div class="chd">共 ${total} 条知识点 · 检查清单 ${cOn}/${cTotal} 项已完成</div>
       ${donutSVG([
         {label:"已掌握", v:mastered, color:"#059669"},
@@ -1934,13 +1936,13 @@ function renderStats(){
       </div>
     </div>
     <div class="ch-card">
-      <h3>📈 题库作答覆盖度</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>96829题库作答覆盖度</h3>
       <div class="chd">每个领域已作答的题数占比——覆盖面比正确率更优先，先做全再做好</div>
       ${barsSVG(doms.map(d=>({label:d.p.name, v:d.total? Math.round(d.done/d.total*100):0})), v=>v>=80?"#2563eb":v>=40?"#7c3aed":"#94a3b8")}
     </div>
     ${timeCardHTML()}
     <div class="ch-card">
-      <h3>🔥 学习打卡</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-flame /></svg> 学习打卡</h3>
       <div class="chd">打开知识点、答题、勾清单、收藏、写笔记都算一次「学习动作」</div>
       <div class="streak-top">
         <b>${streakDays()}</b><span>天当前连续</span>
@@ -1950,7 +1952,7 @@ function renderStats(){
       ${heatHTML()}
     </div>
     <div class="ch-card">
-      <h3>💾 我的数据</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-save /></svg>97540我的数据</h3>
       <div class="chd">所有记录都存在这台电脑的浏览器里；导出后可在其他设备或重装后一键恢复</div>
       <div style="font-size:12.5px; line-height:2.1">
         学习进度 <b>${Object.keys(progress).length}</b> 条　·　答题记录 <b>${answeredQ}</b> 题　·　清单勾选 <b>${cOn}</b> 项<br>
@@ -2011,9 +2013,9 @@ function renderTpl(){
     }
   });
   h += `<div class="tpl-actions">
-      <button class="mini-btn" data-tact="print">🖨️ 打印 / 存为 PDF</button>
+      <button class="mini-btn" data-tact="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印 / 存为 PDF</button>
       <button class="mini-btn" data-tact="clear">🧹 清空填写内容</button>
-      <span class="mini-btn" style="cursor:default; color:var(--sub)">✍️ 填写内容自动保存在本机</span>
+      <span class="mini-btn" style="cursor:default; color:var(--sub)"><svg class=ic aria-hidden=true><use href=#i-edit /></svg> 填写内容自动保存在本机</span>
     </div>`;
   if(t.note) h += `<div class="tpl-note">💡 ${esc(t.note)}</div>`;
   h += `</div>`;
@@ -2024,7 +2026,7 @@ function renderTpl(){
 function renderFav(){
   const tabs = [
     {id:"fav",  n:"⭐ 我的收藏", c:favCount()+" 条"},
-    {id:"note", n:"📝 我的笔记", c:noteCount()+" 条"}
+    {id:"note", n:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>103576我的笔记", c:noteCount()+" 条"}
   ];
   document.getElementById("favTabs").innerHTML = tabs.map(t=>
     `<button class="qv-tab${t.id===favTab?" active":""}" data-fv="${t.id}">${t.n} <span style="opacity:.6">${t.c}</span></button>`).join("");
@@ -2132,7 +2134,7 @@ function randomDaily(){
   const box = document.getElementById("panelDaily"); if(!box) return;
   const q = item.q, lv = quizLvAt(item.p, item.i), tp = quizTypeOf(q);
   box.innerHTML = `
-    <h3>🎲 随机练习题</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-shuffle /></svg>107610随机练习题</h3>
     <div class="pdesc">从 420 题中随机抽一道；刷新或回到首页会恢复「今日一题」</div>
     <div class="qd-head">
       <span class="qd-badge">${item.p.icon} ${esc(item.p.name)}</span>
@@ -2244,7 +2246,7 @@ function renderDaily20(){
   }).join("");
   const pctDone = tot ? Math.round(st.done / tot * 100) : 0;
   document.getElementById("d20Plan").innerHTML = `
-    <h3>📋 ${cur.isToday ? "今日卷面" : "卷面回看"}　<span style="font-size:12px;font-weight:normal;color:var(--sub)">${cur.date} · 共 ${tot} 题 · 难度 ${QUIZ_LEV.map(k=>k+" "+(lvN[k]||0)).join(" / ")}</span></h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>112369${cur.isToday ? "今日卷面" : "卷面回看"}　<span style="font-size:12px;font-weight:normal;color:var(--sub)">${cur.date} · 共 ${tot} 题 · 难度 ${QUIZ_LEV.map(k=>k+" "+(lvN[k]||0)).join(" / ")}</span></h3>
     <div class="qv-desc">${cur.isToday
       ? "12 个领域各抽 1 题 + 随机补 8 题；当天固定不变，明天自动换新卷。点下方题号可以跳到该题"
       : "这是历史卷面，仅供回看与复习，不能再作答"}</div>
@@ -2254,9 +2256,9 @@ function renderDaily20(){
     <div class="qv-desc" style="margin-top:8px">圆点颜色：<b style="color:#059669">绿</b> 答对 · <b style="color:#dc2626">红</b> 答错 · 灰 未作答</div>`;
 
   document.getElementById("d20Actions").innerHTML =
-    (cur.isToday ? `<button class="mini-btn" data-d20="redo">🔁 重做今日错题</button>
-    <button class="mini-btn" data-d20="reset">🔄 清空今日作答</button>` : "") +
-    `<button class="mini-btn" data-d20="print">🖨️ 打印这套卷子</button>
+    (cur.isToday ? `<button class="mini-btn" data-d20="redo"><svg class=ic aria-hidden=true><use href=#i-repeat /></svg> 重做今日错题</button>
+    <button class="mini-btn" data-d20="reset"><svg class=ic aria-hidden=true><use href=#i-refresh /></svg> 清空今日作答</button>` : "") +
+    `<button class="mini-btn" data-d20="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印这套卷子</button>
     <span class="mini-btn ${(st.done===tot && st.pct>=80) ? "ok" : ""}" style="cursor:default">${
       !cur.isToday ? "📖 历史卷面（只读）"
       : st.done === tot ? (st.pct >= 80 ? "🎉 今日完成，正确率优秀" : st.pct >= 60 ? "📖 今日完成，建议把错题再过一遍" : "⚠️ 今日完成，建议回知识库补一补")
@@ -2392,7 +2394,7 @@ function renderReview(){
     <div class="ws-card"><b style="color:var(--lv3)">${soon.length}</b><span>未来 7 天待复习</span></div>`;
 
   document.getElementById("rvPlan").innerHTML = `
-    <h3>📅 复习规则 <span style="font-size:12px;font-weight:normal;color:var(--sub)">艾宾浩斯式间隔重复</span></h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-calendar /></svg> 复习规则 <span style="font-size:12px;font-weight:normal;color:var(--sub)">艾宾浩斯式间隔重复</span></h3>
     <div class="rv-steps">
       <span class="rv-step now">答对 1 次<em>1 天后</em></span><i>›</i>
       <span class="rv-step">答对 2 次<em>4 天后</em></span><i>›</i>
@@ -2405,7 +2407,7 @@ function renderReview(){
   document.getElementById("rvActions").innerHTML =
     (due.length ? `<button class="mini-btn" data-rv="start">▶ 开始今日复习（${due.length} 题）</button>` : "") +
     (due.length > rvLimit ? `<button class="mini-btn" data-rv="more">👀 显示全部 ${due.length} 题</button>` : "") +
-    (due.length ? `<button class="mini-btn" data-rv="print">🖨️ 打印今日复习清单</button>` : "") +
+    (due.length ? `<button class="mini-btn" data-rv="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印今日复习清单</button>` : "") +
     `<span class="mini-btn ${due.length ? "" : "ok"}" style="cursor:default">${
       due.length ? "今天还有 " + due.length + " 题要复习" : "🎉 今天的复习任务已完成"}</span>`;
 
@@ -2449,7 +2451,7 @@ function renderReview(){
   soon.forEach(x=>{ buckets[x.r.due] = (buckets[x.r.due] || 0) + 1; });
   const days = Object.keys(buckets).sort();
   document.getElementById("rvNext").innerHTML = `
-    <h3>📌 接下来要复习的</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-pin /></svg>122477接下来要复习的</h3>
     ${days.length ? `<div class="rv-days">${days.map(d=>{
       const w = ["日","一","二","三","四","五","六"][new Date(d + "T12:00:00").getDay()];
       return `<span class="rv-day"><b>${d.slice(5)}</b><em>周${w}</em>${buckets[d]} 题</span>`;
@@ -2518,11 +2520,11 @@ function renderCompare(){
         <div class="cmp-name" data-rel="${esc(it.name)}">${d.icon} ${esc(it.name)} <span class="cmp-go">查看详情 →</span></div>
         <div class="cmp-meta"><span>${esc(d.name)}</span><span class="cmp-lv">${LVN[it.lv] || ""}</span></div>
       </div>
-      ${memo ? `<div class="cmp-sec memo"><div class="cmp-h">💡 一句话记住</div><div class="cmp-b">${esc(memo)}</div></div>` : ""}
-      <div class="cmp-sec"><div class="cmp-h">📌 核心要点</div><div class="cmp-b"><ul>${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
-      ${nums.length ? `<div class="cmp-sec"><div class="cmp-h">🔢 关键经验数值</div><div class="cmp-b"><ul class="cmp-num">${nums.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>` : ""}
+      ${memo ? `<div class="cmp-sec memo"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-bulb /></svg>128743一句话记住</div><div class="cmp-b">${esc(memo)}</div></div>` : ""}
+      <div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-pin /></svg>128854核心要点</div><div class="cmp-b"><ul>${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
+      ${nums.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-hash /></svg>129015关键经验数值</div><div class="cmp-b"><ul class="cmp-num">${nums.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>` : ""}
       <div class="cmp-sec"><div class="cmp-h">🏭 应用场景</div><div class="cmp-b">${esc(it.usage || "—")}</div></div>
-      ${rel.length ? `<div class="cmp-sec"><div class="cmp-h">🔗 关联条目</div><div class="cmp-b"><div class="rel-box">${rel.map(n=>`<button class="rel-chip sm" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>` : ""}
+      ${rel.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>129315关联条目</div><div class="cmp-b"><div class="rel-box">${rel.map(n=>`<button class="rel-chip sm" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>` : ""}
     </div>`;
   };
   document.getElementById("cmpBody").innerHTML = `<div class="cmp-grid">${col(cmpFind(cmpSel.a))}${col(cmpFind(cmpSel.b))}</div>`;
@@ -2549,7 +2551,7 @@ function relTime(ts){
 function renderRecent(){
   const box = document.getElementById("panelRecent"); if(!box) return;
   const list = recents.filter(x => KB_ITEMS.some(it => it.name === x.n)).slice(0, 8);
-  box.innerHTML = `<h3>🕘 最近浏览</h3>
+  box.innerHTML = `<h3><svg class=ic aria-hidden=true><use href=#i-clock /></svg>127953最近浏览</h3>
     <div class="pdesc">点任意条目直接回到详情（只记录在本机）</div>
     ${list.length ? list.map(x=>{
       const it = KB_ITEMS.find(y => y.name === x.n), d = it ? CAT_DOMAIN[it.cat] : null;
@@ -2566,7 +2568,7 @@ function renderSearchHist(){
   const box = document.getElementById("searchHist"); if(!box) return;
   if(!searchHist.length || kw.value.trim()){ box.classList.remove("on"); box.innerHTML = ""; return; }
   box.innerHTML = `<div class="sh-cap"><span>🕘 搜索历史</span><button data-shclear="1">清空</button></div>` +
-    searchHist.map(q => `<button class="sh-item" data-sh="${esc(q)}">🔍 ${esc(q)}</button>`).join("");
+    searchHist.map(q => `<button class="sh-item" data-sh="${esc(q)}"><svg class=ic aria-hidden=true><use href=#i-search /></svg> ${esc(q)}</button>`).join("");
   box.classList.add("on");
 }
 function hideSearchHist(){ const b = document.getElementById("searchHist"); if(b) b.classList.remove("on"); }
@@ -3182,7 +3184,7 @@ document.getElementById("panelDaily").addEventListener("click", e=>{
     const exp = ((window.KB_QUIZ_EXP||{})[item.p.id+"|"+item.i]||{}).e || item.q.exp || "";
     box.insertAdjacentHTML("beforeend",
       `<div class="q-exp" style="margin-top:12px"><b>${oi===correct?"✓ 回答正确":"✗ 正确答案是 "+"ABCD"[correct]}</b> — ${esc(exp)}</div>
-       <div class="data-note">做完可点「🎲 随机抽一题」再来一道，或去「🎯 自测题库」按领域系统练习</div>`);
+       <div class="data-note">做完可点「<svg class=ic aria-hidden=true><use href=#i-shuffle /></svg> 随机抽一题」再来一道，或去「🎯 自测题库」按领域系统练习</div>`);
     markStudy(1);
     return;
   }
