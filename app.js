@@ -2,28 +2,48 @@
  * app.js —— 页面主逻辑（原 index.html 内联脚本抽出）
  * 与全部数据脚本一同以 defer 加载：并行下载、按序执行、DOM 就绪后运行
  * ============================================================ */
-/* ══════════ 把新增知识点合并进主库（不改 data.js / deep.js） ══════════ */
+/* ══════════ 把新增知识点合并进主库（不改 data.js / deep.js） ══════════
+ * 支持多批新增：PLUS（第 167~186 条）、PLUS2（第 187~198 条）……
+ * 以后再加一批，只要建好 KB_*_PLUS3 并在下面 BATCH 里加 "3" 即可
+ * ══════════════════════════════════════════════════════════════════ */
 (function(){
   try{
-    const P = window.KB_ITEMS_PLUS || [];
-    if(P.length){
-      const has = new Set(KB_ITEMS.map(x=>x.name));
+    const BATCH = ["", "2", "3"];
+
+    /* ① 条目并入 KB_ITEMS */
+    const has = new Set(KB_ITEMS.map(x=>x.name));
+    BATCH.forEach(b => {
+      const P = window["KB_ITEMS_PLUS" + b] || [];
       P.forEach(it=>{ if(!has.has(it.name)){ KB_ITEMS.push(it); has.add(it.name); } });
-    }
-    const merge = (t, s)=>{ if(!t || !s) return; Object.keys(s).forEach(k=>{ if(t[k]===undefined) t[k]=s[k]; }); };
-    merge(window.KB_DEEP, window.KB_DEEP_PLUS);
-    merge(window.KB_NUM,  window.KB_NUM_PLUS);
-    merge(window.KB_REL,  window.KB_REL_PLUS);
-    merge(window.KB_MEMO, window.KB_MEMO_PLUS);
-    merge(window.KB_TASK, window.KB_TASK_PLUS);
-    const MP = window.KB_MAP_PLUS || {};
-    Object.keys(MP).forEach(key=>{
-      const p = key.split("|"), d = (window.KB_MAP||[]).find(x=>x.id===p[0]);
-      if(!d || !d.layers[+p[1]]) return;
-      const items = d.layers[+p[1]].items;
-      MP[key].forEach(x=>{ if(!items.some(y=>y.n===x.n)) items.push(x); });
     });
-    /* 把术语词典的 英文↔中文 并入同义词表，让英文检索也能命中 */
+
+    /* ② 五张以「条目名」为键的表并入 */
+    const mergeAll = (target, base) => {
+      if(!target) return;
+      BATCH.forEach(b => {
+        const s = window[base + b];
+        if(!s) return;
+        Object.keys(s).forEach(k=>{ if(target[k] === undefined) target[k] = s[k]; });
+      });
+    };
+    mergeAll(window.KB_DEEP, "KB_DEEP_PLUS");
+    mergeAll(window.KB_NUM,  "KB_NUM_PLUS");
+    mergeAll(window.KB_REL,  "KB_REL_PLUS");
+    mergeAll(window.KB_MEMO, "KB_MEMO_PLUS");
+    mergeAll(window.KB_TASK, "KB_TASK_PLUS");
+
+    /* ③ 学习地图归位（键为「领域id|层序号」） */
+    BATCH.forEach(b => {
+      const MP = window["KB_MAP_PLUS" + b] || {};
+      Object.keys(MP).forEach(key=>{
+        const p = key.split("|"), d = (window.KB_MAP||[]).find(x=>x.id===p[0]);
+        if(!d || !d.layers[+p[1]]) return;
+        const items = d.layers[+p[1]].items;
+        MP[key].forEach(x=>{ if(!items.some(y=>y.n===x.n)) items.push(x); });
+      });
+    });
+
+    /* ④ 把术语词典的 英文↔中文 并入同义词表，让英文检索也能命中 */
     const syn = window.KB_SYN = window.KB_SYN || [];
     const seenPair = new Set(syn.map(g=>g.join("|")));
     (window.KB_GLOSS||[]).forEach(g=>{
