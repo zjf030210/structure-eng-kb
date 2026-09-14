@@ -700,6 +700,13 @@
   html[data-theme="dark"] .qv-note{background:#3a2e12; border-color:#5c4a1c; color:#f3e3bd;}
   html[data-theme="dark"] .next-step{background:#1d2a4d; border-color:#2f4b8a;}
   html[data-theme="dark"] .prog-bar{background:#242d42;}
+  html[data-theme="dark"] .d20-dot{background:#182135; color:#7c8ba1;}
+  html[data-theme="dark"] .d20-dot.ok{background:rgba(5,150,105,.16); border-color:#059669; color:#34d399;}
+  html[data-theme="dark"] .d20-dot.no{background:rgba(220,38,38,.16); border-color:#dc2626; color:#f87171;}
+  html[data-theme="dark"] .d20-hrow{background:#182135;}
+  html[data-theme="dark"] .d20-hd{color:#cbd5e1;}
+  html[data-theme="dark"] .d20-hb{background:#242d42;}
+  html[data-theme="dark"] .d20-entry{background:#171f33;}
   html[data-theme="dark"] .calc-formula,
   html[data-theme="dark"] .cf input,
   html[data-theme="dark"] .modal .prompt-box{background:#131a2c; border-color:var(--border);}
@@ -871,6 +878,28 @@
   .data-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
   .data-note{font-size:11.5px; color:var(--sub); line-height:1.75; margin-top:10px;}
 
+  /* ══════ 每日 20 题 ══════ */
+  .d20-dots{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+  .d20-dot{width:28px; height:28px; border-radius:9px; border:1px solid var(--border); background:#fff;
+    color:#94a3b8; font-size:11.5px; font-weight:bold; cursor:pointer; font-family:inherit; transition:all .15s; padding:0;}
+  .d20-dot:hover{border-color:var(--primary); color:var(--primary);}
+  .d20-dot.ok{background:#ecfdf5; border-color:#059669; color:#059669;}
+  .d20-dot.no{background:#fef2f2; border-color:#dc2626; color:#dc2626;}
+  .d20-from{font-size:11.5px; font-weight:normal; color:var(--sub); margin-top:6px; line-height:1.6;}
+  .d20-hist{display:flex; flex-direction:column; gap:7px;}
+  .d20-hrow{display:flex; align-items:center; gap:10px; padding:8px 12px; border:1px solid var(--border);
+    border-radius:10px; background:#fff; cursor:pointer; font-family:inherit; text-align:left; transition:all .15s; width:100%;}
+  .d20-hrow:hover{border-color:var(--primary);}
+  .d20-hrow.on{border-color:var(--primary); background:var(--primary-weak);}
+  .d20-hd{font-size:12px; color:#334155; width:132px; flex-shrink:0; font-weight:bold;}
+  .d20-hb{flex:1; height:6px; background:#eef1f6; border-radius:3px; overflow:hidden;}
+  .d20-hb i{display:block; height:100%; border-radius:3px;}
+  .d20-hv{font-size:11.5px; color:var(--sub); width:116px; text-align:right; flex-shrink:0;}
+  .d20-entry{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    margin-top:15px; padding:11px 14px; border:1px dashed var(--border); border-radius:10px; background:#f8faff;}
+  .d20-entry .d20-et{font-size:12.5px; color:var(--sub); line-height:1.7;}
+  .d20-entry .d20-et b{color:var(--primary);}
+
   @media print{
     @page{margin:12mm 10mm;}
     .search-hist{display:none !important;}
@@ -1002,6 +1031,7 @@
       <span class="nav-cap">学习</span>
       <button class="nav-tab active" data-mod="kb">📚 知识库<span class="nb" id="nbKb"></span></button>
       <button class="nav-tab" data-mod="map">🧭 学习地图<span class="nb" id="nbMap"></span></button>
+      <button class="nav-tab" data-mod="daily">📅 每日20题<span class="nb" id="nbDaily"></span></button>
       <button class="nav-tab" data-mod="quiz">🎯 自测题库<span class="nb" id="nbQuiz"></span></button>
       <button class="nav-tab" data-mod="wrong">❌ 错题本<span class="nb" id="nbWrong"></span></button>
       <button class="nav-tab" data-mod="stats">📈 学习数据<span class="nb" id="nbStats"></span></button>
@@ -1040,13 +1070,29 @@
     <div id="mapBody"></div>
   </div>
 
+  <!-- 每日 20 题 -->
+  <div id="dailyView" style="display:none">
+    <div class="mod-head">
+      <div class="mic">📅</div>
+      <div>
+        <h2>每日 20 题</h2>
+        <div class="mtg">每天一套固定练习卷：12 个领域各抽 1 题 + 再随机补 8 题。当天不变、次日自动换新卷，答完立刻出解析与干扰项分析</div>
+      </div>
+    </div>
+    <div class="wrong-sum" id="d20Sum"></div>
+    <div class="card" id="d20Plan"></div>
+    <div class="tpl-actions" id="d20Actions"></div>
+    <div id="d20Body"></div>
+    <div class="card" id="d20Hist"></div>
+  </div>
+
   <!-- 自测题库 -->
   <div id="quizView" style="display:none">
     <div class="mod-head">
       <div class="mic">🎯</div>
       <div>
         <h2>自测题库</h2>
-        <div class="mtg">12 个领域各 30 题，共 360 题。每题都有深度解析，选择题还会逐项说明其他选项为什么不对；可按「基础 / 进阶 / 易错」筛选</div>
+        <div class="mtg">12 个领域各 35 题，共 420 题。每题都有深度解析，选择题还会逐项说明其他选项为什么不对；可按「基础 / 进阶 / 易错」筛选</div>
       </div>
     </div>
     <div class="qv-tabs" id="quizTabs"></div>
@@ -1582,6 +1628,7 @@ const glossView = document.getElementById("glossView");
 const pathView = document.getElementById("pathView");
 const mapView = document.getElementById("mapView");
 const quizView = document.getElementById("quizView");
+const dailyView = document.getElementById("dailyView");
 const calcView = document.getElementById("calcView");
 const fieldView = document.getElementById("fieldView");
 const galleryView = document.getElementById("galleryView");
@@ -1595,7 +1642,7 @@ const KB_VIEWS = [homeView, domainView, searchView];
 const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossView, path:pathView,
                    map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView,
                    select:selectView, formula:formulaView, wrong:wrongView, stats:statsView,
-                   tpl:tplView, fav:favView};
+                   tpl:tplView, fav:favView, daily:dailyView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -1743,6 +1790,8 @@ function makeHit(terms){
 function refreshBadges(){
   const f = document.getElementById("nbFav"); if(f) f.textContent = favCount() + " 条";
   const w = document.getElementById("nbWrong"); if(w) w.textContent = wrongList().length + " 题";
+  const dl = document.getElementById("nbDaily");
+  if(dl){ const s = d20StatOf(d20Today()); dl.textContent = s.done + "/" + D20_N; }
 }
 function domainItems(d){ return KB_ITEMS.filter(it=>d.subs.includes(it.cat)); }
 function sortByLv(list){ return [...list].sort((a,b)=> LV_ORDER[a.lv]-LV_ORDER[b.lv]); }
@@ -1995,6 +2044,7 @@ function renderHome(){
     {n:total, l:"知识点", mod:"kb"},
     {n:ovCount((a,b)=>a+b.length, Object.values(window.KB_IMG||{})), l:"参考图", mod:"gallery"},
     {n:ovCount((a,p)=>a+quizTotal(p), KB_QUIZ), l:"自测题", mod:"quiz"},
+    {n:D20_N, l:"每日练习题", mod:"daily"},
     {n:(typeof CALCS!=="undefined"?CALCS.length:0), l:"计算器", mod:"calc"},
     {n:ovCount((a,d)=>a+d.layers.reduce((x,l)=>x+l.items.length,0), KB_MAP), l:"地图条目", mod:"map"},
     {n:ovCount((a,w)=>a+w.days.length, KB_PATH), l:"天学习计划", mod:"path"},
@@ -3530,7 +3580,11 @@ function renderDaily(){
       if(answered){ cls += " lock"; cls += j === q.a ? " right" : (j === chosen ? " wrong" : ""); }
       return `<div class="${cls}" data-daily="${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`;
     }).join("")}</div>
-    ${answered ? `<div class="q-exp" style="margin-top:12px"><b>${chosen===q.a?"✓ 回答正确":"✗ 正确答案是 "+"ABCD"[q.a]}</b> — ${esc(exp)}</div>` : ""}`;
+    ${answered ? `<div class="q-exp" style="margin-top:12px"><b>${chosen===q.a?"✓ 回答正确":"✗ 正确答案是 "+"ABCD"[q.a]}</b> — ${esc(exp)}</div>` : ""}
+    <div class="d20-entry">
+      <div class="d20-et">📅 <b>每日 20 题</b>　跨 12 个领域各抽 1 题 + 随机补 8 题，做完自动算正确率，错题会同步进错题本</div>
+      <button class="mini-btn" data-godaily="1">去挑战今日 20 题 →</button>
+    </div>`;
 }
 
 /* 随机抽一题（与今日一题共用渲染逻辑，但临时覆盖） */
@@ -3555,6 +3609,166 @@ function randomDaily(){
     <div class="qd-q">${esc(q.q)}</div>
     <div class="qd-opts">${q.opts.map((o,j)=>`<div class="qd-opt" data-rand="${idx}|${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`).join("")}</div>`;
   box._randItem = item;
+}
+
+/* ══════════════ 每日 20 题 ══════════════ */
+const LS_D20 = "kb-daily20-v1";
+const D20_N = 20, D20_KEEP = 30;
+let d20Store = lsGet(LS_D20, {});   // { "2026-09-14": { order:[{d,i}], ans:{"0":2}, at } }
+let d20ViewDate = "";               // 空 = 今天；否则是回看的历史日期
+
+function d20Save(){
+  const ks = Object.keys(d20Store).sort();
+  if(ks.length > D20_KEEP){ ks.slice(0, ks.length - D20_KEEP).forEach(k=>{ delete d20Store[k]; }); }
+  lsSet(LS_D20, d20Store);
+}
+/* 确定性随机：同一天永远抽出同一套题 */
+function d20Rng(seed){
+  let s = seed >>> 0;
+  return function(){
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function d20Shuffle(arr, rnd){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function d20Build(date){
+  const rnd = d20Rng(hashStr("d20|" + date));
+  const picked = [], used = {};
+  // ① 12 个领域各抽 1 题：保证每天都能覆盖全部领域
+  KB_QUIZ.forEach(p=>{
+    const idxs = [];
+    for(let i = 0; i < quizTotal(p); i++){ if(quizAt(p, i)) idxs.push(i); }
+    const sh = d20Shuffle(idxs, rnd);
+    if(sh.length){ picked.push({ d: p.id, i: sh[0] }); used[p.id + "|" + sh[0]] = 1; }
+  });
+  // ② 再从剩余题库随机补齐到 20 题
+  const rest = [];
+  KB_QUIZ.forEach(p=>{
+    for(let i = 0; i < quizTotal(p); i++){ if(quizAt(p, i) && !used[p.id + "|" + i]) rest.push({ d: p.id, i }); }
+  });
+  d20Shuffle(rest, rnd).forEach(it=>{ if(picked.length < D20_N) picked.push(it); });
+  // ③ 打乱最终顺序
+  return { order: d20Shuffle(picked, rnd), ans: {}, at: Date.now() };
+}
+function d20Today(){
+  const t = todayStr(), cur = d20Store[t];
+  /* 题量不足或索引失效（题库结构变动）时自动重抽，保证永远是一套可用的 20 题 */
+  const bad = !cur || !cur.order || cur.order.length !== D20_N ||
+    cur.order.some(r=>{ const p = KB_QUIZ.find(x=>x.id === r.d); return !p || !quizAt(p, r.i); });
+  if(bad){ d20Store[t] = d20Build(t); d20Save(); }
+  return d20Store[t];
+}
+function d20Day(){
+  const t = todayStr();
+  const v = (d20ViewDate && d20Store[d20ViewDate]) ? d20ViewDate : t;
+  if(v === t) return { date: t, day: d20Today(), isToday: true };
+  return { date: v, day: d20Store[v], isToday: false };
+}
+function d20Quiz(ref){
+  const p = KB_QUIZ.find(x=>x.id === ref.d);
+  return p ? { p, q: quizAt(p, ref.i) } : null;
+}
+function d20StatOf(day){
+  let done = 0, right = 0;
+  day.order.forEach((r, k)=>{
+    const v = day.ans[k]; if(v === undefined) return;
+    const x = d20Quiz(r); if(!x || !x.q) return;
+    done++; if(v === x.q.a) right++;
+  });
+  return { done, right, pct: done ? Math.round(right / done * 100) : 0 };
+}
+
+function renderDaily20(){
+  const cur = d20Day(), day = cur.day, tot = day.order.length;
+  const st = d20StatOf(day);
+  const domN = new Set(day.order.map(r=>r.d)).size;
+  document.getElementById("d20Sum").innerHTML = `
+    <div class="ws-card"><b style="color:var(--primary)">${st.done}<span style="font-size:14px;color:var(--sub)"> / ${tot}</span></b><span>${cur.isToday ? "今日已答" : "当日已答"} · ${cur.date}</span></div>
+    <div class="ws-card"><b style="color:#059669">${st.right}</b><span>答对</span></div>
+    <div class="ws-card"><b style="color:${st.pct>=80?'#059669':st.pct>=60?'#d97706':'#dc2626'}">${st.done?st.pct+"%":"—"}</b><span>正确率</span></div>
+    <div class="ws-card"><b style="color:var(--lv3)">${domN}</b><span>覆盖领域</span></div>`;
+
+  const lvN = {};
+  day.order.forEach(r=>{
+    const x = d20Quiz(r); if(!x || !x.q) return;
+    const lv = quizLvAt(x.p, r.i) || "未标注";
+    lvN[lv] = (lvN[lv] || 0) + 1;
+  });
+  const dots = day.order.map((r, k)=>{
+    const x = d20Quiz(r); if(!x || !x.q) return "";
+    const v = day.ans[k];
+    const cls = v === undefined ? "" : (v === x.q.a ? " ok" : " no");
+    return `<button class="d20-dot${cls}" data-d20go="${k}">${k+1}</button>`;
+  }).join("");
+  const pctDone = tot ? Math.round(st.done / tot * 100) : 0;
+  document.getElementById("d20Plan").innerHTML = `
+    <h3>📋 ${cur.isToday ? "今日卷面" : "卷面回看"}　<span style="font-size:12px;font-weight:normal;color:var(--sub)">${cur.date} · 共 ${tot} 题 · 难度 ${QUIZ_LEV.map(k=>k+" "+(lvN[k]||0)).join(" / ")}</span></h3>
+    <div class="qv-desc">${cur.isToday
+      ? "12 个领域各抽 1 题 + 随机补 8 题；当天固定不变，明天自动换新卷。点下方题号可以跳到该题"
+      : "这是历史卷面，仅供回看与复习，不能再作答"}</div>
+    ${cur.isToday ? "" : `<div style="margin:10px 0"><button class="mini-btn" data-d20day="${todayStr()}">← 回到今天的卷子</button></div>`}
+    <div class="prog-row"><span class="pl">完成进度</span><div class="prog-bar"><i style="width:${pctDone}%;background:${barBg(pctDone)}"></i></div><span class="pv">${st.done}/${tot}</span></div>
+    <div class="d20-dots">${dots}</div>
+    <div class="qv-desc" style="margin-top:8px">圆点颜色：<b style="color:#059669">绿</b> 答对 · <b style="color:#dc2626">红</b> 答错 · 灰 未作答</div>`;
+
+  document.getElementById("d20Actions").innerHTML =
+    (cur.isToday ? `<button class="mini-btn" data-d20="redo">🔁 重做今日错题</button>
+    <button class="mini-btn" data-d20="reset">🔄 清空今日作答</button>` : "") +
+    `<button class="mini-btn" data-d20="print">🖨️ 打印这套卷子</button>
+    <span class="mini-btn ${(st.done===tot && st.pct>=80) ? "ok" : ""}" style="cursor:default">${
+      !cur.isToday ? "📖 历史卷面（只读）"
+      : st.done === tot ? (st.pct >= 80 ? "🎉 今日完成，正确率优秀" : st.pct >= 60 ? "📖 今日完成，建议把错题再过一遍" : "⚠️ 今日完成，建议回知识库补一补")
+      : "还剩 " + (tot - st.done) + " 题"}</span>`;
+
+  document.getElementById("d20Body").innerHTML = day.order.map((r, k)=>{
+    const x = d20Quiz(r); if(!x || !x.q) return "";
+    const p = x.p, q = x.q;
+    const chosen = day.ans[k], answered = chosen !== undefined;
+    const lv = quizLvAt(p, r.i), tp = quizTypeOf(q);
+    const opts = q.opts.map((o, j)=>{
+      let cls = "q-opt";
+      if(answered || !cur.isToday){
+        cls += " lock";
+        if(j === q.a) cls += " right";
+        else if(j === chosen) cls += " wrong";
+      }
+      return `<div class="${cls}" data-dq="${k}" data-do="${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`;
+    }).join("");
+    return `<div class="quiz-q" id="d20q-${k}">
+      <div class="qq-title"><div class="qq-no">${k+1}</div>
+        <div class="qq-main">${esc(q.q)}<div class="d20-from">${p.icon} ${esc(p.name)} · 该领域第 ${r.i+1} 题${
+          answered ? (chosen === q.a ? "　✓ 已答对" : "　✗ 已答错") : ""}</div></div>
+        <div class="qq-tags">${lv?`<span class="qq-lv l-${QUIZ_LEV.indexOf(lv)}">${lv}</span>`:""}${
+          tp!=="choice"?`<span class="qq-tp">${QUIZ_TYPE[tp]||tp}</span>`:""}</div>
+      </div>
+      ${opts}
+      ${answered ? quizExpHTML(p.id, q, r.i, chosen) : ""}
+    </div>`;
+  }).join("");
+
+  const hist = Object.keys(d20Store).sort().reverse().slice(0, 10);
+  document.getElementById("d20Hist").innerHTML = hist.length > 1 ? `
+    <h3>📆 最近记录　<span style="font-size:12px;font-weight:normal;color:var(--sub)">最多保留 30 天</span></h3>
+    <div class="qv-desc">每天一套卷；点任意一天可回看当天的题目与解析（历史卷只读）</div>
+    <div class="d20-hist">${hist.map(dt=>{
+      const s2 = d20StatOf(d20Store[dt]);
+      const on = dt === cur.date;
+      return `<button class="d20-hrow${on?" on":""}" data-d20day="${dt}">
+        <span class="d20-hd">${dt}${dt===todayStr()?"（今天）":""}</span>
+        <span class="d20-hb"><i style="width:${s2.done?s2.pct:0}%;background:${s2.done?barBg(s2.pct):"transparent"}"></i></span>
+        <span class="d20-hv">${s2.done}/${D20_N}${s2.done?"　"+s2.pct+"%":"　未开始"}</span>
+      </button>`;
+    }).join("")}</div>` :
+    `<h3>📆 最近记录</h3>
+    <div class="qv-desc">从今天开始记录——坚持每天完成一套，这里会累积你最近 30 天的正确率。</div>`;
 }
 
 /* ══════════════ 首页：最近浏览 ══════════════ */
@@ -3605,7 +3819,7 @@ function heatHTML(){
 
 /* ══════════════ 学习数据备份与恢复 ══════════════ */
 const LS_ALL = ["kb-progress-v1","kb-check-v2","kb-quiz-v1","kb-fav-v1","kb-note-v1","kb-tpl-v1",
-                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1"];
+                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1","kb-daily20-v1"];
 function exportData(){
   const bag = {};
   LS_ALL.forEach(k => { const v = localStorage.getItem(k); if(v !== null) bag[k] = v; });
@@ -3658,6 +3872,7 @@ function clearAllData(){
 }
 
 function renderAll(){
+  if(activeModule !== "daily") d20ViewDate = "";   // 离开「每日20题」就回到今天的卷子
   navbar.querySelectorAll(".nav-tab").forEach(b=>b.classList.toggle("active", b.dataset.mod===activeModule));
   const isKB = activeModule === "kb";
   Object.values(MOD_VIEWS).forEach(v=>{ if(v) v.style.display = "none"; });
@@ -3675,6 +3890,7 @@ function renderAll(){
     else if(activeModule==="path") renderPath();
     else if(activeModule==="map") renderMap();
     else if(activeModule==="quiz") renderQuiz();
+    else if(activeModule==="daily") renderDaily20();
     else if(activeModule==="calc") renderCalc();
     else if(activeModule==="field") renderField();
     else if(activeModule==="gallery") renderGallery();
@@ -3802,6 +4018,7 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbSelect", (window.KB_SELECT||[]).length + " 棵树");
   set("nbFormula", ((window.KB_FORMULA||[]).reduce((a,g)=>a+(g.items||[]).length,0) + (window.KB_UNIT||[]).reduce((a,g)=>a+(g.items||[]).length,0)) + " 条");
   set("nbTpl", (window.KB_TEMPLATE||[]).length + " 份");
+  set("nbDaily", "20 题");
   set("nbWrong", wrongList().length ? wrongList().length + " 题" : "0 题");
   set("nbStats", "6 图");
   set("nbFav", favCount() + " 条");
@@ -4091,6 +4308,11 @@ document.getElementById("favBody").addEventListener("click", e=>{
 /* ══════════ 每日一题 / 随机练习 ══════════ */
 document.getElementById("panelDaily").addEventListener("click", e=>{
   const box = document.getElementById("panelDaily");
+  if(e.target.closest("[data-godaily]")){
+    activeModule = "daily"; d20ViewDate = ""; renderAll();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
   const r = e.target.closest("[data-rand]");
   if(r){
     const item = box._randItem; if(!item) return;
@@ -4120,6 +4342,68 @@ document.getElementById("randBtn").addEventListener("click", ()=>{
   randomDaily();
   const el = document.getElementById("panelDaily");
   if(el && el.scrollIntoView) try{ el.scrollIntoView({ behavior: "smooth", block: "center" }); }catch(e){}
+});
+
+/* ══════════ 每日 20 题 ══════════ */
+document.getElementById("d20Body").addEventListener("click", e=>{
+  const o = e.target.closest("[data-dq]"); if(!o) return;
+  const k = +o.dataset.dq, oi = +o.dataset.do;
+  const cur = d20Day();
+  if(!cur.isToday || cur.day.ans[k] !== undefined) return;
+  const x = d20Quiz(cur.day.order[k]); if(!x || !x.q) return;
+  cur.day.ans[k] = oi;
+  d20Save();
+  /* 同步写回总答题记录：错题本、领域薄弱度、学习数据会自动联动 */
+  const ans = quizAnsOf(x.p.id); ans[x.i] = oi; quizSave();
+  markStudy(1);
+  renderDaily20();
+  refreshBadges();
+});
+
+document.getElementById("d20Actions").addEventListener("click", e=>{
+  const b = e.target.closest("[data-d20]"); if(!b) return;
+  const act = b.dataset.d20, cur = d20Day();
+  if(act === "print"){ window.print(); return; }
+  if(!cur.isToday) return;
+  if(act === "redo"){
+    let n = 0;
+    cur.day.order.forEach((r, k)=>{
+      if(cur.day.ans[k] === undefined) return;
+      const x = d20Quiz(r); if(!x || !x.q) return;
+      if(cur.day.ans[k] !== x.q.a){
+        delete cur.day.ans[k]; n++;
+        const ans = quizAnsOf(x.p.id);
+        if(ans[x.i] !== undefined && ans[x.i] !== x.q.a) delete ans[x.i];   // 只清错题记录，不误删正确答案
+      }
+    });
+    d20Save(); quizSave();
+    if(!n) alert("今天还没有答错的题。");
+  }else if(act === "reset"){
+    if(!confirm("清空今天的 20 题作答记录？（只影响这套每日卷，自测题库里的记录不受影响）")) return;
+    cur.day.ans = {}; d20Save();
+  }
+  renderDaily20();
+  refreshBadges();
+});
+
+document.getElementById("d20Plan").addEventListener("click", e=>{
+  const s = e.target.closest("[data-d20go]");
+  if(s){
+    const el = document.getElementById("d20q-" + s.dataset.d20go);
+    if(el && el.scrollIntoView) try{ el.scrollIntoView({ behavior: "smooth", block: "center" }); }catch(err){}
+    return;
+  }
+  const back = e.target.closest("[data-d20day]");
+  if(back){
+    d20ViewDate = (back.dataset.d20day === todayStr()) ? "" : back.dataset.d20day;
+    renderDaily20(); window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+});
+
+document.getElementById("d20Hist").addEventListener("click", e=>{
+  const h = e.target.closest("[data-d20day]"); if(!h) return;
+  d20ViewDate = (h.dataset.d20day === todayStr()) ? "" : h.dataset.d20day;
+  renderDaily20(); window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 /* ══════════ 最近浏览 ══════════ */
@@ -4158,7 +4442,7 @@ document.getElementById("statsBody").addEventListener("click", e=>{
 
 /* ══════════ 键盘快捷键 ══════════ */
 (function(){
-  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav"];
+  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily"];
   document.addEventListener("keydown", e=>{
     const tag = (e.target.tagName || "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
