@@ -5,7 +5,7 @@
 // ============================================================
 window.KB_QUIZ = [
 {
-  id:"material", icon:"🧱", name:"塑料材料",
+  id:"material", icon:"<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name:"塑料材料",
   questions:[
     {q:"PC 材料的透明灯罩长期用酒精擦拭，最典型会出现什么问题？", opts:["表面变黄","应力开裂（龟裂）","材质变软","尺寸收缩"], a:1, exp:"PC 耐溶剂性差，酒精、酮类会诱发环境应力开裂（ESC），表现为细密龟裂纹。PMMA 也有类似问题。"},
     {q:"下列四种塑料中，成型收缩率最大的是？", opts:["ABS","PC","PP","PMMA"], a:2, exp:"PP 是结晶性塑料，收缩率 1.0-2.5%；ABS/PC/PMMA 为非结晶塑料，收缩率仅 0.3-0.8%。"},
@@ -20,7 +20,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"manufacturing", icon:"🏭", name:"成型工艺",
+  id:"manufacturing", icon:"<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name:"成型工艺",
   questions:[
     {q:"注塑锁模力估算的经验公式是？", opts:["制品重量 × 0.3","制品投影面积 × 0.3-0.5 t/cm²","制品体积 × 0.5","模具尺寸 × 1.5"], a:1, exp:"按制品在分型面上的投影面积乘以 0.3-0.5 t/cm² 估算，选注塑机吨位时用。"},
     {q:"搪胶（滚塑搪胶）成型使用的原料形态是？", opts:["塑料颗粒","PVC 糊料（液态）","塑料板材","玻纤预浸料"], a:1, exp:"搪胶用 PVC 糊料灌入模具后滚转加热（200-260℃），糊料黏附内壁逐层成型。"},
@@ -35,7 +35,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"mold", icon:"🧊", name:"模具与DFM",
+  id:"mold", icon:"<svg class=ic aria-hidden=true><use href=#i-mold /></svg>", name:"模具与DFM",
   questions:[
     {q:"脱模斜度设计不足最直接的后果是？", opts:["制品尺寸偏小","脱模拉伤、顶白","浇口变大","颜色不均"], a:1, exp:"脱模阻力大，造成表面拉花、顶针处顶白，严重时制品被撕裂。"},
     {q:"对蚀纹（咬花）表面，脱模斜度应如何调整？", opts:["不需要调整","每 0.025mm 纹深增加 1°","减少 1°","统一取 0.5°"], a:1, exp:"纹路增加了脱模阻力，纹深每增加 0.025mm 就需增加约 1° 脱模角来补偿。"},
@@ -50,7 +50,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"design", icon:"📐", name:"结构设计",
+  id:"design", icon:"<svg class=ic aria-hidden=true><use href=#i-grid /></svg>", name:"结构设计",
   questions:[
     {q:"塑料件加强筋的根部厚度一般取主壁厚的？", opts:["0.2-0.3 倍","0.5-0.6 倍","1.0 倍","1.5 倍"], a:1, exp:"筋底厚取 0.5-0.6t；超过 0.7t 时根部冷却慢，背面会出现明显缩水痕。"},
     {q:"自攻螺丝用的 BOSS 柱（螺丝柱），其外径约为内孔径的？", opts:["1.2-1.4 倍","1.8-2.0 倍","2.5-3.0 倍","与内孔相同"], a:1, exp:"外径 = 内孔径 × 1.8-2.0，保证有足够壁厚承受螺丝的胀开力而不开裂。"},
@@ -65,7 +65,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"drawing", icon:"📏", name:"制图与公差",
+  id:"drawing", icon:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", name:"制图与公差",
   questions:[
     {q:"GD&T 基准体系中，第一基准（A）通常控制几个接触点？", opts:["1 个","2 个","3 个","4 个"], a:2, exp:"第一基准定主平面用 3 点，第二基准定方向用 2 点，第三基准定位置用 1 点。"},
     {q:"中国与欧洲标准采用的投影法是？", opts:["第一角投影","第三角投影","中心投影","轴测投影"], a:0, exp:"中国/欧洲用第一角投影，日本/美国用第三角投影，两者视图布局左右相反。"},
@@ -80,7 +80,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"surface", icon:"🎨", name:"表面处理",
+  id:"surface", icon:"<svg class=ic aria-hidden=true><use href=#i-brush /></svg>", name:"表面处理",
   questions:[
     {q:"模具咬花时，纹深每增加 0.025mm，脱模斜度需增加约？", opts:["0.1°","1°","5°","不需要增加"], a:1, exp:"纹路增加脱模阻力，须按纹深补偿脱模角，这是模具与结构工程师交接时最易漏掉的一项。"},
     {q:"塑料件 UV 面漆的典型膜厚是？", opts:["1-5μm","15-40μm","100-200μm","500μm 以上"], a:1, exp:"UV 面漆一般 20-30μm，整体喷油膜厚 15-40μm，附着力要求百格测试 ≤1 级。"},
@@ -95,7 +95,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"optic", icon:"💡", name:"光学结构",
+  id:"optic", icon:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name:"光学结构",
   questions:[
     {q:"显色指数 CRI ≥ 90 属于哪个档次？", opts:["常规","高显色","专业级","不合格"], a:1, exp:"≥80 常规、≥90 高显色、≥95 专业级；补光灯等对色彩还原要求高的产品需 ≥95 且 R9 >50。"},
     {q:"RGB 氛围灯出光面出现「分色环」或色斑，最主要的原因是？", opts:["灯珠功率太低","混光距离不足","扩散板太厚","驱动电流不稳"], a:1, exp:"RGB 需要足够距离让颜色混合，混光腔高度一般要 8-20mm，且内壁做白色漫反射。"},
@@ -110,7 +110,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"thermal", icon:"🔥", name:"散热设计",
+  id:"thermal", icon:"<svg class=ic aria-hidden=true><use href=#i-flame /></svg>", name:"散热设计",
   questions:[
     {q:"LED 结温的计算公式是？", opts:["Tj = Ta + P × (Rθjc + Rθcs + Rθsa)","Tj = Ta ÷ P","Tj = P × Ta","Tj = Rθ × Ta"], a:0, exp:"环境温度加上功耗乘各段热阻之和。目标通常把 Tj 控制在 85-105℃ 以下。"},
     {q:"LED 功率超过约多少瓦时应改用铝基板（MCPCB）？", opts:["0.1W","0.5W","5W","50W"], a:1, exp:"功率 >0.5W 建议用铝基板，小夜灯等低功率可用 FR4；铝基板成本是 FR4 的 3-6 倍。"},
@@ -125,7 +125,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"safety", icon:"🛡️", name:"安规认证",
+  id:"safety", icon:"<svg class=ic aria-hidden=true><use href=#i-shield /></svg>", name:"安规认证",
   questions:[
     {q:"230V 电路在基本绝缘条件下，电气间隙一般不小于？", opts:["0.5mm","1.5mm","5mm","10mm"], a:1, exp:"电气间隙 ≥1.5mm；爬电距离按污染等级与材料 CTI 在 1.5-3.2mm 之间取值。"},
     {q:"防护等级 IP65 中「6」和「5」分别代表？", opts:["6 级防水、5 级防尘","尘密、防喷水","防尘、防溅水","防浸水、防尘"], a:1, exp:"第一位数字是防固体（6 = 尘密），第二位是防水（5 = 防喷水）。IP44 才是防溅水。"},
@@ -140,7 +140,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"test", icon:"🔬", name:"可靠性测试",
+  id:"test", icon:"<svg class=ic aria-hidden=true><use href=#i-flask /></svg>", name:"可靠性测试",
   questions:[
     {q:"便携式灯具跌落测试的常用高度范围是？", opts:["0.1-0.3m","0.7-1.2m","2-3m","5m 以上"], a:1, exp:"按产品重量与定位取 0.7-1.2m，需做六面 + 四角 + 四棱，角跌最严苛。"},
     {q:"中性盐雾测试（NSS）的溶液与环境条件是？", opts:["3% NaCl，室温","5% NaCl，35℃","10% NaCl，50℃","纯水，100℃"], a:1, exp:"5% NaCl 溶液、35℃。24h 属轻度，48h 常规，96h 以上为严苛（户外件）。"},
@@ -155,7 +155,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"pack", icon:"📦", name:"包装与运输",
+  id:"pack", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装与运输",
   questions:[
     {q:"E 瓦楞纸板的常见厚度是？", opts:["1.1-2.0mm","4.5-5.0mm","7-8mm","10mm 以上"], a:0, exp:"E 瓦最薄（1.1-2.0mm），表面平整，适合彩盒；A 瓦 4.5-5mm、BC 双瓦 7-8mm 用于运输箱。"},
     {q:"零售产品的彩盒（精美外包装）一般选用哪种瓦楞？", opts:["A 瓦","B 瓦","C 瓦","E 瓦"], a:3, exp:"E 瓦薄而平整，印刷效果好；A/B/C 瓦较厚用于运输箱提供强度。"},
@@ -170,7 +170,7 @@ window.KB_QUIZ = [
   ]
 },
 {
-  id:"cost", icon:"💰", name:"成本与量产",
+  id:"cost", icon:"<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name:"成本与量产",
   questions:[
     {q:"注塑件的材料费计算公式是？", opts:["体积 × 单价","重量(g) × 单价(元/kg) ÷ 1000","模具费 ÷ 产量","机时费 × 周期"], a:1, exp:"再乘损耗系数（塑件一般 3-5%），水口料回用可降低实际材料成本。"},
     {q:"单件模具摊销成本的计算方式是？", opts:["模具总价 ÷ 预计订单量","模具总价 × 0.1","模具总价 ÷ 模穴数","与订单量无关"], a:0, exp:"摊销高于料价的 20% 时就应重新评估模穴数或与供应商谈阶梯价格。"},

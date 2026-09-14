@@ -4,7 +4,7 @@
 
 window.KB_CASES = [
 {
-  id:"nightlight", icon:"🌙", name:"硅胶拍拍小夜灯", tagline:"母婴/卧室场景｜触摸调光 + 内置锂电池｜通用性最强的入门级整机",
+  id:"nightlight", icon:"<svg class=ic aria-hidden=true><use href=#i-moon /></svg>", name:"硅胶拍拍小夜灯", tagline:"母婴/卧室场景｜触摸调光 + 内置锂电池｜通用性最强的入门级整机",
   meta:[
     {k:"产品定位", v:"母婴喂奶灯 / 卧室氛围起床灯"},
     {k:"供电方式", v:"内置 3.7V 锂电 500-1200 mAh + Type-C 充电"},
@@ -59,7 +59,7 @@ window.KB_CASES = [
   costNote:"以上为 5000-10000 台量级的估算区间，实际依订单量、供应商地域、认证要求浮动"
 },
 {
-  id:"rgb", icon:"🌈", name:"桌面 RGB 氛围灯", tagline:"电竞/桌面装饰｜蓝牙 App 控制 + USB 供电｜均匀混光是核心难点",
+  id:"rgb", icon:"<svg class=ic aria-hidden=true><use href=#i-rainbow /></svg>", name:"桌面 RGB 氛围灯", tagline:"电竞/桌面装饰｜蓝牙 App 控制 + USB 供电｜均匀混光是核心难点",
   meta:[
     {k:"产品定位", v:"电竞桌面氛围灯 / 送礼装饰灯"},
     {k:"供电方式", v:"USB Type-C 5V 供电（可选内置电池）"},
@@ -112,7 +112,7 @@ window.KB_CASES = [
   costNote:"蓝牙模组与灯珠数量是成本弹性最大的两项；金属底座会显著提高成本"
 },
 {
-  id:"filllight", icon:"💡", name:"便携补光灯", tagline:"直播/拍摄场景｜双色温混光 + 折叠支架｜光学与散热要求最高",
+  id:"filllight", icon:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name:"便携补光灯", tagline:"直播/拍摄场景｜双色温混光 + 折叠支架｜光学与散热要求最高",
   meta:[
     {k:"产品定位", v:"直播补光 / 短视频拍摄补光 / 桌面夹持补光"},
     {k:"供电方式", v:"内置锂电 2000-5000 mAh + Type-C 充电（支持边充边用）"},
@@ -330,7 +330,7 @@ window.KB_GLOSS = [
 // ─────────────────────────────────────────────
 window.KB_PATH = [
 {
-  week:1, icon:"🌱", title:"第 1 周：材料与成型基础", goal:"能看懂物性表、能判断一个塑料件大概用什么材料、什么工艺",
+  week:1, icon:"<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", title:"第 1 周：材料与成型基础", goal:"能看懂物性表、能判断一个塑料件大概用什么材料、什么工艺",
   days:[
     {d:"Day 1-2", t:"塑料材料扫盲", tasks:["通读「塑料材料」领域全部 22 条","重点掌握 ABS / PC / PP 三大常用料的差异","学会看物性表的 7 个关键项"], items:["ABS","PC（聚碳酸酯）","PP（聚丙烯）","塑料物性表解读","收缩率"]},
     {d:"Day 3", t:"弹性体与硅胶", tasks:["理解软胶的两种成型路线：模压 vs 液态注射","记住硬度、耐温、收缩率的关键数值"], items:["液态硅胶 LSR","固态硅胶（HTV）","TPE/TPR","压缩模塑（硅胶模压）"]},
@@ -340,7 +340,7 @@ window.KB_PATH = [
   output:"能独立判断一个灯具外壳该用 ABS 还是 PC，并说出理由"
 },
 {
-  week:2, icon:"📐", title:"第 2 周：结构设计核心", goal:"能独立完成一个塑料件的结构设计并自检，这是最核心的一周",
+  week:2, icon:"<svg class=ic aria-hidden=true><use href=#i-grid /></svg>", title:"第 2 周：结构设计核心", goal:"能独立完成一个塑料件的结构设计并自检，这是最核心的一周",
   days:[
     {d:"Day 6-7", t:"壁厚与脱模", tasks:["背下壁厚、脱模斜度的经验值","学会厚薄过渡与防缩水的处理手法"], items:["壁厚设计","脱模斜度","注塑常见缺陷与对策"]},
     {d:"Day 8", t:"加强筋与 BOSS 柱", tasks:["掌握筋厚、筋高、间距的计算规则","掌握 BOSS 柱内外径与高度的设计规则"], items:["加强筋","BOSS柱（螺丝柱）","自攻螺丝","热熔螺母（铜嵌件）"]},
@@ -351,7 +351,7 @@ window.KB_PATH = [
   output:"能对现有产品做一次完整结构评审，输出一份改进清单"
 },
 {
-  week:3, icon:"🏭", title:"第 3 周：模具、制图与表面处理", goal:"能跟模具厂有效沟通 DFM，能出一份车间不会误读的图纸",
+  week:3, icon:"<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", title:"第 3 周：模具、制图与表面处理", goal:"能跟模具厂有效沟通 DFM，能出一份车间不会误读的图纸",
   days:[
     {d:"Day 13", t:"模具基础", tasks:["理解分型面、滑块、斜顶的作用与选择","记住不同钢材的寿命与适用场景"], items:["分型面（Parting Line）","滑块与斜顶","模具钢材与寿命","顶针与浇口"]},
     {d:"Day 14-15", t:"DFM 与试模", tasks:["照着「DFM 检讨清单」参与一次真实检讨","了解 T0/T1 的流程与改模周期"], items:["DFM 检讨","T0/T1 试模与检讨","模流分析 Moldflow","排气设计"]},
@@ -362,7 +362,7 @@ window.KB_PATH = [
   output:"能独立出一份注塑件 2D 图纸，并通过 DFM 检讨"
 },
 {
-  week:4, icon:"⚡", title:"第 4 周：光学、热、安规与量产", goal:"完成从「能画结构」到「能交付可量产、可认证的产品」的跨越",
+  week:4, icon:"<svg class=ic aria-hidden=true><use href=#i-zap /></svg>", title:"第 4 周：光学、热、安规与量产", goal:"完成从「能画结构」到「能交付可量产、可认证的产品」的跨越",
   days:[
     {d:"Day 20-21", t:"光学结构", tasks:["掌握混光距离与均匀度的关系","记住色温、CRI、频闪、蓝光的合格线"], items:["配光基础","扩散件（PC/PMMA光扩散）","混光腔","色温与显色指数（CRI）","频闪与护眼"]},
     {d:"Day 22", t:"散热设计", tasks:["理解热阻链路公式并能做粗略估算","掌握铝基板与导热垫的使用条件"], items:["LED热阻链路","铝基板（MCPCB）","导热界面材料","散热器鳍片设计"]},

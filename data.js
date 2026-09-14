@@ -15,7 +15,7 @@
 // ── 领域（Domain）：顶层分类，点开一个领域即可查看"该领域需要掌握什么" ──
 // subs: 领域下包含的子分类 id（对应 KB_CATS）；abilities: 该领域的核心能力清单
 const KB_DOMAINS = [
-  {id:"material", icon:"🧱", name:"材料应用", tagline:"塑料、金属、弹性体的特性与选材",
+  {id:"material", icon:"<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name:"材料应用", tagline:"塑料、金属、弹性体的特性与选材",
    abilities:[
      "熟悉 ABS / PC / PP / PMMA 等常用塑料的力学、光学与耐温特性",
      "掌握收缩率、公差与材料选型的联动关系",
@@ -24,7 +24,7 @@ const KB_DOMAINS = [
      "会查 RoHS / REACH 与 UL94 阻燃等级等环保安全要求"
    ],
    subs:["mat","metal"]},
-  {id:"manufacturing", icon:"🏭", name:"成型与加工", tagline:"从注塑到搪胶、钣金、机加工的工艺路线",
+  {id:"manufacturing", icon:"<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name:"成型与加工", tagline:"从注塑到搪胶、钣金、机加工的工艺路线",
    abilities:[
      "掌握注塑、双色、挤出等主流工艺的适用边界与成本量级",
      "熟悉搪胶、树脂浇注、硅胶模压等小众工艺的成型原理与控制点",
@@ -32,7 +32,7 @@ const KB_DOMAINS = [
      "能按产能与批量选择打样 → 小批量 → 量产的工艺路线"
    ],
    subs:["proc","sheet"]},
-  {id:"mold", icon:"🔩", name:"模具与DFM", tagline:"开模前的结构可制造性把关",
+  {id:"mold", icon:"<svg class=ic aria-hidden=true><use href=#i-mold /></svg>", name:"模具与DFM", tagline:"开模前的结构可制造性把关",
    abilities:[
      "能独立完成 DFM 检讨：拔模、壁厚、倒扣、顶针、浇口",
      "熟悉分型面、滑块、斜顶对结构和外观的影响",
@@ -41,7 +41,7 @@ const KB_DOMAINS = [
      "能识别缩水、披锋、熔接线等注塑缺陷并给出对策"
    ],
    subs:["mold"]},
-  {id:"design", icon:"📐", name:"结构设计", tagline:"卡扣、止口、防水、跌落等核心设计能力",
+  {id:"design", icon:"<svg class=ic aria-hidden=true><use href=#i-grid /></svg>", name:"结构设计", tagline:"卡扣、止口、防水、跌落等核心设计能力",
    abilities:[
      "熟练运用卡扣、螺丝柱、止口、加强筋等基础结构要素",
      "掌握公差配合、防水防尘、跌落防护的结构实现",
@@ -49,7 +49,7 @@ const KB_DOMAINS = [
      "会做 DFA 装配工艺性与 DFMEA 失效分析"
    ],
    subs:["struct","fasten"]},
-  {id:"drawing", icon:"📏", name:"工程制图与公差", tagline:"出图规范、GD&T 与变更管理",
+  {id:"drawing", icon:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", name:"工程制图与公差", tagline:"出图规范、GD&T 与变更管理",
    abilities:[
      "熟练输出符合 GB 规范的 2D 图纸（视图 / 剖视 / 标注）",
      "掌握 GD&T 形位公差与基准体系",
@@ -57,7 +57,7 @@ const KB_DOMAINS = [
      "严格执行图纸版本管理与 ECN 变更流程"
    ],
    subs:["drawing"]},
-  {id:"surface", icon:"🎨", name:"表面处理", tagline:"喷涂、电镀、咬花等外观工艺",
+  {id:"surface", icon:"<svg class=ic aria-hidden=true><use href=#i-brush /></svg>", name:"表面处理", tagline:"喷涂、电镀、咬花等外观工艺",
    abilities:[
      "熟悉喷油、电镀、真空镀、丝印、镭雕的适用面与限制",
      "掌握咬花与脱模斜度、阳极氧化与铝件类型的联动关系",
@@ -65,7 +65,7 @@ const KB_DOMAINS = [
      "会制定外观签样与色差管控标准"
    ],
    subs:["sf"]},
-  {id:"optic", icon:"💡", name:"光学设计", tagline:"配光、扩散、防眩与光品质",
+  {id:"optic", icon:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name:"光学设计", tagline:"配光、扩散、防眩与光品质",
    abilities:[
      "理解配光曲线、光束角、遮光角等基本概念",
      "掌握扩散件、透镜、反射杯、混光腔的结构实现",
@@ -73,7 +73,7 @@ const KB_DOMAINS = [
      "能与光学工程师对接并落地光学件结构"
    ],
    subs:["optic"]},
-  {id:"thermal", icon:"🔥", name:"散热设计", tagline:"LED 热阻链路与散热结构",
+  {id:"thermal", icon:"<svg class=ic aria-hidden=true><use href=#i-flame /></svg>", name:"散热设计", tagline:"LED 热阻链路与散热结构",
    abilities:[
      "会按功率估算热阻链路与结温",
      "掌握铝基板、导热界面材料的应用与公差控制",
@@ -81,7 +81,7 @@ const KB_DOMAINS = [
      "了解自然对流与散热筋布置原则"
    ],
    subs:["thermal"]},
-  {id:"safety", icon:"🛡️", name:"安规认证", tagline:"GB / 3C / CE / UL 与专项法规",
+  {id:"safety", icon:"<svg class=ic aria-hidden=true><use href=#i-shield /></svg>", name:"安规认证", tagline:"GB / 3C / CE / UL 与专项法规",
    abilities:[
      "熟悉 GB7000 / 3C / CE / UL 的核心差异与认证流程",
      "掌握爬电距离、电气间隙的结构预留",
@@ -89,7 +89,7 @@ const KB_DOMAINS = [
      "关注儿童产品、无线产品等专项法规"
    ],
    subs:["safety"]},
-  {id:"test", icon:"🧪", name:"测试验证", tagline:"可靠性测试计划与失效分析",
+  {id:"test", icon:"<svg class=ic aria-hidden=true><use href=#i-flask /></svg>", name:"测试验证", tagline:"可靠性测试计划与失效分析",
    abilities:[
      "会制定可靠性测试计划（跌落 / 高低温 / 老化 / IP / 盐雾）",
      "能分析失效原因并推动结构整改",
@@ -97,7 +97,7 @@ const KB_DOMAINS = [
      "掌握拉扭力、寿命等量化验证手段"
    ],
    subs:["test"]},
-  {id:"pack", icon:"📦", name:"包装与物流", tagline:"彩盒、内衬与运输防护",
+  {id:"pack", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装与物流", tagline:"彩盒、内衬与运输防护",
    abilities:[
      "掌握彩盒、内衬、外箱的选型与结构设计",
      "会按 ISTA / 电商要求验证运输方案",
@@ -105,7 +105,7 @@ const KB_DOMAINS = [
      "了解包装成本与装载率优化"
    ],
    subs:["pack"]},
-  {id:"cost", icon:"💰", name:"成本与量产", tagline:"BOM、估价、降本与量产跟进",
+  {id:"cost", icon:"<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name:"成本与量产", tagline:"BOM、估价、降本与量产跟进",
    abilities:[
      "会拆解 BOM 与成本构成并快速估价",
      "掌握 DFC 设计降本思路与开模报价评估",

@@ -294,11 +294,11 @@ const PLAT = {
 
 // 深度解析小节定义与渲染
 const DEEP_DEF = {
-  p:{t:"<svg class=ic aria-hidden=true><use href=#i-compass /></svg>13124核心原理",          c:"#2563eb", bg:"#eff4ff"},
-  k:{t:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>13179关键参数与公式",     c:"#7c3aed", bg:"#f5f3ff"},
-  e:{t:"<svg class=ic aria-hidden=true><use href=#i-settings /></svg>13232实战经验值",        c:"#059669", bg:"#ecfdf5"},
-  f:{t:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>13286常见错误与避坑",     c:"#dc2626", bg:"#fef2f2"},
-  s:{t:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>13339相关标准与术语",     c:"#d97706", bg:"#fffbeb"}
+  p:{t:"<svg class=ic aria-hidden=true><use href=#i-compass /></svg>核心原理",          c:"#2563eb", bg:"#eff4ff"},
+  k:{t:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>关键参数与公式",     c:"#7c3aed", bg:"#f5f3ff"},
+  e:{t:"<svg class=ic aria-hidden=true><use href=#i-settings /></svg>实战经验值",        c:"#059669", bg:"#ecfdf5"},
+  f:{t:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>常见错误与避坑",     c:"#dc2626", bg:"#fef2f2"},
+  s:{t:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>相关标准与术语",     c:"#d97706", bg:"#fffbeb"}
 };
 function renderDeep(it){
   const sec = document.getElementById("dpDeepSec"), box = document.getElementById("dpDeep");
@@ -459,11 +459,11 @@ function dpNavUpdate(it){
 
 // 详情面板：区块快速跳转
 const DP_ANCHORS = [
-  {id:"secPoints", t:"<svg class=ic aria-hidden=true><use href=#i-pin /></svg>20563要点"}, {id:"secUsage", t:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>20592应用"},
-  {id:"dpNumSec", t:"<svg class=ic aria-hidden=true><use href=#i-hash /></svg>20622数值"},  {id:"dpDeepSec", t:"<svg class=ic aria-hidden=true><use href=#i-book-open /></svg>20651深度"},
-  {id:"dpRelSec", t:"<svg class=ic aria-hidden=true><use href=#i-link /></svg>20682关联"},  {id:"dpTaskSec", t:"<svg class=ic aria-hidden=true><use href=#i-edit /></svg>20711练习"},
-  {id:"secVideos", t:"<svg class=ic aria-hidden=true><use href=#i-play /></svg>20742视频"}, {id:"dpRefSec", t:"<svg class=ic aria-hidden=true><use href=#i-camera /></svg>20771图集"},
-  {id:"secNote", t:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>20801笔记"}
+  {id:"secPoints", t:"<svg class=ic aria-hidden=true><use href=#i-pin /></svg>要点"}, {id:"secUsage", t:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>应用"},
+  {id:"dpNumSec", t:"<svg class=ic aria-hidden=true><use href=#i-hash /></svg>数值"},  {id:"dpDeepSec", t:"<svg class=ic aria-hidden=true><use href=#i-book-open /></svg>深度"},
+  {id:"dpRelSec", t:"<svg class=ic aria-hidden=true><use href=#i-link /></svg>关联"},  {id:"dpTaskSec", t:"<svg class=ic aria-hidden=true><use href=#i-edit /></svg>练习"},
+  {id:"secVideos", t:"<svg class=ic aria-hidden=true><use href=#i-play /></svg>视频"}, {id:"dpRefSec", t:"<svg class=ic aria-hidden=true><use href=#i-camera /></svg>图集"},
+  {id:"secNote", t:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>笔记"}
 ];
 function updateAnchors(){
   const box = document.getElementById("dpAnchors");
@@ -544,7 +544,7 @@ function renderHome(){
     {n:favCount(), l:"我的收藏", mod:"fav"}
   ];
   document.getElementById("panelOverview").innerHTML = `
-    <h3><svg class=ic aria-hidden=true><use href=#i-box /></svg>25600内容总览</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-box /></svg>内容总览</h3>
     <div class="pdesc">点任意数字直接进入对应模块</div>
     <div class="stat-grid">${OVERVIEW.map(o=>`
       <div class="stat-item" data-mod="${o.mod}" ${o.f?`data-field="${o.f}"`:""}>
@@ -594,10 +594,10 @@ function renderHome(){
   else if(weak && weak.pct < 60) advice = `<b>「${weak.p.name}」</b>自测正确率只有 <b>${weak.pct}%</b>（已答 ${weak.dn} 题），建议回知识库重读这一块，再用「重做错题」巩固。`;
   else if(zeroDom) advice = `<b>「${zeroDom.d.name}」</b>（${zeroDom.n} 条）还没开始，建议点开 🧭 学习地图按层级过一遍。`;
   else if(mastered < total) advice = `已掌握 ${mastered}/${total} 条，还剩 <b>${total-mastered}</b> 条。保持每天 5-8 条的速度即可。`;
-  else advice = `🎉 166 条全部掌握！去「💼 实战宝典」用 35 道面试题检验一下，再去「🎯 自测题库」冲满分。`;
+  else advice = `🎉 198 条全部掌握！去「💼 实战宝典」用 35 道面试题检验一下，再去「🎯 自测题库」冲满分。`;
   const barColor = p=> p>=80 ? "linear-gradient(90deg,#059669,#10b981)" : p>=40 ? "linear-gradient(90deg,#d97706,#f59e0b)" : "linear-gradient(90deg,#dc2626,#ef4444)";
   document.getElementById("panelProgress").innerHTML = `
-    <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>28084我的学习进度</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>我的学习进度</h3>
     <div class="pdesc">数据保存在本机浏览器，换电脑或清缓存会重置</div>
     <div class="prog-row"><span class="pl">知识掌握</span>
       <div class="prog-bar"><i style="width:${total?Math.round(mastered/total*100):0}%;background:${barColor(total?mastered/total*100:0)}"></i></div>
@@ -705,20 +705,20 @@ function renderDomainGuide(d){
       </div>
       <div class="dg-body" id="dgBody">
         <div class="dg-sec">
-          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-target /></svg>33720这个领域解决什么问题</div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-target /></svg>这个领域解决什么问题</div>
           <div class="dg-p">${esc(g.pos)}</div>
           <div class="dg-p sub">${esc(g.why)}</div>
         </div>
         <div class="dg-sec">
-          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-map /></svg>33912核心概念地图<span class="dg-note">点任意概念直接打开</span></div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-map /></svg>核心概念地图<span class="dg-note">点任意概念直接打开</span></div>
           <div class="dg-map">${mapHtml}</div>
         </div>
         <div class="dg-sec">
-          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>34086在整机开发链条中的位置</div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>在整机开发链条中的位置</div>
           <div class="dg-p">${esc(g.link)}</div>
         </div>
         <div class="dg-sec">
-          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-alert /></svg>34228常见误区 Top${(g.myth||[]).length}</div>
+          <div class="dg-h"><svg class=ic aria-hidden=true><use href=#i-alert /></svg>常见误区 Top${(g.myth||[]).length}</div>
           <ul class="dg-myth">${(g.myth||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
         </div>
         <div class="dg-tip">💡 <b>学习建议：</b>${esc(g.tips)}</div>
@@ -897,7 +897,7 @@ function renderGlobalSearch(q){
     if(hit(x.s)||hit(x.c.join(" "))||hit(x.f.join(" "))||hit(x.v))
       tr.push({t:x.s, d:`原因：${x.c.slice(0,2).map(esc).join("；")}　对策：${esc(x.f[0])}`});
   }));
-  if(tr.length) groups.push({icon:"🔎", name:"缺陷排查", n:tr.length, jump:"field", f:"trouble", items: tr});
+  if(tr.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-search /></svg>", name:"缺陷排查", n:tr.length, jump:"field", f:"trouble", items: tr});
 
   // 面试题
   const iv = [];
@@ -932,14 +932,14 @@ function renderGlobalSearch(q){
     const hay = [c.name,c.tagline,c.issues.map(x=>x.t+x.d).join(" "),c.composition.map(x=>x.part+x.material+x.note).join(" ")].join(" ");
     if(hit(hay)) cs.push({t:c.name, d:esc(c.tagline)});
   });
-  if(cs.length) groups.push({icon:"🧩", name:"整机案例", n:cs.length, jump:"case", items: cs});
+  if(cs.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-puzzle /></svg>", name:"整机案例", n:cs.length, jump:"case", items: cs});
 
   // 一句话记忆
   const mm = [];
   Object.entries(window.KB_MEMO||{}).forEach(([k,v])=>{
     if(hit(k)||hit(v)) mm.push({t:k, d:`<b>${esc(v)}</b>`, openName:k});
   });
-  if(mm.length) groups.push({icon:"🧠", name:"一句话记忆", n:mm.length, jump:"kb", items: mm.slice(0,8)});
+  if(mm.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-pin /></svg>", name:"一句话记忆", n:mm.length, jump:"kb", items: mm.slice(0,8)});
 
   // 设计避坑
   const mk = [];
@@ -981,7 +981,7 @@ function renderGlobalSearch(q){
       dg.push({t:`${d.icon} ${d.name} · 领域导读`, d:m?`常见误区：${esc(m)}`:esc(g.pos), jumpDom:id});
     }
   });
-  if(dg.length) groups.push({icon:"📘", name:"领域导读", n:dg.length, jump:"kb", items: dg});
+  if(dg.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-book-open /></svg>", name:"领域导读", n:dg.length, jump:"kb", items: dg});
 
   if(!groups.length){ box.innerHTML = ""; return; }
   const LIMIT = 6;
@@ -1103,19 +1103,19 @@ function renderCases(){
       </table></div>
     </div>
     <div class="card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>51816关键设计参数</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>关键设计参数</h3>
       ${c.specs.map(s=>`<div class="spec-grp"><h5>${esc(s.t)}</h5><ul>${s.items.map(i=>`<li>${i}</li>`).join("")}</ul></div>`).join("")}
     </div>
     <div class="card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-calculator /></svg>52012开发流程与工艺路线</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-calculator /></svg>开发流程与工艺路线</h3>
       ${c.steps.map((s,i)=>`<div class="step"><div class="sn">${i+1}</div><div class="st2"><b>${esc(s.t)}</b> — ${esc(s.d)}</div></div>`).join("")}
     </div>
     <div class="card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-alert /></svg>52223常见问题与对策</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-alert /></svg>常见问题与对策</h3>
       ${c.issues.map(s=>`<div class="iss"><div class="iq">${esc(s.t)}</div><div class="ia">${esc(s.d)}</div></div>`).join("")}
     </div>
     ${((window.KB_CASE_DFM||{})[c.id]||[]).length?`<div class="card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-search /></svg>52457DFM 检讨记录</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-search /></svg>DFM 检讨记录</h3>
       <div class="qv-desc">开模前评审与试模检讨的真实过程：模具厂/工艺提出的问题 → 怎么处理 → 结果是什么</div>
       ${((window.KB_CASE_DFM||{})[c.id]||[]).map((x,i)=>`<div class="dfm-item">
         <div class="dfm-q"><span class="dfm-no">Q${i+1}</span><span>${esc(x.q)}</span></div>
@@ -1363,7 +1363,7 @@ const CALCS = [
    main:{l:"模具型腔尺寸", val:nfmt(m,3), u:"mm"},
    extra:[{k:"相比成品需做大", v:nfmt(m-v.dim,3)+" mm"}, {k:"放大比例", v:nfmt(v.sr,2)+" %"},
           {k:"提示", v:"精密件需在成型 24h 后复测（后收缩）"}]};}},
-{id:"clamp", icon:"🔒", name:"锁模力估算", desc:"选注塑机吨位的快速估算，避免飞边或欠注",
+{id:"clamp", icon:"<svg class=ic aria-hidden=true><use href=#i-gauge /></svg>", name:"锁模力估算", desc:"选注塑机吨位的快速估算，避免飞边或欠注",
  fields:[{k:"area", l:"制品投影面积 (cm²)", v:100}, {k:"coef", l:"材料系数 (t/cm²)", v:0.4}],
  formula:"锁模力 = 投影面积 × 材料系数　·　系数参考：ABS/PC 0.3-0.4，PP 0.3-0.5，流动性差取上限",
  calc:v=>{ const f = v.area*v.coef; return {
@@ -1377,14 +1377,14 @@ const CALCS = [
    main:{l:"建议模穴数", val:cav, u:"穴"},
    extra:[{k:"理论需求", v:nfmt(need,2)+" 穴"}, {k:"日产能需求", v:nfmt(v.annual/Math.max(v.days,1),0)+" 件/天"},
           {k:"提示", v:"模穴数每翻倍，模具费约增 40-60%，效率增约 80%"}]};}},
-{id:"amort", icon:"💵", name:"模具摊销计算", desc:"判断模具成本对单价的影响，决定是否谈阶梯价",
+{id:"amort", icon:"<svg class=ic aria-hidden=true><use href=#i-coins /></svg>", name:"模具摊销计算", desc:"判断模具成本对单价的影响，决定是否谈阶梯价",
  fields:[{k:"mold", l:"模具总价 (元)", v:60000}, {k:"qty", l:"订单量 (件)", v:100000}],
  formula:"单件摊销 = 模具总价 ÷ 订单量　·　摊销高于料价 20% 就要重新评估模穴数或谈阶梯价",
  calc:v=>{ const per = v.mold/(v.qty||1); return {
    main:{l:"单件模具摊销", val:nfmt(per,3), u:"元/件"},
    extra:[{k:"订单量翻倍后的摊销", v:nfmt(per/2,3)+" 元/件"},
           {k:"订单量减半后的摊销", v:nfmt(per*2,3)+" 元/件"}]};}},
-{id:"tj", icon:"🔥", name:"LED 结温估算", desc:"判断散热方案是否够用，Tj 越低 LED 寿命越长",
+{id:"tj", icon:"<svg class=ic aria-hidden=true><use href=#i-flame /></svg>", name:"LED 结温估算", desc:"判断散热方案是否够用，Tj 越低 LED 寿命越长",
  fields:[{k:"ta", l:"环境温度 Ta (℃)", v:25}, {k:"p", l:"LED 功耗 P (W)", v:3},
          {k:"rjc", l:"结壳热阻 Rθjc (℃/W)", v:5}, {k:"rcs", l:"界面热阻 Rθcs (℃/W)", v:1},
          {k:"rsa", l:"散热器热阻 Rθsa (℃/W)", v:4}],
@@ -1394,7 +1394,7 @@ const CALCS = [
    return { main:{l:"估算结温 Tj", val:nfmt(tj,1), u:"℃"},
    extra:[{k:"总热阻 ΣRθ", v:nfmt(r,2)+" ℃/W"}, {k:"按功耗分摊的温升", v:nfmt(v.p*r,1)+" ℃"},
           {k:"判定", v:judge}, {k:"最大热阻环节", v:["结壳","界面","散热器"][[v.rjc,v.rcs,v.rsa].indexOf(Math.max(v.rjc,v.rcs,v.rsa))]}]};}},
-{id:"cost", icon:"💰", name:"塑料件成本估算", desc:"料工费 + 良率 + 表面处理，估算单件落地成本",
+{id:"cost", icon:"<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name:"塑料件成本估算", desc:"料工费 + 良率 + 表面处理，估算单件落地成本",
  fields:[{k:"w", l:"单件重量 (g)", v:50}, {k:"price", l:"料价 (元/kg)", v:18}, {k:"loss", l:"材料损耗 (%)", v:4},
          {k:"rate", l:"机时费 (元/h)", v:60}, {k:"cycle", l:"成型周期 (s)", v:30}, {k:"cav", l:"模穴数", v:2},
          {k:"yield", l:"良率 (%)", v:95}, {k:"extra", l:"表处+包装 (元)", v:1.5}],
@@ -1414,7 +1414,7 @@ const CALCS = [
    main:{l:"建议缓冲厚度", val:nfmt(t,1), u:"mm"},
    extra:[{k:"脆值参考", v:"电子件 40-60G、结构件 60-100G"},
           {k:"注意", v:"按角跌姿态校核，四角缓冲需加厚"}]};}},
-{id:"tol", icon:"📏", name:"公差叠加分析", desc:"对比最坏情况法与统计法，判断装配是否可靠",
+{id:"tol", icon:"<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name:"公差叠加分析", desc:"对比最坏情况法与统计法，判断装配是否可靠",
  fields:[{k:"t1", l:"公差 1 (±mm)", v:0.1}, {k:"t2", l:"公差 2 (±mm)", v:0.1},
          {k:"t3", l:"公差 3 (±mm)", v:0.15}, {k:"t4", l:"公差 4 (±mm)", v:0.1}, {k:"t5", l:"公差 5 (±mm)", v:0.2}],
  formula:"最坏情况法 WC = Σ公差（保守）；统计法 RSS = √(Σ公差²)（更贴近实际）",
@@ -1425,7 +1425,7 @@ const CALCS = [
    extra:[{k:"统计法（RSS）总公差", v:"±"+nfmt(rss,3)+" mm"},
           {k:"差值", v:nfmt(wc-rss,3)+" mm"},
           {k:"建议预留装配间隙", v:"≥ "+nfmt(wc,3)+" mm（取保守值）"}]};}},
-{id:"snap", icon:"🪝", name:"卡扣应变校核", desc:"算出卡扣的最大应变，判断会不会装一次就断",
+{id:"snap", icon:"<svg class=ic aria-hidden=true><use href=#i-snap /></svg>", name:"卡扣应变校核", desc:"算出卡扣的最大应变，判断会不会装一次就断",
  fields:[{k:"t", l:"卡扣厚度 t (mm)", v:1.5}, {k:"y", l:"扣入量 / 挠度 y (mm)", v:1},
          {k:"L", l:"悬臂有效长度 L (mm)", v:12}, {k:"allow", l:"材料允许应变 (%)", v:1.5}],
  formula:"ε = 1.5 · t · y / L²　·　允许应变参考：ABS 约 1.5%、PC 约 2.0%、PP 约 3.0%、POM 约 2.5%（已含安全系数）",
@@ -1449,7 +1449,7 @@ const CALCS = [
    extra:[{k:"整灯光效 η", v:nfmt(eff,1)+" lm/W（"+lvl+"）"},
           {k:"阅读场景（需 ≥300 lx）", v:E>=300 ? "✅ 达标" : "❌ 不足，需提高光通量或缩小面积"},
           {k:"注意", v:"整灯光效通常比单颗 LED 低 20%-40%，损失在扩散件、透镜与驱动上"}]};}},
-{id:"stack", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装堆码强度", desc:"按堆码层数与仓储条件反推纸箱所需抗压强度",
+{id:"stack", icon:"<svg class=ic aria-hidden=true><use href=#i-stack /></svg>", name:"包装堆码强度", desc:"按堆码层数与仓储条件反推纸箱所需抗压强度",
  fields:[{k:"w", l:"单箱重量 (kg)", v:8}, {k:"n", l:"堆码层数", v:6}, {k:"k", l:"安全系数", v:2}],
  formula:"BCT ≥ (n − 1) × W × K　·　K 取 1.6-3.0（仓储越久、湿度越高取越大；纸箱长期堆码强度会衰减到 50%-60%）",
  calc:v=>{ const need = Math.max(v.n-1,0)*v.w*v.k;
@@ -1458,7 +1458,7 @@ const CALCS = [
           {k:"折合牛顿", v:nfmt(need*9.807,0)+" N"},
           {k:"堆高参考（单箱按 300mm 估）", v:nfmt((v.n-1)*0.3,1)+" m"},
           {k:"提示", v:"按最底层箱子计算；仓储超过 30 天建议 K 取 2.5 以上"}]};}},
-{id:"pilot", icon:"🔩", name:"自攻螺丝底孔", desc:"算出底孔、柱外径与柱壁厚，避免滑牙或撑裂",
+{id:"pilot", icon:"<svg class=ic aria-hidden=true><use href=#i-screw /></svg>", name:"自攻螺丝底孔", desc:"算出底孔、柱外径与柱壁厚，避免滑牙或撑裂",
  fields:[{k:"d", l:"螺丝外径 d (mm)", v:3}, {k:"kf", l:"底孔系数 (0.78-0.82)", v:0.8},
          {k:"len", l:"螺丝旋入长度 (mm)", v:6}],
  formula:"底孔 ≈ d × 0.8　·　柱外径 ≈ d × 2（保证柱壁厚 ≥1.0mm）　·　内孔深 ≥ 旋入长度 + 0.5mm",
@@ -1469,7 +1469,7 @@ const CALCS = [
           {k:"实际柱壁厚", v:nfmt(wall,2)+" mm（"+warn+"）"},
           {k:"建议内孔深度", v:nfmt(v.len+0.5,1)+" mm 以上"},
           {k:"根部", v:"加 R0.25-0.5 圆角或加强筋，抗裂能力明显提升"}]};}},
-{id:"cool", icon:"❄️", name:"注塑冷却时间", desc:"理论冷却时间估算，判断周期是否还有压缩空间",
+{id:"cool", icon:"<svg class=ic aria-hidden=true><use href=#i-snow /></svg>", name:"注塑冷却时间", desc:"理论冷却时间估算，判断周期是否还有压缩空间",
  fields:[{k:"T", l:"制品壁厚 T (mm)", v:2}, {k:"a", l:"热扩散系数 α (mm²/s)", v:0.09},
          {k:"tm", l:"熔体温度 (℃)", v:230}, {k:"tw", l:"模具温度 (℃)", v:60}, {k:"te", l:"顶出温度 (℃)", v:90}],
  formula:"t = { T² / (π² · α) } · ln{ (4/π) · (Tm − Tw) / (Te − Tw) }　·　α 参考：ABS 约 0.09、PC 约 0.10、PP 约 0.08 mm²/s",
@@ -1518,10 +1518,10 @@ function renderField(){
   const MIS = window.KB_MISTAKE || [];
   const misN = MIS.reduce((a,x)=>a+x.items.length,0);
   const TABS = [
-    {id:"mistake", n:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>74671设计避坑", c:misN+" 个"},
+    {id:"mistake", n:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>设计避坑", c:misN+" 个"},
     {id:"trouble", n:"🔎 缺陷排查", c:KB_TROUBLE.reduce((a,x)=>a+x.items.length,0)+" 条"},
-    {id:"interview", n:"<svg class=ic aria-hidden=true><use href=#i-briefcase /></svg>74805面试题库", c:KB_INTERVIEW.reduce((a,x)=>a+x.items.length,0)+" 题"},
-    {id:"std", n:"<svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>74889标准清单", c:KB_STD.reduce((a,x)=>a+x.items.length,0)+" 项"}
+    {id:"interview", n:"<svg class=ic aria-hidden=true><use href=#i-briefcase /></svg>面试题库", c:KB_INTERVIEW.reduce((a,x)=>a+x.items.length,0)+" 题"},
+    {id:"std", n:"<svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>标准清单", c:KB_STD.reduce((a,x)=>a+x.items.length,0)+" 项"}
   ];
   document.getElementById("fieldTabs").innerHTML = TABS.map(t=>
     `<button class="qv-tab${t.id===activeField?" active":""}" data-field="${t.id}">${t.n} <span style="opacity:.65">${t.c}</span></button>`).join("");
@@ -1534,7 +1534,7 @@ function renderField(){
                       .filter(x=>x.items.length);
     box.innerHTML = groups.length ? `
       <div class="card">
-        <h3><svg class=ic aria-hidden=true><use href=#i-alert /></svg>74573开模前评审：设计阶段的坑</h3>
+        <h3><svg class=ic aria-hidden=true><use href=#i-alert /></svg>开模前评审：设计阶段的坑</h3>
         <div class="qv-desc">这里的每一条都是<strong>在设计阶段就能避免</strong>的错误。和「缺陷排查」的区别：排查表对付的是量产后出现的现象，这里防的是还没开模就埋下的隐患。</div>
         <div class="mk-key">
           <span><b class="mk-b">错误做法</b></span>
@@ -1787,7 +1787,7 @@ function renderWrong(){
     `<span class="mini-btn" style="cursor:default">🎉 目前没有错题</span>`;
 
   const ids = [...new Set(list.map(x=>x.p.id))];
-  const tabs = [{id:"all", n:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>89664全部错题", c:list.length+" 题"}].concat(
+  const tabs = [{id:"all", n:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>全部错题", c:list.length+" 题"}].concat(
     ids.map(id=>{ const p = KB_QUIZ.find(x=>x.id===id);
       return {id, n:(p.icon||"")+p.name, c:list.filter(x=>x.p.id===id).length+" 题"}; }));
   document.getElementById("wrongTabs").innerHTML = tabs.map(t=>
@@ -1903,12 +1903,12 @@ function renderStats(){
   document.getElementById("statsBody").innerHTML = `
   <div class="ch-grid">
     <div class="ch-card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-target /></svg>95313知识点掌握雷达</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-target /></svg>知识点掌握雷达</h3>
       <div class="chd">12 个领域的「已掌握」占比（在知识库里把状态标成「已掌握」才会算进去）</div>
       ${radarSVG(domRows)}
     </div>
     <div class="ch-card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-table /></svg>95469各领域答题正确率</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-table /></svg>各领域答题正确率</h3>
       <div class="chd">按自测题库的实际作答计算；「未作答」表示这一领域还没做题</div>
       ${barsSVG(doms.map(d=>({label:d.p.name, v:d.pct})), col)}
     </div>
@@ -1918,12 +1918,12 @@ function renderStats(){
       ${barsSVG(["基础","进阶","易错"].map(k=>({label:k, v:pctOf(lvRight[k]||0, lvDone[k]||0)})), col)}
     </div>
     <div class="ch-card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>95882题型维度正确率</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>题型维度正确率</h3>
       <div class="chd">选择题、判断题、计算题、情景题——计算题与情景题偏低说明「会背不会用」</div>
       ${barsSVG(["choice","tf","calc","scene"].map(k=>({label:QUIZ_TYPE[k], v:pctOf(tRight[k]||0, tDone[k]||0)})), col)}
     </div>
     <div class="ch-card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-book /></svg>96131知识库进度</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-book /></svg>知识库进度</h3>
       <div class="chd">共 ${total} 条知识点 · 检查清单 ${cOn}/${cTotal} 项已完成</div>
       ${donutSVG([
         {label:"已掌握", v:mastered, color:"#059669"},
@@ -1936,7 +1936,7 @@ function renderStats(){
       </div>
     </div>
     <div class="ch-card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>96829题库作答覆盖度</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>题库作答覆盖度</h3>
       <div class="chd">每个领域已作答的题数占比——覆盖面比正确率更优先，先做全再做好</div>
       ${barsSVG(doms.map(d=>({label:d.p.name, v:d.total? Math.round(d.done/d.total*100):0})), v=>v>=80?"#2563eb":v>=40?"#7c3aed":"#94a3b8")}
     </div>
@@ -1952,7 +1952,7 @@ function renderStats(){
       ${heatHTML()}
     </div>
     <div class="ch-card">
-      <h3><svg class=ic aria-hidden=true><use href=#i-save /></svg>97540我的数据</h3>
+      <h3><svg class=ic aria-hidden=true><use href=#i-save /></svg>我的数据</h3>
       <div class="chd">所有记录都存在这台电脑的浏览器里；导出后可在其他设备或重装后一键恢复</div>
       <div style="font-size:12.5px; line-height:2.1">
         学习进度 <b>${Object.keys(progress).length}</b> 条　·　答题记录 <b>${answeredQ}</b> 题　·　清单勾选 <b>${cOn}</b> 项<br>
@@ -2026,7 +2026,7 @@ function renderTpl(){
 function renderFav(){
   const tabs = [
     {id:"fav",  n:"⭐ 我的收藏", c:favCount()+" 条"},
-    {id:"note", n:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>103576我的笔记", c:noteCount()+" 条"}
+    {id:"note", n:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>我的笔记", c:noteCount()+" 条"}
   ];
   document.getElementById("favTabs").innerHTML = tabs.map(t=>
     `<button class="qv-tab${t.id===favTab?" active":""}" data-fv="${t.id}">${t.n} <span style="opacity:.6">${t.c}</span></button>`).join("");
@@ -2134,8 +2134,8 @@ function randomDaily(){
   const box = document.getElementById("panelDaily"); if(!box) return;
   const q = item.q, lv = quizLvAt(item.p, item.i), tp = quizTypeOf(q);
   box.innerHTML = `
-    <h3><svg class=ic aria-hidden=true><use href=#i-shuffle /></svg>107610随机练习题</h3>
-    <div class="pdesc">从 420 题中随机抽一道；刷新或回到首页会恢复「今日一题」</div>
+    <h3><svg class=ic aria-hidden=true><use href=#i-shuffle /></svg>随机练习题</h3>
+    <div class="pdesc">从 432 题中随机抽一道；刷新或回到首页会恢复「今日一题」</div>
     <div class="qd-head">
       <span class="qd-badge">${item.p.icon} ${esc(item.p.name)}</span>
       <span class="qd-badge" style="background:var(--st0-bg); color:var(--sub)">第 ${item.i+1} 题</span>
@@ -2246,7 +2246,7 @@ function renderDaily20(){
   }).join("");
   const pctDone = tot ? Math.round(st.done / tot * 100) : 0;
   document.getElementById("d20Plan").innerHTML = `
-    <h3><svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>112369${cur.isToday ? "今日卷面" : "卷面回看"}　<span style="font-size:12px;font-weight:normal;color:var(--sub)">${cur.date} · 共 ${tot} 题 · 难度 ${QUIZ_LEV.map(k=>k+" "+(lvN[k]||0)).join(" / ")}</span></h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>${cur.isToday ? "今日卷面" : "卷面回看"}　<span style="font-size:12px;font-weight:normal;color:var(--sub)">${cur.date} · 共 ${tot} 题 · 难度 ${QUIZ_LEV.map(k=>k+" "+(lvN[k]||0)).join(" / ")}</span></h3>
     <div class="qv-desc">${cur.isToday
       ? "12 个领域各抽 1 题 + 随机补 8 题；当天固定不变，明天自动换新卷。点下方题号可以跳到该题"
       : "这是历史卷面，仅供回看与复习，不能再作答"}</div>
@@ -2451,7 +2451,7 @@ function renderReview(){
   soon.forEach(x=>{ buckets[x.r.due] = (buckets[x.r.due] || 0) + 1; });
   const days = Object.keys(buckets).sort();
   document.getElementById("rvNext").innerHTML = `
-    <h3><svg class=ic aria-hidden=true><use href=#i-pin /></svg>122477接下来要复习的</h3>
+    <h3><svg class=ic aria-hidden=true><use href=#i-pin /></svg>接下来要复习的</h3>
     ${days.length ? `<div class="rv-days">${days.map(d=>{
       const w = ["日","一","二","三","四","五","六"][new Date(d + "T12:00:00").getDay()];
       return `<span class="rv-day"><b>${d.slice(5)}</b><em>周${w}</em>${buckets[d]} 题</span>`;
@@ -2520,11 +2520,11 @@ function renderCompare(){
         <div class="cmp-name" data-rel="${esc(it.name)}">${d.icon} ${esc(it.name)} <span class="cmp-go">查看详情 →</span></div>
         <div class="cmp-meta"><span>${esc(d.name)}</span><span class="cmp-lv">${LVN[it.lv] || ""}</span></div>
       </div>
-      ${memo ? `<div class="cmp-sec memo"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-bulb /></svg>128743一句话记住</div><div class="cmp-b">${esc(memo)}</div></div>` : ""}
-      <div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-pin /></svg>128854核心要点</div><div class="cmp-b"><ul>${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
-      ${nums.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-hash /></svg>129015关键经验数值</div><div class="cmp-b"><ul class="cmp-num">${nums.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>` : ""}
+      ${memo ? `<div class="cmp-sec memo"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-bulb /></svg>一句话记住</div><div class="cmp-b">${esc(memo)}</div></div>` : ""}
+      <div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-pin /></svg>核心要点</div><div class="cmp-b"><ul>${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
+      ${nums.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-hash /></svg>关键经验数值</div><div class="cmp-b"><ul class="cmp-num">${nums.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>` : ""}
       <div class="cmp-sec"><div class="cmp-h">🏭 应用场景</div><div class="cmp-b">${esc(it.usage || "—")}</div></div>
-      ${rel.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>129315关联条目</div><div class="cmp-b"><div class="rel-box">${rel.map(n=>`<button class="rel-chip sm" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>` : ""}
+      ${rel.length ? `<div class="cmp-sec"><div class="cmp-h"><svg class=ic aria-hidden=true><use href=#i-link /></svg>关联条目</div><div class="cmp-b"><div class="rel-box">${rel.map(n=>`<button class="rel-chip sm" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>` : ""}
     </div>`;
   };
   document.getElementById("cmpBody").innerHTML = `<div class="cmp-grid">${col(cmpFind(cmpSel.a))}${col(cmpFind(cmpSel.b))}</div>`;
@@ -2551,7 +2551,7 @@ function relTime(ts){
 function renderRecent(){
   const box = document.getElementById("panelRecent"); if(!box) return;
   const list = recents.filter(x => KB_ITEMS.some(it => it.name === x.n)).slice(0, 8);
-  box.innerHTML = `<h3><svg class=ic aria-hidden=true><use href=#i-clock /></svg>127953最近浏览</h3>
+  box.innerHTML = `<h3><svg class=ic aria-hidden=true><use href=#i-clock /></svg>最近浏览</h3>
     <div class="pdesc">点任意条目直接回到详情（只记录在本机）</div>
     ${list.length ? list.map(x=>{
       const it = KB_ITEMS.find(y => y.name === x.n), d = it ? CAT_DOMAIN[it.cat] : null;

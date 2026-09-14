@@ -5,7 +5,7 @@
 // ============================================================
 window.KB_MAP = [
 {
-  id:"material", icon:"🧱", name:"材料应用", goal:"能看懂物性表、能独立判断一个零件该用什么材料，并说得出理由",
+  id:"material", icon:"<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name:"材料应用", goal:"能看懂物性表、能独立判断一个零件该用什么材料，并说得出理由",
   layers:[
     {t:"第 1 层 · 先学会看数据", d:"不懂物性表就只能凭感觉选材，先建立量化判断的基础", items:[
       {n:"塑料物性表解读", why:"7 个关键项（密度/收缩/MFI/拉伸/冲击/HDT/UL94）是选材的共同语言"},
@@ -53,7 +53,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"manufacturing", icon:"🏭", name:"成型与加工", goal:"听到一个零件，能说出它大概怎么造出来、成本与精度大概什么水平",
+  id:"manufacturing", icon:"<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name:"成型与加工", goal:"听到一个零件，能说出它大概怎么造出来、成本与精度大概什么水平",
   layers:[
     {t:"第 1 层 · 绝对主线：注塑", d:"塑料件 90% 靠注塑，这一步不扎实后面全是空中楼阁", items:[
       {n:"注塑成型", why:"压力/温度/周期/锁模力四个参数是所有后续讨论的基础"}
@@ -88,7 +88,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"mold", icon:"🧊", name:"模具与DFM", goal:"能跟模具厂坐在一张桌上把 DFM 谈完，听懂对方在说什么",
+  id:"mold", icon:"<svg class=ic aria-hidden=true><use href=#i-mold /></svg>", name:"模具与DFM", goal:"能跟模具厂坐在一张桌上把 DFM 谈完，听懂对方在说什么",
   layers:[
     {t:"第 1 层 · 模具三大基础结构", d:"不懂这三样，无法判断一个设计能不能脱模", items:[
       {n:"分型面（Parting Line）", why:"分型面一错，外观面就会留痕，后面全部推翻重来"},
@@ -113,7 +113,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"design", icon:"📐", name:"结构设计", goal:"能独立完成一个塑料件的结构设计并自检通过，这是最核心的领域",
+  id:"design", icon:"<svg class=ic aria-hidden=true><use href=#i-grid /></svg>", name:"结构设计", goal:"能独立完成一个塑料件的结构设计并自检通过，这是最核心的领域",
   layers:[
     {t:"第 1 层 · 四个原子级规则", d:"任何塑料件都逃不出这四条，先把它们变成肌肉记忆", items:[
       {n:"壁厚设计", why:"壁厚是一切的前提，1.5-3mm 与厚薄比 1:1.5"},
@@ -159,7 +159,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"drawing", icon:"📏", name:"工程制图与公差", goal:"出一份车间不会误读、检具能照着做的图纸",
+  id:"drawing", icon:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", name:"工程制图与公差", goal:"出一份车间不会误读、检具能照着做的图纸",
   layers:[
     {t:"第 1 层 · 制图基础", d:"先保证别人能看懂你的图", items:[
       {n:"制图投影与视图规范", why:"第一角/第三角搞错，方向整反"},
@@ -182,7 +182,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"surface", icon:"🎨", name:"表面处理", goal:"能按外观档次、成本、功能（导不导电）三要素挑出对的工艺",
+  id:"surface", icon:"<svg class=ic aria-hidden=true><use href=#i-brush /></svg>", name:"表面处理", goal:"能按外观档次、成本、功能（导不导电）三要素挑出对的工艺",
   layers:[
     {t:"第 1 层 · 最常用的两种", d:"90% 的塑料件外观靠这两样解决", items:[
       {n:"喷油（喷漆）", why:"哑光/亮光/橡胶漆，膜厚与附着力是判据"},
@@ -205,7 +205,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"optic", icon:"💡", name:"光学设计", goal:"能设计出「均匀、不刺眼、色彩准」的出光结构",
+  id:"optic", icon:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name:"光学设计", goal:"能设计出「均匀、不刺眼、色彩准」的出光结构",
   layers:[
     {t:"第 1 层 · 光学语言", d:"先学会用光学术语说话，否则无法提需求也无法验收", items:[
       {n:"光通量/光效/照度", why:"lm / lm·W⁻¹ / lx 三个单位要先分清"},
@@ -230,7 +230,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"thermal", icon:"🔥", name:"散热设计", goal:"能估算结温、判断要不要散热器、并给出具体的散热结构",
+  id:"thermal", icon:"<svg class=ic aria-hidden=true><use href=#i-flame /></svg>", name:"散热设计", goal:"能估算结温、判断要不要散热器、并给出具体的散热结构",
   layers:[
     {t:"第 1 层 · 一条公式打通全局", d:"热阻链路是散热的全部逻辑，必须能默写", items:[
       {n:"LED热阻链路", why:"Tj = Ta + P × (Rθjc+Rθcs+Rθsa)，结温每升 10℃ 寿命约减半"}
@@ -250,7 +250,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"safety", icon:"🛡️", name:"安规认证", goal:"在设计阶段就把安规项预留好，而不是送检后反复整改",
+  id:"safety", icon:"<svg class=ic aria-hidden=true><use href=#i-shield /></svg>", name:"安规认证", goal:"在设计阶段就把安规项预留好，而不是送检后反复整改",
   layers:[
     {t:"第 1 层 · 两个通用基础", d:"灯具安规的共同语言", items:[
       {n:"GB 7000 灯具安全标准", why:"国内销售的技术基础，3C 就考它"},
@@ -273,7 +273,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"test", icon:"🔬", name:"测试验证", goal:"能用数据证明设计合格，而不是靠「应该没问题」",
+  id:"test", icon:"<svg class=ic aria-hidden=true><use href=#i-flask /></svg>", name:"测试验证", goal:"能用数据证明设计合格，而不是靠「应该没问题」",
   layers:[
     {t:"第 1 层 · 两项必测", d:"几乎每个产品都要做，优先掌握", items:[
       {n:"跌落测试", why:"0.7-1.2m 六面四角，角跌最严苛"},
@@ -295,7 +295,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"pack", icon:"📦", name:"包装与物流", goal:"让产品安全到达客户手上，同时把包装成本算清楚",
+  id:"pack", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装与物流", goal:"让产品安全到达客户手上，同时把包装成本算清楚",
   layers:[
     {t:"第 1 层 · 包装的两大件", d:"外盒与内衬，先知道怎么选", items:[
       {n:"彩盒结构与瓦楞选型", why:"A/B/C/E 瓦的厚度与用途，彩盒用 E 瓦"},
@@ -316,7 +316,7 @@ window.KB_MAP = [
   ]
 },
 {
-  id:"cost", icon:"💰", name:"成本与量产", goal:"能把一个设计方案翻译成报价，并判断哪里还能降",
+  id:"cost", icon:"<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name:"成本与量产", goal:"能把一个设计方案翻译成报价，并判断哪里还能降",
   layers:[
     {t:"第 1 层 · 成本的语言", d:"先知道钱花在哪", items:[
       {n:"成本构成（料工费）", why:"材料 40-60%、人工 15-25%，先建立全局比例感"},

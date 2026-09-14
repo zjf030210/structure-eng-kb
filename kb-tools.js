@@ -6,7 +6,7 @@
 
 window.KB_QUICK = [
 {
-  id:"plastic", icon:"🧱", name:"常用塑料特性对比", desc:"选材第一张表：密度、收缩、耐温、透光与典型用途",
+  id:"plastic", icon:"<svg class=ic aria-hidden=true><use href=#i-layers /></svg>", name:"常用塑料特性对比", desc:"选材第一张表：密度、收缩、耐温、透光与典型用途",
   cols:["材料","密度 g/cm³","收缩率 %","耐温 ℃","透光率","特点与典型用途"],
   rows:[
     ["ABS","1.04-1.07","0.4-0.7","70-90","不透明","综合均衡、易喷涂电镀；外壳/底座"],
@@ -26,7 +26,7 @@ window.KB_QUICK = [
   note:"数值为常用牌号区间，实际以厂家物性表与打样验证为准"
 },
 {
-  id:"struct", icon:"📐", name:"注塑结构设计速查", desc:"壁厚、脱模斜度、加强筋、BOSS 柱、卡扣的一线经验值",
+  id:"struct", icon:"<svg class=ic aria-hidden=true><use href=#i-grid /></svg>", name:"注塑结构设计速查", desc:"壁厚、脱模斜度、加强筋、BOSS 柱、卡扣的一线经验值",
   cols:["设计项目","经验值","说明与避坑"],
   rows:[
     ["壁厚（通用）","1.5-3.0 mm","小件 1.0-1.5；大件 2.5-4.0"],
@@ -53,7 +53,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"tol", icon:"📏", name:"公差与配合速查", desc:"塑料件公差、形位公差、孔轴配合一次查全",
+  id:"tol", icon:"<svg class=ic aria-hidden=true><use href=#i-ruler /></svg>", name:"公差与配合速查", desc:"塑料件公差、形位公差、孔轴配合一次查全",
   cols:["项目","数值 / 等级","说明"],
   rows:[
     ["塑料件线性公差 0-30 mm","±0.10","GB/T 14486 MT5 常规级"],
@@ -77,7 +77,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"screw", icon:"🔩", name:"螺丝与紧固速查", desc:"自攻螺丝底孔径、扭矩、热熔螺母与超声波焊参数",
+  id:"screw", icon:"<svg class=ic aria-hidden=true><use href=#i-screw /></svg>", name:"螺丝与紧固速查", desc:"自攻螺丝底孔径、扭矩、热熔螺母与超声波焊参数",
   cols:["紧固方式","规格 / 参数","经验值","说明"],
   rows:[
     ["自攻螺丝 ST2.2","塑件底孔","φ1.8 mm","BOSS 外径 φ3.2-3.6"],
@@ -99,7 +99,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"metal", icon:"⚙️", name:"金属材料与钣金速查", desc:"钢材/铝材选型、料厚系列、折弯与加工半径",
+  id:"metal", icon:"<svg class=ic aria-hidden=true><use href=#i-settings /></svg>", name:"金属材料与钣金速查", desc:"钢材/铝材选型、料厚系列、折弯与加工半径",
   cols:["材料 / 项目","密度 g/cm³","抗拉强度","耐蚀 / 特点","典型用途"],
   rows:[
     ["SPCC 冷轧板","7.85","270-410 MPa","不防锈，需表面处理","内部支架、屏蔽罩"],
@@ -116,7 +116,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"sheet", icon:"🔧", name:"钣金与机加工速查", desc:"折弯、展开、冲孔、激光切割与 CNC 的公差与限制",
+  id:"sheet", icon:"<svg class=ic aria-hidden=true><use href=#i-wrench /></svg>", name:"钣金与机加工速查", desc:"折弯、展开、冲孔、激光切割与 CNC 的公差与限制",
   cols:["加工项目","经验值","限制与说明"],
   rows:[
     ["折弯最小内 R（软钢/铝）","≥ 1.0 × 板厚","硬料/高强钢需 1.5-2.0t"],
@@ -134,7 +134,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"surface", icon:"🎨", name:"表面处理对比", desc:"喷油、电镀、真空镀、阳极氧化的膜厚、耐磨与适用场景",
+  id:"surface", icon:"<svg class=ic aria-hidden=true><use href=#i-brush /></svg>", name:"表面处理对比", desc:"喷油、电镀、真空镀、阳极氧化的膜厚、耐磨与适用场景",
   cols:["工艺","典型膜厚","耐磨 / 耐蚀","适用基材","备注"],
   rows:[
     ["喷油（UV 面漆）","15-40 μm","附着力百格 ≤1 级","ABS/PC/金属","哑光/亮光/橡胶漆可选"],
@@ -151,7 +151,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"safety", icon:"🛡️", name:"安规与防护等级速查", desc:"IP 等级、爬电距离、温升限值与主要认证要求",
+  id:"safety", icon:"<svg class=ic aria-hidden=true><use href=#i-shield /></svg>", name:"安规与防护等级速查", desc:"IP 等级、爬电距离、温升限值与主要认证要求",
   cols:["项目","数值 / 等级","说明"],
   rows:[
     ["IP20","防 ≥12.5mm 固体，无防水","室内干燥环境"],
@@ -176,7 +176,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"optic", icon:"💡", name:"光学参数速查", desc:"配光、扩散、色温、显色、频闪、蓝光的合格线",
+  id:"optic", icon:"<svg class=ic aria-hidden=true><use href=#i-bulb /></svg>", name:"光学参数速查", desc:"配光、扩散、色温、显色、频闪、蓝光的合格线",
   cols:["参数","常用值 / 合格线","说明"],
   rows:[
     ["光束角（半峰全宽）","窄光 <20° / 中光 20-40° / 宽光 >60°","按用途选配光"],
@@ -200,7 +200,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"pack", icon:"📦", name:"包装与运输速查", desc:"瓦楞选型、缓冲、堆码、ISTA 与装载率计算",
+  id:"pack", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装与运输速查", desc:"瓦楞选型、缓冲、堆码、ISTA 与装载率计算",
   cols:["项目","数值 / 参数","说明"],
   rows:[
     ["A 瓦 / B 瓦 / C 瓦 / E 瓦","4.5-5 / 2.5-3 / 3.5-4 / 1.1-2 mm","运输用粗楞，彩盒用 E 瓦"],
@@ -219,7 +219,7 @@ window.KB_QUICK = [
   ]
 },
 {
-  id:"cost", icon:"💰", name:"成本与量产速查", desc:"料工费拆解、开模报价、模具摊销与良率爬坡",
+  id:"cost", icon:"<svg class=ic aria-hidden=true><use href=#i-tag /></svg>", name:"成本与量产速查", desc:"料工费拆解、开模报价、模具摊销与良率爬坡",
   cols:["项目","经验值 / 公式","说明"],
   rows:[
     ["成本结构","材料 40-60% / 人工 15-25%","表面处理 10-20%，管理利润 10-20%"],
@@ -243,7 +243,7 @@ window.KB_QUICK = [
 // ─────────────────────────────────────────────
 window.KB_CHECKS = [
 {
-  id:"premold", icon:"🧊", name:"开模前结构评审", desc:"结构定型后、开模图纸下发前的必备自检，共 31 项",
+  id:"premold", icon:"<svg class=ic aria-hidden=true><use href=#i-mold /></svg>", name:"开模前结构评审", desc:"结构定型后、开模图纸下发前的必备自检，共 31 项",
   groups:[
     {t:"一、外观与分型", items:[
       {t:"分型面位置已确认", d:"分型线不落在主要外观面；封胶面宽 3-8 mm"},
@@ -289,7 +289,7 @@ window.KB_CHECKS = [
   ]
 },
 {
-  id:"dfm", icon:"🏭", name:"DFM 检讨清单", desc:"与模具厂当面检讨时的 7 大项、23 个检查点",
+  id:"dfm", icon:"<svg class=ic aria-hidden=true><use href=#i-factory /></svg>", name:"DFM 检讨清单", desc:"与模具厂当面检讨时的 7 大项、23 个检查点",
   groups:[
     {t:"1. 分型与脱模", items:[
       {t:"分型面选择合理且加工可行", d:"避免曲面分型与尖锐夹口"},
@@ -331,7 +331,7 @@ window.KB_CHECKS = [
   ]
 },
 {
-  id:"safetychk", icon:"🛡️", name:"安规自检清单", desc:"送认证机构前的自检，避免反复整改，共 22 项",
+  id:"safetychk", icon:"<svg class=ic aria-hidden=true><use href=#i-shield /></svg>", name:"安规自检清单", desc:"送认证机构前的自检，避免反复整改，共 22 项",
   groups:[
     {t:"一、结构与距离", items:[
       {t:"爬电距离与电气间隙达标", d:"按工作电压/污染等级/材料 CTI 查表"},
@@ -368,7 +368,7 @@ window.KB_CHECKS = [
   ]
 },
 {
-  id:"pilot", icon:"🔬", name:"试产与量产准备", desc:"T0 试模到量产爬坡的检查表，共 20 项",
+  id:"pilot", icon:"<svg class=ic aria-hidden=true><use href=#i-flask /></svg>", name:"试产与量产准备", desc:"T0 试模到量产爬坡的检查表，共 20 项",
   groups:[
     {t:"T0 / T1 阶段", items:[
       {t:"试模条件与量产一致", d:"同机台吨位、同材料、同模温"},
@@ -399,7 +399,7 @@ window.KB_CHECKS = [
   ]
 },
 {
-  id:"packchk", icon:"📦", name:"包装与运输评审", desc:"跌落、堆码、ISTA 与电商物流的检查表，共 18 项",
+  id:"packchk", icon:"<svg class=ic aria-hidden=true><use href=#i-box /></svg>", name:"包装与运输评审", desc:"跌落、堆码、ISTA 与电商物流的检查表，共 18 项",
   groups:[
     {t:"包装结构", items:[
       {t:"瓦楞楞型与克重匹配毛重", d:"越重用粗楞（BC/AB 瓦）"},
