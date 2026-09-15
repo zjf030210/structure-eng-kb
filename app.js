@@ -435,7 +435,8 @@ function openDetail(it){
       clearTimeout(noteTimer);
       noteTimer = setTimeout(()=>{ lsSet(LS_NOTE, notes); refreshBadges(); }, 500);
       const nj = document.getElementById("dpNoteJump");
-      if(nj) nj.textContent = ta.value.trim() ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${ta.value.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记";
+      // ⚠️ 这里必须用 innerHTML：图标是 <svg> 标签，用 textContent 会把源码当文字显示出来
+      if(nj) nj.innerHTML = ta.value.trim() ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${ta.value.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记";
     };
     ta.onblur = ()=>{ lsSet(LS_NOTE, notes); refreshBadges(); renderDpActions(it); };
   }
@@ -610,9 +611,9 @@ function renderHome(){
       <span class="pv">${cOn}/${cTotal} 项</span></div>
     <div style="margin-top:13px; font-size:12px; color:var(--sub); margin-bottom:7px;">各领域掌握率</div>
     ${domRows.map(r=>`<div class="prog-row" style="margin-bottom:6px;">
-      <span class="pl" style="width:96px;font-size:11.5px;">${r.d.icon} ${r.d.name}</span>
+      <span class="pl" style="width:96px;font-size:var(--fs-xs);">${r.d.icon} ${r.d.name}</span>
       <div class="prog-bar" style="height:6px;"><i style="width:${r.pct}%;background:${barColor(r.pct)}"></i></div>
-      <span class="pv" style="width:56px;font-size:11.5px;">${r.m}/${r.n}</span></div>`).join("")}
+      <span class="pv" style="width:56px;font-size:var(--fs-xs);">${r.m}/${r.n}</span></div>`).join("")}
     <div class="next-step">💡 <b>下一步建议：</b>${advice}</div>`;
 
   domainsEl.innerHTML = KB_DOMAINS.map(d=>{
@@ -1769,7 +1770,7 @@ function renderWrong(){
   const pct = answered ? Math.round(right/answered*100) : 0;
   document.getElementById("wrongSum").innerHTML = `
     <div class="ws-card"><b style="color:var(--lv1)">${list.length}</b><span>当前错题数</span></div>
-    <div class="ws-card"><b style="color:var(--primary)">${answered}<span style="font-size:14px;color:var(--sub)"> / ${allQuizQuestions().length}</span></b><span>已作答</span></div>
+    <div class="ws-card"><b style="color:var(--primary)">${answered}<span style="font-size:var(--fs-md);color:var(--sub)"> / ${allQuizQuestions().length}</span></b><span>已作答</span></div>
     <div class="ws-card"><b style="color:#059669">${right}</b><span>累计答对</span></div>
     <div class="ws-card"><b style="color:${pct>=80?'#059669':pct>=60?'#d97706':'#dc2626'}">${answered?pct+"%":"—"}</b><span>总正确率</span></div>`;
 
@@ -1787,11 +1788,12 @@ function renderWrong(){
     `<span class="mini-btn" style="cursor:default">🎉 目前没有错题</span>`;
 
   const ids = [...new Set(list.map(x=>x.p.id))];
-  const tabs = [{id:"all", n:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>全部错题", c:list.length+" 题"}].concat(
+  // ⚠️ icon 与 name 必须分开，模板里 icon 不能过 esc()（否则 <svg> 会被转义成源码文字）
+  const tabs = [{id:"all", icon:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>", name:"全部错题", c:list.length+" 题"}].concat(
     ids.map(id=>{ const p = KB_QUIZ.find(x=>x.id===id);
-      return {id, n:(p.icon||"")+p.name, c:list.filter(x=>x.p.id===id).length+" 题"}; }));
+      return {id, icon:p.icon||"", name:p.name, c:list.filter(x=>x.p.id===id).length+" 题"}; }));
   document.getElementById("wrongTabs").innerHTML = tabs.map(t=>
-    `<button class="qv-tab${t.id===wrongDom?" active":""}" data-wd="${t.id}">${esc(t.n)} <span style="opacity:.6">${t.c}</span></button>`).join("");
+    `<button class="qv-tab${t.id===wrongDom?" active":""}" data-wd="${t.id}">${t.icon} ${esc(t.name)} <span style="opacity:.6">${t.c}</span></button>`).join("");
 
   const show = wrongDom === "all" ? list : list.filter(x=>x.p.id === wrongDom);
   document.getElementById("wrongBody").innerHTML = show.length ? show.map(x=>{
@@ -1835,8 +1837,8 @@ function radarSVG(rows){
     const [x,y] = pt(i, R + 26), a = ang(i), c = Math.cos(a), s = Math.sin(a);
     const anchor = Math.abs(c) < 0.25 ? "middle" : (c > 0 ? "start" : "end");
     const dy = s > 0.55 ? 10 : (s < -0.55 ? -3 : 4);
-    g += `<text x="${x.toFixed(1)}" y="${(y+dy).toFixed(1)}" text-anchor="${anchor}" font-size="10.5" fill="var(--sub)" font-family="inherit">${esc(r.label)}</text>`;
-    g += `<text x="${x.toFixed(1)}" y="${(y+dy+11).toFixed(1)}" text-anchor="${anchor}" font-size="10" fill="var(--primary)" font-weight="bold" font-family="inherit">${r.v}%</text>`;
+    g += `<text x="${x.toFixed(1)}" y="${(y+dy).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--sub)" font-family="inherit">${esc(r.label)}</text>`;
+    g += `<text x="${x.toFixed(1)}" y="${(y+dy+11).toFixed(1)}" text-anchor="${anchor}" font-size="11" fill="var(--primary)" font-weight="bold" font-family="inherit">${r.v}%</text>`;
   });
   return `<svg class="ch-svg" viewBox="0 0 ${W} ${H}">${g}</svg>`;
 }
@@ -1864,11 +1866,11 @@ function donutSVG(parts){
     off += len;
   });
   g += `<text x="${cx}" y="${cy+3}" text-anchor="middle" font-size="24" font-weight="bold" fill="var(--text)" font-family="inherit">${Math.round(parts[0].v/total*100)}%</text>`;
-  g += `<text x="${cx}" y="${cy+21}" text-anchor="middle" font-size="10.5" fill="var(--sub)" font-family="inherit">已掌握</text>`;
+  g += `<text x="${cx}" y="${cy+21}" text-anchor="middle" font-size="11" fill="var(--sub)" font-family="inherit">已掌握</text>`;
   const legend = parts.map(p=>`<div><i style="background:${p.color}"></i>${esc(p.label)}　<b style="color:var(--text)">${p.v}</b></div>`).join("");
   return `<div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap">
     <svg viewBox="0 0 176 176" style="width:176px; height:176px; flex-shrink:0">${g}</svg>
-    <div class="ch-legend" style="flex-direction:column; gap:9px; margin:0; font-size:12.5px">${legend}</div></div>`;
+    <div class="ch-legend" style="flex-direction:column; gap:9px; margin:0; font-size:var(--fs-xs)">${legend}</div></div>`;
 }
 function renderStats(){
   const domRows = KB_DOMAINS.map(d=>{
@@ -1954,7 +1956,7 @@ function renderStats(){
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-save /></svg>我的数据</h3>
       <div class="chd">所有记录都存在这台电脑的浏览器里；导出后可在其他设备或重装后一键恢复</div>
-      <div style="font-size:12.5px; line-height:2.1">
+      <div style="font-size:var(--fs-xs); line-height:var(--lh-loose)">
         学习进度 <b>${Object.keys(progress).length}</b> 条　·　答题记录 <b>${answeredQ}</b> 题　·　清单勾选 <b>${cOn}</b> 项<br>
         收藏 <b>${favCount()}</b> 条　·　笔记 <b>${noteCount()}</b> 条　·　模板草稿 <b>${Object.keys(tplDraft).length}</b> 格<br>
         浏览记录 <b>${recents.length}</b> 条　·　搜索历史 <b>${searchHist.length}</b> 条　·　打卡 <b>${streakTotal()}</b> 天
@@ -2068,7 +2070,8 @@ function renderDpActions(it){
   const btn = document.getElementById("dpFavBtn");
   if(btn){ btn.className = favOn(it.name) ? "on" : ""; btn.textContent = favOn(it.name) ? "★ 已收藏" : "☆ 收藏"; }
   const nj = document.getElementById("dpNoteJump");
-  if(nj){ const n = notes[it.name]; nj.textContent = (n && n.trim()) ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${n.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记"; }
+  // ⚠️ 同上：图标是 <svg>，必须 innerHTML
+  if(nj){ const n = notes[it.name]; nj.innerHTML = (n && n.trim()) ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${n.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记"; }
 }
 function toggleFav(name){
   if(favs[name]) delete favs[name]; else favs[name] = Date.now();
@@ -2227,7 +2230,7 @@ function renderDaily20(){
   const st = d20StatOf(day);
   const domN = new Set(day.order.map(r=>r.d)).size;
   document.getElementById("d20Sum").innerHTML = `
-    <div class="ws-card"><b style="color:var(--primary)">${st.done}<span style="font-size:14px;color:var(--sub)"> / ${tot}</span></b><span>${cur.isToday ? "今日已答" : "当日已答"} · ${cur.date}</span></div>
+    <div class="ws-card"><b style="color:var(--primary)">${st.done}<span style="font-size:var(--fs-md);color:var(--sub)"> / ${tot}</span></b><span>${cur.isToday ? "今日已答" : "当日已答"} · ${cur.date}</span></div>
     <div class="ws-card"><b style="color:#059669">${st.right}</b><span>答对</span></div>
     <div class="ws-card"><b style="color:${st.pct>=80?'#059669':st.pct>=60?'#d97706':'#dc2626'}">${st.done?st.pct+"%":"—"}</b><span>正确率</span></div>
     <div class="ws-card"><b style="color:var(--lv3)">${domN}</b><span>覆盖领域</span></div>`;
@@ -2506,7 +2509,7 @@ function renderCompare(){
     const A = cmpFind(p.a), B = cmpFind(p.b);
     if(!A || !B) return "";
     const on = (cmpSel.a === A.name && cmpSel.b === B.name);
-    return `<button class="mini-btn${on ? " ok" : ""}" data-cmp="${i}" style="padding:5px 11px; font-size:11.5px;">${esc(p.t)}</button>`;
+    return `<button class="mini-btn${on ? " ok" : ""}" data-cmp="${i}" style="padding:5px 11px; font-size:var(--fs-xs);">${esc(p.t)}</button>`;
   }).join("");
 
   const LVN = ["", "核心必会", "进阶掌握", "了解即可"];
@@ -2646,7 +2649,7 @@ function timeCardHTML(){
         <span class="pv">${Math.round(s.week / 60)}/${s.goalMin} 分</span>
       </div>
       <div class="qv-desc" style="margin-top:8px">目标：
-        ${opts.map(m=>`<button class="mini-btn${m === s.goalMin ? " ok" : ""}" data-goal="${m}" style="padding:4px 10px; font-size:11.5px; margin:0 3px;">${m} 分/周</button>`).join("")}
+        ${opts.map(m=>`<button class="mini-btn${m === s.goalMin ? " ok" : ""}" data-goal="${m}" style="padding:4px 10px; font-size:var(--fs-xs); margin:0 3px;">${m} 分/周</button>`).join("")}
       </div>
     </div>`;
 }
