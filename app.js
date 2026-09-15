@@ -498,7 +498,12 @@ document.getElementById("dpClose").onclick = closeDetail;
 document.getElementById("detailBackdrop").onclick = closeDetail;
 document.addEventListener("keydown", e => {
   if(e.key === "Escape"){
-    if(document.getElementById("aiModal").classList.contains("open")) document.getElementById("aiModal").classList.remove("open");
+    const im = document.getElementById("imgModal");
+    const dm = document.getElementById("donateModal");
+    const am = document.getElementById("aiModal");
+    if(im && im.classList.contains("open")) im.classList.remove("open");
+    else if(dm && dm.classList.contains("open")) dm.classList.remove("open");
+    else if(am && am.classList.contains("open")) am.classList.remove("open");
     else if(document.body.classList.contains("detail-open")) closeDetail();
   }
 });
@@ -2855,6 +2860,27 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   if(e.target === document.getElementById("imgModal")) document.getElementById("imgModal").classList.remove("open");
 });
 
+/* ══════════════ 赞赏支持 ══════════════ */
+(function initDonate(){
+  const modal = document.getElementById("donateModal");
+  const btn = document.getElementById("donateBtn");
+  if(!modal || !btn) return;
+  const close = ()=> modal.classList.remove("open");
+  btn.addEventListener("click", ()=> modal.classList.add("open"));
+  const closeBtn = document.getElementById("donateCloseBtn");
+  if(closeBtn) closeBtn.addEventListener("click", close);
+  // 点遮罩关闭
+  modal.addEventListener("click", e=>{ if(e.target === modal) close(); });
+  // 点二维码放大查看（复用大图弹窗，它在本弹窗之上）
+  modal.querySelectorAll(".donate-card img").forEach(img=>{
+    img.addEventListener("click", ()=>{
+      document.getElementById("imgModalSrc").src = img.getAttribute("src");
+      document.getElementById("imgModalCap").textContent = img.getAttribute("alt") || "";
+      document.getElementById("imgModal").classList.add("open");
+    });
+  });
+})();
+
 /* ══════════════ 模块导航与交互绑定 ══════════════ */
 (function initBadges(){
   const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
@@ -3061,8 +3087,12 @@ document.addEventListener("click", e=>{
   openItemByName(chip.dataset.rel);
 });
 
-// Esc：详情未打开时，从其他模块回到知识库
+// Esc：详情未打开时，从其他模块回到知识库（有弹窗打开时先让弹窗处理）
 document.addEventListener("keydown", e=>{
+  const modalOpen = ["donateModal","imgModal","aiModal"].some(id=>{
+    const el = document.getElementById(id); return el && el.classList.contains("open");
+  });
+  if(modalOpen) return;
   if(e.key === "Escape" && !document.body.classList.contains("detail-open") && activeModule !== "kb"){
     activeModule = "kb"; renderAll();
   }
