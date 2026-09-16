@@ -751,18 +751,22 @@
       };
     });
   }
+  /* ⚠️ 必须深拷贝：tool / dim / min / max 都是引用，
+     直接放进去会让「已保存的方案」跟着后续改动一起变 —— 那样对比出来的数字全一样，功能等于白做。 */
+  function clone(x) { return x === null || x === undefined ? x : JSON.parse(JSON.stringify(x)); }
   function packParts(list) {
     return (list || []).map(function (p) {
       return { name: p.name, nodeId: p.nodeId, depth: p.depth, path: p.path,
-        vol: p.vol, area: p.area, tris: p.tris, dim: p.dim, min: p.min, max: p.max,
-        mat: p.mat, on: p.on, tool: p.tool };
+        vol: p.vol, area: p.area, tris: p.tris,
+        dim: clone(p.dim), min: clone(p.min), max: clone(p.max),
+        mat: p.mat, on: p.on, tool: clone(p.tool || {}) };
     });
   }
   function packPlan(name) {
     return {
       id: st.planId || "",
       name: name || st.planName || (st.info && st.info.file) || "未命名方案",
-      info: st.info || {}, params: st.params, parts: packParts(st.parts)
+      info: clone(st.info || {}), params: clone(st.params), parts: packParts(st.parts)
     };
   }
   function planParams(rec) {
