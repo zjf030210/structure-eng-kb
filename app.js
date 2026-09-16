@@ -2870,8 +2870,9 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   const modal = document.getElementById("donateModal");
   const btn = document.getElementById("donateBtn");
   if(!modal || !btn) return;
+  const open = ()=> modal.classList.add("open");
   const close = ()=> modal.classList.remove("open");
-  btn.addEventListener("click", ()=> modal.classList.add("open"));
+  btn.addEventListener("click", open);
   const closeBtn = document.getElementById("donateCloseBtn");
   if(closeBtn) closeBtn.addEventListener("click", close);
   // 点遮罩关闭
@@ -2884,6 +2885,49 @@ document.getElementById("imgModal").addEventListener("click", e=>{
       document.getElementById("imgModal").classList.add("open");
     });
   });
+
+  /* ══════════════════ 打开页面自动弹出 ══════════════════
+     ⚙️ 想调整曝光强度，只改下面这一行：
+        delay  延迟多少毫秒再弹（先让页面渲染出来，不要一打开就糊脸）
+        days   同一访客最少间隔几天再弹一次。改成 0 = 每次打开都弹
+     · 访客点「不再提示」后永久不再弹
+     · 自己看效果：链接后加 ?donate=1 强制弹；?donate=0 关掉本轮 */
+  const DONATE_AUTO = { on: true, delay: 1600, days: 3 };
+  const LS_DONATE_TS = "kb-donate-ts", LS_DONATE_OFF = "kb-donate-off";
+
+  (function autoPopup(){
+    if(!DONATE_AUTO.on) return;
+    let forced = false;
+    try{
+      const q = new URLSearchParams(location.search).get("donate");
+      if(q === "0") return;                    // ?donate=0 → 本轮不弹
+      forced = (q === "1");                    // ?donate=1 → 强制弹（跳过频率限制）
+    }catch(e){}
+    if(!forced){
+      if(lsGet(LS_DONATE_OFF, false)) return;                       // 访客点过「不再提示」
+      const last = +lsGet(LS_DONATE_TS, 0) || 0;
+      if(last && Date.now() - last < DONATE_AUTO.days * 864e5) return;   // 距上次弹出还不够久
+    }
+    let tries = 0;
+    const tick = ()=>{
+      /* 页面在后台、或访客正开着别的弹窗时不打扰（且不消耗这次的弹出机会） */
+      const busy = document.visibilityState === "hidden"
+        || document.getElementById("imgModal").classList.contains("open")
+        || document.getElementById("aiModal").classList.contains("open")
+        || modal.classList.contains("open");
+      if(busy){
+        if(tries++ < 8) setTimeout(tick, 4000);
+        return;
+      }
+      open();
+      if(!forced) lsSet(LS_DONATE_TS, Date.now());   // 强制预览时不占用的名额
+    };
+    setTimeout(tick, Math.max(0, DONATE_AUTO.delay));
+  })();
+
+  /* 「不再提示」：记一个永久标记，之后不再自动弹出（仍可手动点按钮打开） */
+  const neverBtn = document.getElementById("donateNeverBtn");
+  if(neverBtn) neverBtn.addEventListener("click", ()=>{ lsSet(LS_DONATE_OFF, true); close(); });
 })();
 
 /* ══════════════ 模块导航与交互绑定 ══════════════ */

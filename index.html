@@ -249,6 +249,10 @@
   .modal .prompt-box{background:var(--bg-sub); border:1px solid var(--border); border-radius:var(--r-md); padding:14px; font-size:var(--fs-sm); line-height:var(--lh-relaxed); color:var(--tx-body); max-height:240px; overflow-y:auto; white-space:pre-wrap;}
   .modal .modal-actions{display:flex; gap:var(--sp-5); margin-top:var(--sp-7); justify-content:flex-end;}
   .modal button{padding:8px 16px; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:var(--fs-sm);}
+  /* 打赏弹窗的「不再提示」：低调的次要按钮，用 margin-right:auto 推到左侧 */
+  .modal button.donate-never{margin-right:auto; padding:8px 10px; border-color:transparent;
+    background:none; color:var(--tx-faint); font-size:var(--fs-caption);}
+  .modal button.donate-never:hover{color:var(--tx-soft); text-decoration:underline;}
   .modal button.primary{background:var(--primary); color:var(--tx-inv); border-color:var(--primary);}
   /* ══════ 模块导航 ══════ */
   .navbar{display:flex; gap:var(--sp-4); flex-wrap:wrap; margin:0 0 var(--sp-7); padding:6px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-lg); box-shadow:var(--shadow);}
@@ -1951,6 +1955,8 @@
     </div>
     <div class="donate-tip">手机上长按识别，电脑上截图后扫一扫 · 点击图片可放大</div>
     <div class="modal-actions">
+      <button class="donate-never" id="donateNeverBtn" type="button"
+        title="以后打开这个站点不再自动弹出">不再提示</button>
       <button class="primary" id="donateCloseBtn">关闭</button>
     </div>
   </div>
