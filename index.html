@@ -995,6 +995,175 @@
   .st-tier b{font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; text-align:right;}
   .st-tier span:last-child{text-align:right; color:var(--tx-faint); font-size:var(--fs-caption); font-variant-numeric:tabular-nums;}
 
+  /* ══════ 我的常用（首页快捷入口） ══════ */
+  .hq-h{display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-5); margin:var(--sp-8) 0 var(--sp-7);}
+  .hq-h b{font-size:var(--fs-lg); font-weight:600; color:var(--tx-strong);}
+  .hq-h span{flex:1; min-width:0; font-size:var(--fs-caption); color:var(--tx-faint);}
+  .hq-edit{padding:3px 11px; border:1px solid var(--border); border-radius:var(--r-xs); background:var(--card);
+    color:var(--tx-soft); font-family:inherit; font-size:var(--fs-caption); cursor:pointer; flex-shrink:0;}
+  .hq-edit:hover{border-color:var(--primary); color:var(--primary);}
+  .hq-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(196px,1fr)); gap:var(--sp-5);}
+  .hq-item{display:block; text-align:left; padding:11px 13px; border:1px solid var(--border);
+    border-radius:var(--r-md); background:var(--card); cursor:pointer; font-family:inherit;
+    transition:border-color .16s cubic-bezier(.4,0,.2,1), transform .16s cubic-bezier(.4,0,.2,1), box-shadow .16s cubic-bezier(.4,0,.2,1);}
+  .hq-item:hover{border-color:var(--primary); transform:translateY(-1px); box-shadow:var(--shadow-sm);}
+  .hq-item b{display:block; font-size:var(--fs-sm); font-weight:600; color:var(--primary); margin-bottom:2px;}
+  .hq-item span{display:block; font-size:var(--fs-caption); color:var(--tx-faint); line-height:var(--lh-base);}
+  .hq-pick{margin-top:var(--sp-6); padding:var(--sp-6); background:var(--bg-sub); border:1px solid var(--border);
+    border-radius:var(--r-md); display:flex; flex-wrap:wrap; gap:var(--sp-4) var(--sp-7); align-items:center;}
+  .hq-pick-i{display:inline-flex; align-items:center; gap:5px; font-size:var(--fs-caption);
+    color:var(--tx-soft); cursor:pointer;}
+  .hq-pick-t{flex-basis:100%; font-size:var(--fs-caption); color:var(--tx-faint);}
+
+  /* ══════ 计算器：工具行 ══════ */
+  .calc-tools{display:flex; gap:var(--sp-4); margin-top:var(--sp-5); align-items:center;}
+  .calc-tools .mini-t{padding:3px 9px; border:1px solid var(--border); border-radius:var(--r-xs);
+    background:var(--card); color:var(--tx-faint); font-family:inherit; font-size:var(--fs-caption);
+    cursor:pointer; transition:border-color .16s cubic-bezier(.4,0,.2,1), color .16s cubic-bezier(.4,0,.2,1);}
+  .calc-tools .mini-t:hover{border-color:var(--danger-bd); color:var(--danger);}
+
+  /* ══════ 项目台账 ══════ */
+  .st-sec-plain{margin-top:var(--sp-9); padding-top:var(--sp-7); border-top:1px solid var(--bd-row);}
+  .st-sec-plain h3{display:flex; align-items:center; gap:var(--sp-4); font-size:var(--fs-md);
+    font-weight:600; color:var(--tx-strong); margin-bottom:var(--sp-6);}
+  .st-sec-plain h3 .ic{width:1.1em; height:1.1em; color:var(--primary);}
+  .st-ptable-proj .st-prow-proj{grid-template-columns:minmax(0,1.5fr) minmax(0,1.2fr) 76px 82px 82px 84px 74px 62px;}
+  .st-prow-proj input,.st-prow-proj select{width:100%; padding:4px 6px; border:1px solid transparent;
+    border-radius:var(--r-xs); background:transparent; color:var(--text); font-size:var(--fs-xs);
+    font-family:inherit; font-variant-numeric:tabular-nums;}
+  .st-prow-proj input:hover,.st-prow-proj select:hover{border-color:var(--border);}
+  .st-prow-proj input:focus,.st-prow-proj select:focus{border-color:var(--primary); background:var(--card); outline:none;}
+  .st-prow-proj > span{padding:5px 0;}
+  .st-prow-proj .c7{text-align:right;}
+  .st-prow-proj .c7 b{font-size:var(--fs-xs); font-weight:600; color:var(--ok); font-variant-numeric:tabular-nums;}
+  .st-prow-proj .c7 i{display:block; font-style:normal; font-size:var(--fs-caption); color:var(--tx-faint);}
+  .st-prow-proj .c8{text-align:right;}
+  .st-prow-proj .c8 button{padding:2px 7px; border:1px solid var(--border); border-radius:var(--r-xs);
+    background:var(--card); color:var(--tx-faint); font-family:inherit; font-size:var(--fs-caption); cursor:pointer;}
+  .st-prow-proj .c8 button:hover{border-color:var(--danger-bd); color:var(--danger);}
+  .calc-card.hi{outline:2px solid var(--primary); outline-offset:2px;}
+
+  /* ══════ 工作台：方案 / 单价库 / 报价单 ══════ */
+  .st-empty{padding:14px; background:var(--bg-sub); border:1px dashed var(--border); border-radius:var(--r-sm);
+    font-size:var(--fs-caption); color:var(--tx-faint); text-align:center;}
+  .st-h3n{font-size:var(--fs-caption); font-weight:400; color:var(--tx-faint); margin-left:6px;}
+
+  /* 继续上次的报价 */
+  .st-resume{margin-bottom:14px; padding:12px 14px; background:var(--primary-weak); border:1px solid var(--primary);
+    border-radius:var(--r-md); display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-5);}
+  .st-resume-h{flex:1; min-width:0; display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-4);}
+  .st-resume-h b{font-size:var(--fs-sm); color:var(--primary);}
+  .st-resume-h span{font-size:var(--fs-caption); color:var(--tx-soft);}
+  .st-resume .st-tools{margin:0;}
+
+  /* 方案名 */
+  .st-planbar{display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-5); margin-top:10px;}
+  .st-pb-l{font-size:var(--fs-caption); color:var(--tx-faint); flex-shrink:0;}
+  .st-planbar input{flex:1; min-width:170px; padding:6px 9px; border:1px solid var(--border);
+    border-radius:var(--r-sm); background:var(--card); color:var(--text); font-size:var(--fs-xs); font-family:inherit;}
+  .st-planbar input:focus{border-color:var(--primary); outline:none;}
+  .st-pb-n{font-size:var(--fs-caption); color:var(--tx-faint); flex-shrink:0;}
+  .st-applied{margin-top:8px; padding:7px 10px; background:var(--ok-bg); border:1px solid var(--ok-bd);
+    border-radius:var(--r-xs); font-size:var(--fs-caption); color:var(--ok); display:flex; align-items:center; gap:6px;}
+
+  /* 从保存的记录恢复后：3D 需要重新拖文件 */
+  /* ⚠️ 不能用 absolute：没有 canvas 时 .st-stage 会高度塌陷，按钮会被别的元素盖住点不到 */
+  .st-reload{display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:7px; padding:34px 20px; text-align:center; min-height:330px;}
+  .st-reload svg{color:var(--tx-faint);}
+  .st-reload b{font-size:var(--fs-sm); color:var(--tx-body);}
+  .st-reload p{margin:0; font-size:var(--fs-caption); color:var(--tx-faint); line-height:var(--lh-base); max-width:430px;}
+  .st-reload em{font-style:normal; color:var(--tx-soft); font-weight:600;}
+
+  /* 通用表头 / 表格（单价库、方案） */
+  .st-ph{display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--sp-5); margin:16px 0 7px;}
+  .st-ph b{font-size:var(--fs-xs); color:var(--tx-body);}
+  .st-ph span{flex:1; min-width:0; font-size:var(--fs-caption); color:var(--tx-faint);}
+  .st-mini-t{padding:2px 8px; border:1px solid var(--border); border-radius:var(--r-xs); background:var(--card);
+    color:var(--tx-soft); font-family:inherit; font-size:var(--fs-caption); cursor:pointer; flex-shrink:0;
+    transition:border-color .16s cubic-bezier(.4,0,.2,1), color .16s cubic-bezier(.4,0,.2,1);}
+  .st-mini-t:hover{border-color:var(--primary); color:var(--primary);}
+  .st-ptable{border:1px solid var(--border); border-radius:var(--r-sm); overflow:hidden; background:var(--card);}
+  .st-prow{display:grid; align-items:center; gap:var(--sp-5); padding:0 10px; border-bottom:1px solid var(--bd-row);}
+  .st-prow:last-child{border-bottom:0;}
+  .st-prow.head{background:var(--bg-sub); font-size:var(--fs-caption); color:var(--tx-soft); font-weight:600;
+    height:28px;}
+  .st-prow-mat{grid-template-columns:minmax(0,150px) 88px 88px minmax(0,1fr);}
+  .st-prow-tool{grid-template-columns:minmax(0,210px) 106px minmax(0,1fr);}
+  .st-prow-rate{grid-template-columns:minmax(0,190px) 106px;}
+  .st-prow input[type=number]{width:100%; padding:3px 6px; border:1px solid transparent; border-radius:var(--r-xs);
+    background:transparent; color:var(--text); font-size:var(--fs-xs); font-family:inherit;
+    font-variant-numeric:tabular-nums;}
+  .st-prow input[type=number]:hover{border-color:var(--border);}
+  .st-prow input[type=number]:focus{border-color:var(--primary); background:var(--card); outline:none;}
+  .st-pn{padding:5px 0; font-size:var(--fs-xs); color:var(--tx-body); display:flex; align-items:center;
+    gap:5px; min-width:0; overflow:hidden;}
+  .st-pn i{font-style:normal; font-size:var(--fs-caption); padding:1px 5px; border-radius:var(--r-xs);
+    background:var(--warn-bg); color:var(--warn); flex-shrink:0;}
+  .st-pu{font-size:var(--fs-caption); color:var(--tx-faint); padding:5px 0; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap;}
+  .st-pfoot{display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-5); margin-top:12px;}
+  .st-pfoot .st-privacy b{color:var(--primary); font-weight:600; font-variant-numeric:tabular-nums;}
+
+  /* 方案列表 */
+  .st-ptable-plan .st-prow-plan{grid-template-columns:minmax(0,1fr) 94px 100px 84px 156px;}
+  .st-prow-plan.on{background:var(--primary-weak);}
+  .st-prow-plan .c1{display:flex; align-items:baseline; gap:6px; padding:7px 0; min-width:0;}
+  .st-prow-plan .c1 input{flex-shrink:0; margin:0;}
+  .st-prow-plan .c1 b{font-size:var(--fs-xs); color:var(--tx-body); font-weight:600; overflow:hidden;
+    text-overflow:ellipsis; white-space:nowrap; max-width:230px;}
+  .st-prow-plan .c1 i{font-style:normal; font-size:var(--fs-caption); color:var(--tx-faint); flex-shrink:0;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .st-prow-plan .c2,.st-prow-plan .c3,.st-prow-plan .c4{padding:7px 0; font-size:var(--fs-xs);
+    font-variant-numeric:tabular-nums;}
+  .st-prow-plan .c2{font-weight:600; color:var(--primary);}
+  .st-prow-plan .c3{color:var(--tx-body);}
+  .st-prow-plan .c4{color:var(--tx-faint); font-size:var(--fs-caption);}
+  .st-prow-plan .c5{display:flex; gap:4px; padding:7px 0; justify-content:flex-end;}
+  .st-prow-plan .c5 button{padding:2px 7px; border:1px solid var(--border); border-radius:var(--r-xs);
+    background:var(--card); color:var(--tx-soft); font-family:inherit; font-size:var(--fs-caption); cursor:pointer;
+    transition:border-color .16s cubic-bezier(.4,0,.2,1), color .16s cubic-bezier(.4,0,.2,1);}
+  .st-prow-plan .c5 button:hover{border-color:var(--primary); color:var(--primary);}
+
+  /* 方案对比 */
+  .st-cmp-wrap{margin-top:14px; overflow-x:auto;}
+  .st-cmp{width:100%; border-collapse:collapse; font-size:var(--fs-xs);}
+  .st-cmp th,.st-cmp td{padding:8px 10px; border:1px solid var(--border); text-align:right;
+    font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .st-cmp th{background:var(--bg-sub); font-weight:600; color:var(--tx-soft); font-size:var(--fs-caption);}
+  .st-cmp td.k{text-align:left; color:var(--tx-faint); background:var(--bg-sub);
+    font-size:var(--fs-caption);}
+  .st-cmp th:first-child{text-align:left;}
+  .st-cmp td.best{background:var(--ok-bg); color:var(--ok); font-weight:600;}
+  .st-cmp td.best i{font-style:normal; margin-left:5px; font-size:var(--fs-caption); font-weight:400;}
+
+  /* 报价单表单 */
+  .st-qform{display:grid; grid-template-columns:minmax(0,1fr) 132px; gap:var(--sp-5) var(--sp-7); margin-bottom:12px;}
+  .st-qform label{display:block; font-size:var(--fs-caption); color:var(--tx-faint);}
+  .st-qform input{width:100%; margin-top:3px; padding:6px 9px; border:1px solid var(--border);
+    border-radius:var(--r-xs); background:var(--card); color:var(--text); font-size:var(--fs-xs); font-family:inherit;}
+  .st-qform input:focus{border-color:var(--primary); outline:none;}
+  .st-qform .st-qnote{grid-column:1 / -1;}
+
+  /* ── 报价单本身：打印件强制浅色（不跟随深色模式），所以这里刻意写死颜色 ── */
+  .st-quote-wrap{display:none;}
+  .st-quote-wrap .st-q{background:#fff; color:#111827; font-size:13px; line-height:1.6; padding:6px 0;}
+  .st-quote-wrap .st-q h1{font-size:21px; text-align:center; letter-spacing:.35em; margin:0 0 16px;
+    font-weight:600; color:#111827;}
+  .st-quote-wrap .st-q h2{font-size:13px; margin:18px 0 7px; padding-left:8px; border-left:3px solid #2563eb;
+    color:#111827; font-weight:600;}
+  .st-quote-wrap .st-q table{width:100%; border-collapse:collapse;}
+  .st-quote-wrap .st-q th,.st-quote-wrap .st-q td{border:1px solid #cbd5e1; padding:6px 9px;
+    text-align:left; vertical-align:top;}
+  .st-quote-wrap .st-q .n{text-align:right; font-variant-numeric:tabular-nums;}
+  .st-quote-wrap .st-q-meta th{background:#f1f5f9; width:88px; font-weight:600; white-space:nowrap;}
+  .st-quote-wrap .st-q-t thead th{background:#f1f5f9; font-weight:600;}
+  .st-quote-wrap .st-q-t tr.sum td{background:#eff6ff; font-weight:700; color:#1d4ed8;}
+  .st-quote-wrap .st-q-note p{margin:0 0 4px; font-size:12px; color:#374151;}
+  .st-quote-wrap .st-q-sign{margin-top:26px;}
+  .st-quote-wrap .st-q-sign th{background:#f1f5f9; width:96px; white-space:nowrap;}
+  .st-quote-wrap .st-q-sign td{height:52px;}
+
   /* 提示条 */
   .st-note{margin-top:var(--sp-6); padding:10px 12px; border-radius:var(--r-sm); font-size:var(--fs-xs);
     line-height:var(--lh-base); background:var(--bg-sub); border:1px solid var(--border); color:var(--tx-body);}
@@ -1005,6 +1174,24 @@
     .st-cfg-grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));}
     .st-share-list{max-height:104px;}
     .st-share-h em{display:none;}
+    /* 工作台表格：窄屏收起次要列，方案行改为可换行 */
+    .st-ptable-proj .st-prow-proj{display:flex; flex-wrap:wrap; gap:2px var(--sp-6); padding:8px 10px;}
+    .st-prow-proj > span{padding:0;}
+    .st-prow-proj > span:nth-child(1){flex:1 1 100%;}
+    .st-prow-proj > span:nth-child(2){flex:1 1 100%;}
+    .st-prow-proj > span:nth-child(3),.st-prow-proj > span:nth-child(4),.st-prow-proj > span:nth-child(5){flex:0 1 88px;}
+    .st-prow-proj .c7{margin-left:auto;}
+    .st-prow-mat{grid-template-columns:minmax(0,1fr) 74px 74px;}
+    .st-prow-mat .st-pu{display:none;}
+    .st-prow-tool{grid-template-columns:minmax(0,1fr) 92px;}
+    .st-prow-tool .st-pu{display:none;}
+    .st-ptable-plan .st-prow-plan{display:flex; flex-wrap:wrap; gap:2px var(--sp-6); padding:8px 10px;}
+    .st-prow-plan .c1{flex:1 1 100%; padding:0;}
+    .st-prow-plan .c2,.st-prow-plan .c3,.st-prow-plan .c4,.st-prow-plan .c5{padding:0;}
+    .st-prow-plan .c5{margin-left:auto;}
+    .st-qform{grid-template-columns:1fr;}
+    .st-reload p{font-size:var(--fs-caption);}
+    .st-planbar input{min-width:120px;}
     .st-tier{grid-template-columns:1fr auto 74px; padding:7px 11px; font-size:var(--fs-xs);}
   }
 
@@ -1301,6 +1488,15 @@
     a{color:var(--text) !important; text-decoration:none;}
     mark{background:#fff2a8 !important; color:var(--text) !important;}
     .ch-svg text{fill:#111 !important;}
+
+    /* 报价单：只印它自己（打印时它被临时挂到 body 上，所以这里按 body 的直接子元素隐藏其余内容） */
+    body.printing-quote{background:#fff !important; padding:0 !important;}
+    body.printing-quote > *:not(.st-quote-wrap){display:none !important;}
+    body.printing-quote .st-quote-wrap{display:block !important; max-width:none !important;}
+    body.printing-quote .st-quote-wrap .st-q{padding:0;}
+    body.printing-quote .st-q h2{page-break-after:avoid;}
+    body.printing-quote .st-q tr{page-break-inside:avoid;}
+    body.printing-quote .st-q thead{display:table-header-group;}
   }
   @media (max-width:760px){
     body.detail-open .wrap{padding-right:0;}
@@ -1651,6 +1847,7 @@
       </div>
       <div class="hero-stats" id="homeStats"></div>
     </div>
+    <div id="homeQuick"></div>
     <div class="panel" id="panelDaily"></div>
     <div class="home-panels">
       <div class="panel" id="panelOverview"></div>
@@ -2030,6 +2227,7 @@
 <script src="kb-quiz-add-8.js" defer></script>
 <script src="kb-cases2.js" defer></script>
 <script src="kb-changelog.js" defer></script>
+<script src="kb-workspace.js" defer></script>
 <script src="kb-step.js" defer></script>
 <script src="kb-step-view.js" defer></script>
 <script src="app.js" defer></script>

@@ -94,11 +94,26 @@
     for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
     return list[0];
   }
+
+  /* ══════════ 单价库取值 ══════════
+     优先用用户在「单价库」里改过的值（window.KB_WS 来自 kb-workspace.js），
+     没改过就沿用下面这些行业参考值。这样既能让报价贴合自己的供应商，
+     又不会因为旧数据把默认值卡死。 */
+  function WS() { return window.KB_WS; }
+  function pMat(m) { var w = WS(); return w ? w.matPrice(m.id, m.p) : m.p; }
+  function pDen(m) { var w = WS(); return w ? w.matDensity(m.id, m.d) : m.d; }
+  function pTool(key, dft) { var w = WS(); return w && w.toolOf ? w.toolOf(key, dft) : dft; }
   function moldCoefOf(matId) {
     var v = MOLD_COEF[matId];
     return v === undefined ? 0.38 : v;
   }
   function machineRate(tonnage) {
+    var w = WS();
+    if (w && w.rateTable) {
+      var t = w.rateTable();
+      for (var j = 0; j < t.length; j++) if (tonnage <= t[j].cap) return t[j].v;
+      return t.length ? t[t.length - 1].v : 160;
+    }
     for (var i = 0; i < RATE_TABLE.length; i++) if (tonnage <= RATE_TABLE[i][0]) return RATE_TABLE[i][1];
     return 160;
   }
@@ -306,19 +321,20 @@
     }
     var d = main.dim.slice().sort(function (x, y) { return y - x; });
     var area = d[0] * d[1] / 100;                                  // mm² → cm²
-    var base = 8500 * Math.pow(Math.max(area, 5) / 25, 0.55);      // 经验式：面积越小越便宜
-    base = Math.min(base, 350000);                                 // 软上限，避免超大面积外推过度
+    var baseN = pTool("base", 8500), baseP = pTool("baseP", 0.55), baseCap = pTool("baseCap", 350000);
+    var base = baseN * Math.pow(Math.max(area, 5) / 25, baseP);    // 经验式：面积越小越便宜
+    base = Math.min(base, baseCap);                                // 软上限，避免超大面积外推过度
 
     var cfg = group.cfg;
     var steel = byId(STEELS, cfg.steel), prec = byId(PRECISIONS, cfg.precision), fin = byId(FINISHES, cfg.finish);
     var cav = Math.max(cfg.cav || 1, 1);
-    var kCav = Math.pow(cav, 0.75);                                // 多腔成本递减（非线性）
+    var kCav = Math.pow(cav, pTool("cavP", 0.75));                  // 多腔成本递减（非线性）
     var core = base * kCav * steel.k * prec.k * fin.k;
-    var slideCost = (cfg.slides || 0) * 5000;                      // 滑块 / 行位：每组 5,000 元
-    var liftCost = (cfg.lifters || 0) * 3000;                      // 斜顶：每个 3,000 元
+    var slideCost = (cfg.slides || 0) * pTool("slide", 5000);       // 滑块 / 行位：每组 5,000 元
+    var liftCost = (cfg.lifters || 0) * pTool("lifter", 3000);      // 斜顶：每个 3,000 元
     var runCost = 0;
-    if (cfg.runner === "three") runCost = 4000;
-    else if (cfg.runner === "hot") runCost = 8000 + 1500 * cav;    // 热流道按点数
+    if (cfg.runner === "three") runCost = pTool("three", 4000);
+    else if (cfg.runner === "hot") runCost = pTool("hotBase", 8000) + pTool("hotPoint", 1500) * cav;   // 热流道按点数
 
     var est = core + slideCost + liftCost + runCost;
     var quoted = cfg.quote !== null && cfg.quote !== undefined && +cfg.quote > 0;
@@ -334,7 +350,7 @@
   /* 滑块 / 斜顶会让开合模多出侧向抽芯动作，周期随之变长 */
   function cycleOf(part, baseCycle) {
     var c = part.tool;
-    var k = 1 + 0.08 * (c.slides || 0) + 0.05 * (c.lifters || 0);
+    var k = 1 + pTool("slideCyc", 8) / 100 * (c.slides || 0) + pTool("liftCyc", 5) / 100 * (c.lifters || 0);
     if (c.runner === "three") k *= 1.10;
     else if (c.runner === "hot") k *= 0.96;
     return baseCycle * Math.min(k, 1.6);
@@ -370,11 +386,13 @@
 
     for (var i = 0; i < parts.length; i++) {
       var pt = parts[i], m = matById(pt.mat);
-      var netW = m.d > 0 ? (pt.vol / 1000) * m.d : 0;                 // 净重 g
+      var den = pDen(m);
+      var netW = den > 0 ? (pt.vol / 1000) * den : 0;                // 净重 g
       var rn = byId(RUNNERS, pt.tool.runner);
       var scrapW = netW * rn.scrap;                                   // 水口料重
       /* 材料费 = 净重(含损耗) 全价 + 水口料按回收折价后计入 */
-      var matCost = (netW * (1 + loss) + scrapW * (1 - RECYCLE)) * m.p / 1000;
+      var recycle = pTool("recycle", 62) / 100;
+      var matCost = (netW * (1 + loss) + scrapW * (1 - recycle)) * pMat(m) / 1000;
 
       var mi = partMachine(pt, rateK);
       var cycle = cycleOf(pt, +P.cycle);

@@ -657,6 +657,7 @@ function renderHome(){
   renderDaily();
   renderRecent();
   renderChangelog();
+  renderHomeQuick();
 }
 
 /* ══════════════ 首页：更新日志（可折叠，默认收起） ══════════════ */
@@ -1509,6 +1510,153 @@ function runCalc(c){
     <div class="cr-val">${esc(String(r.main.val))}<small>${esc(r.main.u||"")}</small></div>
     ${(r.extra&&r.extra.length) ? `<div class="cr-extra">${r.extra.map(x=>`<div><span>${esc(x.k)}</span><b>${esc(String(x.v))}</b></div>`).join("")}</div>` : ""}`;
 }
+/* ══════════════ 我的常用（首页快捷入口） ══════════════ */
+const MOD_LABEL = {
+  kb: "知识库", map: "学习地图", daily: "每日20题", quiz: "自测题库", wrong: "错题本",
+  review: "复习计划", stats: "学习数据", calc: "计算器", path: "30天路径", select: "选型决策",
+  formula: "公式速查", quick: "速查手册", check: "检查清单", tpl: "实战模板", case: "整机案例",
+  gloss: "术语词典", gallery: "参考图库", field: "实战宝典", compare: "知识点对比",
+  step: "STEP成本评估", fav: "我的收藏"
+};
+const MOD_DESC = {
+  step: "传 STEP，算体积 / 重量 / 模具费 / 单件成本",
+  calc: "13 个常用工程计算，输入会记住",
+  quick: "17 张速查表：塑料 / 公差 / 螺丝 / 安规",
+  check: "开模前逐项核对，别漏项",
+  formula: "42 个公式，照着套",
+  case: "6 款整机案例，看别人怎么做",
+  select: "选型决策树，纠结时走一遍",
+  gallery: "594 张实景参考图",
+  field: "避坑 30 例 · 缺陷排查 35 条 · 标准 72 项",
+  compare: "任选两条知识点并排看",
+  gloss: "139 条术语，跟供应商对得上话",
+  tpl: "4 份实战模板，直接改着用",
+  daily: "每天 20 题，碎片时间刷",
+  wrong: "错题自动收集，专治反复错",
+  quiz: "432 道题，按领域练",
+  map: "12 个领域的知识地图",
+  path: "6 周 29 天的学习计划",
+  kb: "198 条知识点全库",
+  stats: "掌握率与学习曲线",
+  review: "按记忆曲线安排复习",
+  fav: "收藏与笔记"
+};
+const HQ_DEFAULT = ["step", "calc", "quick", "check"];
+let hqEdit = false;
+
+function switchMod(id){
+  const b = document.querySelector('.nav-tab[data-mod="' + id + '"]');
+  if (b) b.click();
+}
+
+function renderHomeQuick(){
+  const host = document.getElementById("homeQuick");
+  if (!host) return;
+  const w = window.KB_WS;
+  let list = w ? w.shortList() : [];
+  const usingDefault = !list.length;
+  if (usingDefault) list = HQ_DEFAULT.slice();
+
+  host.innerHTML =
+    '<div class="hq-h"><b>我的常用</b>'
+    + '<span>' + (usingDefault ? "先放了几个最常用的，点「编辑」换成你自己的" : "点「编辑」可以增减") + '</span>'
+    + '<button class="hq-edit" id="hqEdit">' + (hqEdit ? "完成" : "编辑") + '</button></div>'
+    + '<div class="hq-grid">'
+    + list.map(id =>
+        '<button class="hq-item" data-mod="' + id + '">'
+        + '<b>' + esc(MOD_LABEL[id] || id) + '</b>'
+        + '<span>' + esc(MOD_DESC[id] || "") + '</span></button>').join("")
+    + '</div>'
+    + (hqEdit
+      ? '<div class="hq-pick">'
+        + Object.keys(MOD_LABEL).map(id =>
+            '<label class="hq-pick-i"><input type="checkbox" data-hqp="' + id + '"'
+            + (list.indexOf(id) >= 0 ? " checked" : "") + '><span>' + esc(MOD_LABEL[id]) + '</span></label>').join("")
+        + '<div class="hq-pick-t">最多钉 8 个；不选就恢复默认</div></div>'
+      : "");
+
+  Array.prototype.forEach.call(host.querySelectorAll(".hq-item"), b => {
+    b.onclick = () => switchMod(b.dataset.mod);
+  });
+  const ebtn = document.getElementById("hqEdit");
+  if (ebtn) ebtn.onclick = () => { hqEdit = !hqEdit; renderHomeQuick(); };
+  Array.prototype.forEach.call(host.querySelectorAll("[data-hqp]"), c => {
+    c.onchange = () => {
+      if (!w) return;
+      let cur = w.shortList();
+      if (!cur.length) cur = list.slice();   // 首次钉选：以当前显示的默认集合为起点
+      const i = cur.indexOf(c.dataset.hqp);
+      if (i >= 0) cur.splice(i, 1); else if (cur.length < 8) cur.push(c.dataset.hqp);
+      else { c.checked = false; return; }
+      w.shortSet(cur); renderHomeQuick();
+    };
+  });
+}
+
+/* ══════════════ 计算器：输入记忆 + 结果复制 ══════════════ */
+function calcMemApply(){
+  const w = window.KB_WS;
+  const cards = document.querySelectorAll("#calcBody .calc-card");
+  /* ① 先把上次填的值放回输入框（必须在 runCalc 之前，结果才对） */
+  if (w) {
+    document.querySelectorAll("#calcBody input[data-calc]").forEach(el => {
+      const m = w.calcGet(el.dataset.calc);
+      if (m && m[el.dataset.k] !== undefined && m[el.dataset.k] !== null) el.value = m[el.dataset.k];
+    });
+  }
+  /* ② 每张卡补两个按钮：复制结果 / 清空输入 */
+  cards.forEach((card, i) => {
+    const c = CALCS[i];
+    if (!c || card.querySelector(".calc-tools")) return;
+    const t = document.createElement("div");
+    t.className = "calc-tools";
+    t.innerHTML = '<button class="pill" data-ccopy="' + c.id + '">'
+      + '<svg class=ic aria-hidden=true><use href=#i-clipboard /></svg>复制结果</button>'
+      + '<button class="mini-t" data-creset="' + c.id + '">清空输入</button>';
+    card.appendChild(t);
+  });
+}
+function calcResultText(c){
+  const vals = [];
+  c.fields.forEach(f => {
+    const el = document.querySelector('input[data-calc="' + c.id + '"][data-k="' + f.k + '"]');
+    vals.push(f.l + " " + (el ? el.value : f.v));
+  });
+  const res = document.getElementById("res-" + c.id);
+  let main = "";
+  if (res) {
+    const l = res.querySelector(".cr-main"), v = res.querySelector(".cr-val");
+    if (v) main = (l ? l.textContent + " = " : "") + v.textContent.replace(/\s+/g, " ").trim();
+  }
+  const ex = [];
+  if (res) res.querySelectorAll(".cr-extra div").forEach(d => {
+    const sp = d.querySelector("span"), b = d.querySelector("b");
+    if (sp && b) ex.push("　· " + sp.textContent + "：" + b.textContent);
+  });
+  return "【" + c.name + "】\n输入：" + vals.join("　")
+    + "\n结果：" + main + (ex.length ? "\n" + ex.join("\n") : "")
+    + "\n（算于 " + new Date().toLocaleString("zh-CN") + "）";
+}
+function copyCalcResult(btn, c){
+  const txt = calcResultText(c);
+  const done = () => {
+    if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = "已复制";
+    setTimeout(() => { if (btn.dataset.orig) btn.innerHTML = btn.dataset.orig; }, 1200);
+  };
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); }
+    catch (e) { alert("复制失败，请手动选中结果复制"); }
+    ta.remove();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done).catch(fallback);
+  } else fallback();
+}
+
 function renderCalc(){
   document.getElementById("calcBody").innerHTML = CALCS.map(c=>`
     <div class="calc-card">
@@ -1520,6 +1668,7 @@ function renderCalc(){
       <div class="calc-res" id="res-${c.id}"></div>
       <div class="calc-formula"><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>${esc(c.formula)}</div>
     </div>`).join("");
+  calcMemApply();
   CALCS.forEach(c=>runCalc(c));
 }
 
@@ -2665,7 +2814,9 @@ function timeCardHTML(){
 
 /* ══════════════ 学习数据备份与恢复 ══════════════ */
 const LS_ALL = ["kb-progress-v1","kb-check-v2","kb-quiz-v1","kb-fav-v1","kb-note-v1","kb-tpl-v1",
-                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1","kb-daily20-v1","kb-review-v1","kb-time-v1","kb-goal-v1"];
+                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1","kb-daily20-v1","kb-review-v1","kb-time-v1","kb-goal-v1",
+                /* 工作台（kb-workspace.js）：单价库 / 报价方案 / 计算器记忆 / 项目台账 / 首页快捷 */
+                "kb-ws-price-v1","kb-ws-plan-v1","kb-ws-calc-v1","kb-ws-proj-v1","kb-ws-short-v1","kb-ws-auto-v1"];
 function exportData(){
   const bag = {};
   LS_ALL.forEach(k => { const v = localStorage.getItem(k); if(v !== null) bag[k] = v; });
@@ -3048,6 +3199,14 @@ document.getElementById("quizActions").addEventListener("click", e=>{
 document.getElementById("calcBody").addEventListener("input", e=>{
   const el = e.target.closest("input[data-calc]"); if(!el) return;
   const c = CALCS.find(x=>x.id===el.dataset.calc); if(c) runCalc(c);
+  /* 输入自动记住：切模块、刷新都不丢 */
+  const w = window.KB_WS; if(w) w.calcSet(el.dataset.calc, el.dataset.k, el.value);
+});
+document.getElementById("calcBody").addEventListener("click", e=>{
+  const cp = e.target.closest("[data-ccopy]");
+  if(cp){ const c = CALCS.find(x=>x.id===cp.dataset.ccopy); if(c) copyCalcResult(cp, c); return; }
+  const rs = e.target.closest("[data-creset]");
+  if(rs){ const w = window.KB_WS; if(w) w.calcReset(rs.dataset.creset); renderCalc(); return; }
 });
 
 // 实战宝典

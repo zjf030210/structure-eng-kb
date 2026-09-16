@@ -36,7 +36,14 @@
   var st = {
     parts: [], tree: [], params: {}, info: null,
     sel: -1, parsed: false, busy: false, err: "",
-    open: {}          // 展开了「开模设置」的零件索引
+    open: {},         // 展开了「开模设置」的零件索引
+    /* 方案与草稿 */
+    planId: "",       // 当前载入的方案 id（空 = 未保存）
+    planName: "",     // 当前方案名
+    fileSize: 0,      // 原始文件字节数，用于「同名文件」匹配
+    needMesh: false,  // 从保存的记录恢复时没有网格 → 3D 需要重新拖文件
+    applyMsg: "",     // 「已自动套用上次配置」之类的一次性提示
+    quote: null       // 报价单的抬头信息（客户 / 有效期 / 备注）
   };
   for (var k in S.PARAMS) st.params[k] = S.PARAMS[k].v;
 
@@ -380,7 +387,7 @@
 
   /* ══════════════ ③ 界面 ══════════════ */
   function uploadHTML() {
-    return ''
+    return resumeHTML()
       + '<div class="st-drop" id="stDrop" role="button" tabindex="0" aria-label="选择或拖入 STEP 文件">'
       + '  <div class="st-ic"><svg class="ic-lg" aria-hidden="true"><use href="#i-upload-cloud"/></svg></div>'
       + '  <h3>拖入 STEP 文件，或点击选择</h3>'
@@ -388,7 +395,9 @@
       + '  <div class="st-privacy">解析全部在你自己的浏览器里完成，文件不会上传到任何服务器。</div>'
       + '  <input type="file" id="stFile" accept=".step,.stp,.STEP,.STP,.igs,.iges,.brep" style="display:none">'
       + '</div>'
-      + '<div id="stStatus" class="st-privacy" style="text-align:center; margin-top:14px;"></div>';
+      + '<div id="stStatus" class="st-privacy" style="text-align:center; margin-top:14px;"></div>'
+      + '<div class="st-sec-plain"><h3><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>项目台账 <span class="st-h3n">在跑的产品的报价记录</span></h3>'
+      + projectsHTML() + '</div>';
   }
 
   function busyHTML(msg) {
@@ -408,17 +417,29 @@
       + '<b>' + esc(st.info.file) + '</b><span>' + esc(st.info.size) + '</span></div>'
       + '<button class="pill" id="stAgain"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg>换一个文件</button>'
       + '</div>');
+    h.push(planBarHTML());
+    if (st.applyMsg) h.push('<div class="st-applied"><svg class="ic" aria-hidden="true"><use href="#i-check-square"/></svg>' + esc(st.applyMsg) + '</div>');
 
     /* 左右分栏 */
     h.push('<div class="st-grid">');
 
     /* 左：3D + 概览 */
     h.push('<div>');
-    h.push('<div class="st-stage" id="stStage"><canvas id="stCanvas"></canvas>'
-      + '<div class="st-btns">'
-      + '<button class="st-mini" id="stReset" title="复位视角" aria-label="复位视角"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></button>'
-      + '</div>'
-      + '<div class="st-hint" id="stHint">拖拽旋转 · 滚轮缩放 · 点击零件查看该零件包围盒</div></div>');
+    h.push('<div class="st-stage" id="stStage">'
+      + (st.needMesh
+          ? '<div class="st-reload">'
+            + '<svg class="ic-lg" aria-hidden="true"><use href="#i-upload-cloud"/></svg>'
+            + '<b>这是从保存的记录恢复的方案</b>'
+            + '<p>成本、模具方案、导出都已经完整恢复。想看 3D 预览，把 <em>' + esc((st.info && st.info.file) || "STEP 文件") + '</em> 再拖进来一次就行 —— 同名文件会自动套用现在这套配置。</p>'
+            + '<button class="pill" id="stReloadPick"><svg class="ic" aria-hidden="true"><use href="#i-upload-cloud"/></svg>重新选择文件</button>'
+            + '<input type="file" id="stFile2" accept=".step,.stp,.STEP,.STP,.igs,.iges,.brep" style="display:none">'
+            + '</div>'
+          : '<canvas id="stCanvas"></canvas>'
+            + '<div class="st-btns">'
+            + '<button class="st-mini" id="stReset" title="复位视角" aria-label="复位视角"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></button>'
+            + '</div>'
+            + '<div class="st-hint" id="stHint">拖拽旋转 · 滚轮缩放 · 点击零件查看该零件包围盒</div>')
+      + '</div>');
     h.push('<div class="st-meta">'
       + '<div><span>零件数</span><b>' + e.n + ' 个</b></div>'
       + '<div><span>总体积</span><b>' + S.vol(e.volSum) + '</b></div>'
@@ -460,6 +481,24 @@
       + '<button class="pill" id="stPrompt"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>生成 AI 提示词</button>'
       + '<button class="pill" id="stCsv"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>导出 CSV（Excel）</button>'
       + '</div><div id="stPromptBox"></div></div>');
+
+    /* 正式报价单（给客户看的） */
+    h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>生成报价单</h3>'
+      + '<div class="st-privacy" style="margin:0 0 10px">CSV 是给工程师看的；这张是给客户 / 老板看的 —— 填好抬头点打印，在打印窗口里选「另存为 PDF」即可。</div>'
+      + quoteFormHTML()
+      + '<div class="st-tools"><button class="pill" id="stQuotePrint"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg>打印 / 存为 PDF</button></div></div>');
+
+    /* 方案管理 */
+    h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>方案与对比</h3>'
+      + plansSecHTML() + '</div>');
+
+    /* 单价库 */
+    h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg>单价库 <span class="st-h3n">把参考价改成你自己的实际价</span></h3>'
+      + priceSecHTML() + '</div>');
+
+    /* 项目台账 */
+    h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>项目台账 <span class="st-h3n">在跑的产品的报价记录</span></h3>'
+      + projectsHTML() + '</div>');
 
     return h.join("");
   }
@@ -595,6 +634,8 @@
     g.push('<label>模具厂报价 (元，留空=按估算)<input type="number" min="0" step="any" data-c="quote" data-i="' + i + '" value="' + (t.quote === null || t.quote === undefined ? "" : t.quote) + '"></label>');
     g.push('</div>');
     g.push(sharePickerHTML(i));
+    g.push('<div class="st-tools" style="margin-top:10px">'
+      + '<button class="pill" data-push="' + i + '"><svg class="ic" aria-hidden="true"><use href="#i-calculator"/></svg>把这个零件带进成本估算</button></div>');
     g.push('<div class="st-cfg-note">' + cfgNoteHTML(i) + '</div>');
     g.push('</div>');
     return g.join("");
@@ -680,6 +721,519 @@
   }
 
   /* ══════════════ 渲染与事件 ══════════════ */
+  /* ══════════════ 方案 / 单价库 / 报价单 / 自动草稿 ══════════════ */
+  var W = function () { return window.KB_WS; };
+
+  function fmtTime(ts) {
+    if (!ts) return "—";
+    var d = new Date(ts), p = function (x) { return (x < 10 ? "0" : "") + x; };
+    return (d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+  }
+  function plusDays(n) {
+    var d = new Date(Date.now() + (isFinite(+n) ? +n : 30) * 864e5), p = function (x) { return (x < 10 ? "0" : "") + x; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+
+  /* 方案里的零件：补齐默认字段（老记录也能载入） */
+  function normParts(list) {
+    return (list || []).map(function (p, i) {
+      var tool = {}, k;
+      for (k in (p.tool || {})) tool[k] = p.tool[k];
+      return {
+        id: i, nodeId: p.nodeId, depth: p.depth || 0, path: p.path || p.name,
+        name: p.name, rawName: p.rawName || p.name, vol: p.vol, area: p.area, tris: p.tris,
+        dim: p.dim || [0, 0, 0], min: p.min || null, max: p.max || null,
+        mat: p.mat || "abs", on: p.on !== false, tool: tool
+      };
+    });
+  }
+  function packParts(list) {
+    return (list || []).map(function (p) {
+      return { name: p.name, nodeId: p.nodeId, depth: p.depth, path: p.path,
+        vol: p.vol, area: p.area, tris: p.tris, dim: p.dim, min: p.min, max: p.max,
+        mat: p.mat, on: p.on, tool: p.tool };
+    });
+  }
+  function packPlan(name) {
+    return {
+      id: st.planId || "",
+      name: name || st.planName || (st.info && st.info.file) || "未命名方案",
+      info: st.info || {}, params: st.params, parts: packParts(st.parts)
+    };
+  }
+  function planParams(rec) {
+    var P2 = {}, k;
+    for (k in S.PARAMS) P2[k] = S.PARAMS[k].v;
+    for (k in (rec.params || {})) if (rec.params.hasOwnProperty(k)) P2[k] = rec.params[k];
+    return P2;
+  }
+  function estimateOfPlan(rec) { return S.estimate(normParts(rec.parts), planParams(rec)); }
+
+  /* 载入方案：几何量都在记录里，所以成本/模具/导出能完整恢复，只有 3D 需要重新拖文件 */
+  function applyPlan(rec) {
+    st.parts = normParts(rec.parts);
+    st.tree = []; st.meshes = null; st.geom = null;
+    st.info = rec.info || { file: "（已保存的方案）", size: "", bbox: "—", tris: 0 };
+    st.params = planParams(rec);
+    st.planId = rec.id || ""; st.planName = rec.name || "";
+    st.sel = -1; st.open = {}; st.err = ""; st.busy = false;
+    st.parsed = true; st.needMesh = true;
+    mount();
+  }
+
+  /* 找出与这个文件匹配的已存配置（先自动草稿，再方案） */
+  function matchSaved(name, size) {
+    var w = W(); if (!w) return null;
+    var a = w.getAuto();
+    if (a && a.file === name && (!size || !a.size || a.size === size)) return a;
+    var list = w.plans();
+    for (var i = 0; i < list.length; i++) {
+      var f = list[i].info || {};
+      if (f.file === name && (!size || !f.size || f.size === size)) return list[i];
+    }
+    return null;
+  }
+  /* 把已存配置按零件名套到新解析出的零件上 */
+  function applyConfigToParts(parts, rec) {
+    var src = rec.parts || [], byName = {}, i, k;
+    for (i = 0; i < src.length; i++) if (!byName[src[i].name]) byName[src[i].name] = src[i];
+    var hit = 0;
+    for (i = 0; i < parts.length; i++) {
+      var p = parts[i], t = byName[p.name] || (src[i] && src[i].name === p.name ? src[i] : null);
+      if (!t) continue;
+      p.mat = t.mat || p.mat;
+      p.on = t.on !== false;
+      if (t.tool) for (k in t.tool) if (t.tool.hasOwnProperty(k)) p.tool[k] = t.tool[k];
+      hit++;
+    }
+    return hit;
+  }
+
+  /* ══════ 自动草稿：改动后延迟写入，页面隐藏时立刻落盘 ══════ */
+  var autoTimer = null;
+  function autoFlush() {
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    var w = W();
+    if (!w || !st.parsed || !st.parts.length) return;
+    var rec = packPlan(st.planName || (st.info && st.info.file));
+    rec.auto = true;
+    rec.file = (st.info && st.info.file) || "";
+    rec.size = st.fileSize || 0;
+    w.setAuto(rec);
+  }
+  function autoSave(delay) {
+    if (!st.parsed || !st.parts.length || st.needMesh && !st.parts.length) return;
+    if (autoTimer) clearTimeout(autoTimer);
+    autoTimer = setTimeout(autoFlush, delay === undefined ? 1200 : delay);
+  }
+  window.addEventListener("beforeunload", function () { autoFlush(); });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") autoFlush();
+  });
+
+  /* ══════ 上传页：继续上次的报价 ══════ */
+  function resumeHTML() {
+    var w = W(); if (!w) return "";
+    var a = w.getAuto();
+    if (!a || !a.parts || !a.parts.length) return "";
+    var e = null;
+    try { e = estimateOfPlan(a); } catch (x) { e = null; }
+    var line = esc(a.file || a.name || "（未命名）") + " · " + a.parts.length + " 个零件 · " + fmtTime(a.at);
+    if (e) line += " · 单件成本 " + S.money(e.total);
+    return '<div class="st-resume">'
+      + '<div class="st-resume-h"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>'
+      + '<b>上次的报价还在</b><span>' + line + '</span></div>'
+      + '<div class="st-tools">'
+      + '<button class="pill" id="stResume"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg>继续上次的报价</button>'
+      + '<button class="pill" id="stResumeDrop">都清掉，重新开始</button>'
+      + '</div></div>';
+  }
+
+  /* ══════ 结果页顶栏：当前方案 ══════ */
+  function planBarHTML() {
+    var w = W(), n = w ? w.plans().length : 0;
+    return '<div class="st-planbar">'
+      + '<span class="st-pb-l">方案名</span>'
+      + '<input id="stPlanName" type="text" value="' + esc(st.planName || "") + '" placeholder="如：夜灯A-4穴ABS（不填就按文件名）">'
+      + '<button class="pill" id="stPlanSave"><svg class="ic" aria-hidden="true"><use href="#i-save"/></svg>保存方案</button>'
+      + '<span class="st-pb-n">已存 ' + n + ' 个</span>'
+      + '</div>';
+  }
+
+  /* ══════ 单价库 ══════ */
+  function priceSecHTML() {
+    var w = W(); if (!w) return '<div class="st-empty">单价库未加载</div>';
+    var L = [];
+    L.push('<div class="st-price">');
+    L.push('<div class="st-privacy" style="margin:0 0 12px">下面是<b>行业参考值</b>。改成你自己供应商的真实价格后，会立刻作用于所有报价 —— 只存你改过的项，没改的继续跟随参考值。</div>');
+
+    L.push('<div class="st-ph"><b>材料单价与密度</b><span>元 / kg　·　密度 g/cm³</span>'
+      + '<button class="st-mini-t" data-wreset="mat">恢复材料默认</button></div>');
+    L.push('<div class="st-ptable">');
+    L.push('<div class="st-prow st-prow-mat head"><span>材料</span><span>密度</span><span>单价</span><span class="st-pu">用途</span></div>');
+    w.mats().forEach(function (m) {
+      L.push('<div class="st-prow st-prow-mat">'
+        + '<span class="st-pn">' + esc(m.n) + (m.pChg || m.dChg ? '<i>已改</i>' : '') + '</span>'
+        + '<span><input type="number" step="any" min="0" data-wp="den" data-wid="' + m.id + '" value="' + m.d + '" title="默认 ' + m.d0 + '"></span>'
+        + '<span><input type="number" step="any" min="0" data-wp="mat" data-wid="' + m.id + '" value="' + m.p + '" title="默认 ' + m.p0 + '"></span>'
+        + '<span class="st-pu">' + esc(m.use || "") + '</span></div>');
+    });
+    L.push('</div>');
+
+    L.push('<div class="st-ph"><b>模具结构单价与系数</b><span>滑块 / 斜顶 / 浇口按行业报价区间</span>'
+      + '<button class="st-mini-t" data-wreset="tool">恢复默认</button></div>');
+    L.push('<div class="st-ptable st-ptable-tool">');
+    w.TOOL_DEF.forEach(function (t) {
+      var cur = w.toolOf(t.k, t.v), chg = cur !== t.v;
+      L.push('<div class="st-prow st-prow-tool">'
+        + '<span class="st-pn">' + esc(t.n) + (chg ? '<i>已改</i>' : '') + '</span>'
+        + '<span><input type="number" step="' + (t.step || "any") + '" min="0" data-wt="' + t.k + '" value="' + cur + '" title="默认 ' + t.v + '"></span>'
+        + '<span class="st-pu">' + esc(t.d || "") + '</span></div>');
+    });
+    L.push('</div>');
+
+    L.push('<div class="st-ph"><b>机时费档位</b><span>按注塑机吨位区间，元 / 小时</span>'
+      + '<button class="st-mini-t" data-wreset="rate">恢复默认</button></div>');
+    L.push('<div class="st-ptable st-ptable-rate">');
+    w.rateTable().forEach(function (r, i) {
+      var lab = r.cap === Infinity ? "> 650 t" : (i === 0 ? "≤ 80 t" : "≤ " + r.cap + " t");
+      L.push('<div class="st-prow st-prow-rate">'
+        + '<span class="st-pn">' + lab + (r.chg ? '<i>已改</i>' : '') + '</span>'
+        + '<span><input type="number" step="any" min="0" data-wr="' + i + '" value="' + r.v + '" title="默认 ' + r.v0 + '"></span></div>');
+    });
+    L.push('</div>');
+
+    L.push('<div class="st-pfoot"><span class="st-privacy" style="margin:0">已自定义 <b>' + w.changedCount() + '</b> 项</span>'
+      + '<button class="pill" data-wact2="export"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>导出单价库</button>'
+      + '<button class="pill" data-wact2="import"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>导入单价库</button>'
+      + '<button class="pill" data-wact2="resetAll">全部恢复默认</button>'
+      + '<input type="file" id="stPriceFile" accept=".json" style="display:none"></div>');
+    L.push('</div>');
+    return L.join("");
+  }
+
+  /* ══════ 方案列表 + 对比 ══════ */
+  function plansSecHTML() {
+    var w = W(); if (!w) return "";
+    var list = w.plans(), L = [];
+    L.push('<div class="st-privacy" style="margin:0 0 12px">模型和配置会自动留底（刷新、关掉页面都不丢）。把成套的配置「保存方案」，之后可以随时载入，或者勾两个并排比一比哪个划算。</div>');
+    if (!list.length) {
+      L.push('<div class="st-empty">还没有保存过方案。在上面填个名字，点「保存方案」就行。</div>');
+      L.push('<div id="stCompare"></div>');
+      return L.join("");
+    }
+    L.push('<div class="st-ptable st-ptable-plan">');
+    L.push('<div class="st-prow st-prow-plan head"><span class="c1">方案</span><span class="c2">单件成本</span><span class="c3">模具投入</span><span class="c4">保存于</span><span class="c5">操作</span></div>');
+    list.forEach(function (p) {
+      var e = null; try { e = estimateOfPlan(p); } catch (x) { e = null; }
+      L.push('<div class="st-prow st-prow-plan' + (p.id === st.planId ? " on" : "") + '">'
+        + '<span class="c1"><input type="checkbox" data-pcmp="' + p.id + '" aria-label="选择对比">'
+        + '<b>' + esc(p.name) + '</b><i>' + (p.parts ? p.parts.length : 0) + ' 个零件 · ' + esc((p.info && p.info.file) || "") + '</i></span>'
+        + '<span class="c2">' + (e ? S.money(e.total) : "—") + '</span>'
+        + '<span class="c3">' + (e ? S.fix(e.moldTotal, 0) + " 元" : "—") + '</span>'
+        + '<span class="c4">' + fmtTime(p.at) + '</span>'
+        + '<span class="c5"><button data-pact="load" data-pid="' + p.id + '">载入</button>'
+        + '<button data-pact="rename" data-pid="' + p.id + '">改名</button>'
+        + '<button data-pact="del" data-pid="' + p.id + '">删除</button></span></div>');
+    });
+    L.push('</div>');
+    L.push('<div class="st-pfoot"><button class="pill" data-pact="compare">并排对比选中的方案</button>'
+      + '<span class="st-privacy" style="margin:0">勾选 2-3 个再点</span></div>');
+    L.push('<div id="stCompare"></div>');
+    return L.join("");
+  }
+
+  function compareHTML(ids) {
+    var w = W(); if (!w) return "";
+    var recs = ids.map(function (id) { return w.getPlan(id); }).filter(Boolean);
+    if (recs.length < 2) return '<div class="st-empty">至少勾选 2 个方案才能对比。</div>';
+    var cols = recs.map(function (r) {
+      var mats = {}, i;
+      for (i = 0; i < (r.parts || []).length; i++) mats[r.parts[i].mat] = 1;
+      var names = [];
+      for (var k in mats) if (mats.hasOwnProperty(k)) names.push(S.matById(k).n);
+      return { name: r.name, e: estimateOfPlan(r), mats: names };
+    });
+    var rows = [
+      ["单件成本", function (c) { return S.money(c.e.total); }, "total"],
+      ["　材料费", function (c) { return S.money(c.e.mat); }],
+      ["　加工费", function (c) { return S.money(c.e.mach); }],
+      ["　模具摊销", function (c) { return S.money(c.e.amort); }],
+      ["模具投入", function (c) { return S.fix(c.e.moldTotal, 0) + " 元"; }, "moldTotal"],
+      ["模具套数", function (c) { return c.e.molds.length + " 套"; }],
+      ["总重量", function (c) { return S.grams(c.e.weighted); }],
+      ["计入零件", function (c) { return c.e.n + " 个"; }],
+      ["订单量", function (c) { return S.fix(c.e.qty, 0) + " 件"; }],
+      ["用到的材料", function (c) { return c.mats.length + " 种"; }]
+    ];
+    var best = {};
+    rows.forEach(function (r) {
+      if (!r[2]) return;
+      var idx = -1, val = Infinity;
+      cols.forEach(function (c, i) { var v = c.e[r[2]]; if (v < val) { val = v; idx = i; } });
+      best[r[0]] = idx;
+    });
+    var L = ['<div class="st-cmp-wrap"><table class="st-cmp"><thead><tr><th>指标</th>'];
+    cols.forEach(function (c) { L.push('<th>' + esc(c.name) + '</th>'); });
+    L.push('</tr></thead><tbody>');
+    rows.forEach(function (r) {
+      L.push('<tr><td class="k">' + esc(r[0]) + '</td>');
+      cols.forEach(function (c, i) {
+        var good = best[r[0]] === i;
+        L.push('<td' + (good ? ' class="best"' : '') + '>' + esc(r[1](c)) + (good ? '<i>最优</i>' : '') + '</td>');
+      });
+      L.push('</tr>');
+    });
+    L.push('</tbody></table></div>');
+    return L.join("");
+  }
+
+  /* ══════ 报价单（打印 / 存 PDF） ══════ */
+  function quoteFormHTML() {
+    if (!st.quote) st.quote = { customer: "", valid: 30, note: "" };
+    var q = st.quote;
+    return '<div class="st-qform">'
+      + '<label>客户 / 项目<input id="stQCustomer" type="text" value="' + esc(q.customer) + '" placeholder="填了会印在报价单上"></label>'
+      + '<label>有效期 (天)<input id="stQValid" type="number" min="1" step="1" value="' + q.valid + '"></label>'
+      + '<label class="st-qnote">备注<input id="stQNote" type="text" value="' + esc(q.note) + '" placeholder="如：以上为不含税单价，模具费预付 50%"></label>'
+      + '</div>';
+  }
+  function w0matsTxt() {
+    var w = W(), ids = {}, i, arr = [];
+    for (i = 0; i < st.parts.length; i++) if (st.parts[i].on) ids[st.parts[i].mat] = 1;
+    var all = w ? w.mats() : [];
+    for (var id in ids) if (ids.hasOwnProperty(id)) {
+      for (i = 0; i < all.length; i++) if (all[i].id === id) arr.push(all[i].n + " " + all[i].p + " 元/kg");
+    }
+    return arr.length ? arr.join("、") : "行业参考值";
+  }
+  function quoteSheetHTML() {
+    var e = S.estimate(st.parts, st.params), q = st.quote || {};
+    var L = [];
+    L.push('<div class="st-q">');
+    L.push('<h1>零件报价单</h1>');
+    L.push('<table class="st-q-meta"><tbody>');
+    L.push('<tr><th>产品 / 项目</th><td>' + esc(st.planName || (st.info && st.info.file) || "—") + '</td>'
+      + '<th>报价日期</th><td>' + today() + '</td></tr>');
+    L.push('<tr><th>客户</th><td>' + esc(q.customer || "—") + '</td>'
+      + '<th>有效期</th><td>' + (q.valid || 30) + ' 天（至 ' + plusDays(q.valid) + '）</td></tr>');
+    L.push('</tbody></table>');
+
+    L.push('<h2>一、单件成本构成</h2>');
+    L.push('<table class="st-q-t"><tbody>');
+    var lines = [
+      ["材料费（含损耗；水口料按回收折价抵扣）", e.mat],
+      ["加工费（按机台吨位与模穴数分摊）", e.mach],
+      ["良率损失", e.yldLoss],
+      ["二次加工 / 表面处理", e.post],
+      ["包装", e.pack],
+      ["组装", e.asm],
+      ["模具摊销（模具投入 " + S.fix(e.moldTotal, 0) + " 元 ÷ " + S.fix(e.qty, 0) + " 件）", e.amort]
+    ];
+    lines.forEach(function (r) {
+      if (!r[1]) return;
+      L.push('<tr><td>' + esc(r[0]) + '</td><td class="n">' + S.money(r[1]) + '</td></tr>');
+    });
+    L.push('<tr class="sum"><td>单件成本合计</td><td class="n">' + S.money(e.total) + '</td></tr>');
+    L.push('</tbody></table>');
+
+    var tiers = S.tiers(st.parts, st.params, [10000, 50000, 100000, 300000, 500000]);
+    L.push('<h2>二、订单量阶梯价</h2>');
+    L.push('<table class="st-q-t"><thead><tr><th>订单量（件）</th>');
+    tiers.forEach(function (t) { L.push('<th class="n">' + S.fix(t.qty, 0) + '</th>'); });
+    L.push('</tr></thead><tbody><tr><td>单件单价（元）</td>');
+    tiers.forEach(function (t) { L.push('<td class="n">' + S.fix(t.unit, 3) + '</td>'); });
+    L.push('</tr><tr><td>其中模具摊销</td>');
+    tiers.forEach(function (t) { L.push('<td class="n">' + S.fix(t.amort, 4) + '</td>'); });
+    L.push('</tr></tbody></table>');
+
+    L.push('<h2>三、零件明细</h2>');
+    L.push('<table class="st-q-t"><thead><tr><th>序号</th><th>零件名称</th><th>材料</th>'
+      + '<th class="n">体积(cm³)</th><th class="n">重量(g)</th><th class="n">模穴</th>'
+      + '<th class="n">材料费</th><th class="n">加工费</th><th class="n">模具摊销</th><th class="n">小计</th></tr></thead><tbody>');
+    var k = 0;
+    e.perPart.forEach(function (r) {
+      if (!r.pt.on) return;
+      k++;
+      L.push('<tr><td>' + k + '</td><td>' + esc(r.pt.name) + '</td><td>' + esc(S.matById(r.pt.mat).n) + '</td>'
+        + '<td class="n">' + S.fix(r.pt.vol / 1000, 2) + '</td><td class="n">' + S.fix(r.netW, 2) + '</td>'
+        + '<td class="n">' + r.cav + '</td><td class="n">' + S.fix(r.mat, 4) + '</td>'
+        + '<td class="n">' + S.fix(r.mach, 4) + '</td><td class="n">' + S.fix(r.amort, 4) + '</td>'
+        + '<td class="n">' + S.fix(r.mat + r.mach + r.post + r.amort, 4) + '</td></tr>');
+    });
+    L.push('</tbody></table>');
+
+    L.push('<h2>四、模具投入</h2>');
+    L.push('<table class="st-q-t"><thead><tr><th>模具</th><th>涉及零件</th><th class="n">穴数</th>'
+      + '<th>钢材</th><th>浇口</th><th class="n">滑块</th><th class="n">斜顶</th><th class="n">金额(元)</th></tr></thead><tbody>');
+    e.molds.forEach(function (m, i) {
+      L.push('<tr><td>模 ' + (i + 1) + '</td><td>' + esc(m.members.map(function (x) { return st.parts[x].name; }).join("、")) + '</td>'
+        + '<td class="n">' + m.cav + '</td><td>' + esc(m.steel.n) + '</td><td>' + esc(S.byId(S.RUNNERS, m.cfg.runner).n) + '</td>'
+        + '<td class="n">' + (m.cfg.slides || 0) + '</td><td class="n">' + (m.cfg.lifters || 0) + '</td>'
+        + '<td class="n">' + S.fix(m.total, 0) + '</td></tr>');
+    });
+    L.push('<tr class="sum"><td colspan="7">模具总投入</td><td class="n">' + S.fix(e.moldTotal, 0) + '</td></tr>');
+    L.push('</tbody></table>');
+
+    L.push('<h2>五、说明</h2>');
+    L.push('<div class="st-q-note">'
+      + '<p>1. 以上单价按订单量 ' + S.fix(e.qty, 0) + ' 件核算；数量变化时单价需重新确认。</p>'
+      + '<p>2. 材料单价按「' + esc(w0matsTxt()) + '」核算。</p>'
+      + '<p>3. 报价不含运费、税费与认证费用；如需含入请另行说明。</p>'
+      + (st.quote && st.quote.note ? '<p>4. ' + esc(st.quote.note) + '</p>' : '')
+      + '</div>');
+    L.push('<table class="st-q-sign"><tbody><tr><th>供方（盖章）</th><td></td><th>需方（盖章）</th><td></td></tr></tbody></table>');
+    L.push('</div>');
+    return L.join("");
+  }
+  /* 打印报价单：临时把报价单挂到 <body> 上（放在页面内部会被层级规则连带隐藏），
+     打完再摘掉。打印件强制浅色，不跟随深色模式。 */
+  function printQuote() {
+    var c = $("stQCustomer"), v = $("stQValid"), nt = $("stQNote");
+    st.quote = {
+      customer: c ? c.value : "",
+      valid: v && isFinite(parseFloat(v.value)) ? parseFloat(v.value) : 30,
+      note: nt ? nt.value : ""
+    };
+    var host = document.createElement("div");
+    host.className = "st-quote-wrap";
+    host.id = "stQuoteSheet";
+    host.innerHTML = quoteSheetHTML();
+    document.body.appendChild(host);
+    document.body.classList.add("printing-quote");
+    setTimeout(function () {
+      window.print();
+      setTimeout(function () {
+        document.body.classList.remove("printing-quote");
+        if (host.parentNode) host.parentNode.removeChild(host);
+      }, 600);
+    }, 80);
+  }
+
+
+  /* ══════════════ 模块联动：STEP → 成本估算计算器 ══════════════ */
+  function pushToCalc(i) {
+    var pt = st.parts[i];
+    if (!pt) return;
+    var e = S.estimate(st.parts, st.params), r = null, k;
+    for (k = 0; k < e.perPart.length; k++) if (e.perPart[k].i === i) r = e.perPart[k];
+    if (!r) return;
+    var w = W(), m = S.matById(pt.mat);
+    var vals = {
+      w: Math.round(r.netW * 100) / 100,
+      price: Math.round((w ? w.matPrice(m.id, m.p) : m.p) * 100) / 100,
+      loss: +st.params.loss,
+      rate: Math.round(r.rate * 10) / 10,
+      cycle: Math.round(r.cycle * 10) / 10,
+      cav: r.cav,
+      yield: +st.params.yield,
+      extra: Math.round(((+pt.tool.post) || 0) + (+st.params.pack || 0) + (+st.params.asm || 0))
+    };
+    if (w) for (k in vals) if (vals.hasOwnProperty(k)) w.calcSet("cost", k, vals[k]);
+    switchMod("calc");
+    setTimeout(function () {
+      var card = null, cards = document.querySelectorAll("#calcBody .calc-card");
+      Array.prototype.forEach.call(cards, function (c) {
+        if (c.querySelector("h4") && c.querySelector("h4").textContent.indexOf("塑料件成本估算") >= 0) card = c;
+      });
+      if (!card) return;
+      try { card.scrollIntoView({ block: "center" }); } catch (e2) {}
+      card.classList.add("hi");
+      setTimeout(function () { card.classList.remove("hi"); }, 1800);
+    }, 260);
+  }
+
+  /* ══════════════ 项目台账 ══════════════ */
+  function projRowHTML(j) {
+    var w = W();
+    return '<div class="st-prow st-prow-proj">'
+      + '<span><input type="text" data-pj="name" data-jid="' + j.id + '" value="' + esc(j.name) + '" placeholder="产品名"></span>'
+      + '<span><input type="text" data-pj="customer" data-jid="' + j.id + '" value="' + esc(j.customer) + '" placeholder="客户"></span>'
+      + '<span><input type="number" step="any" min="0" data-pj="qty" data-jid="' + j.id + '" value="' + (j.qty || "") + '" placeholder="订单量"></span>'
+      + '<span><input type="number" step="any" min="0" data-pj="unitCost" data-jid="' + j.id + '" value="' + (j.unitCost || "") + '" placeholder="成本"></span>'
+      + '<span><input type="number" step="any" min="0" data-pj="price" data-jid="' + j.id + '" value="' + (j.price || "") + '" placeholder="报价"></span>'
+      + '<span><select data-pj="status" data-jid="' + j.id + '">'
+        + (w ? w.PROJ_STATUS.map(function (s) {
+            return '<option value="' + s + '"' + (s === j.status ? " selected" : "") + '>' + s + '</option>';
+          }).join("") : "")
+      + '</select></span>'
+      + '<span class="c7"><b>' + (j.price && j.unitCost ? S.fix(j.price - j.unitCost, 3) : "—") + '</b>'
+        + '<i>' + (j.price && j.unitCost ? (j.unitCost ? "毛利 " + Math.round((j.price - j.unitCost) / j.price * 100) + "%" : "") : "") + '</i></span>'
+      + '<span class="c8"><button data-jact="del" data-jid="' + j.id + '">删除</button></span>'
+      + '</div>';
+  }
+  function projectsHTML() {
+    var w = W(); if (!w) return "";
+    var list = w.projects();
+    var L = ['<div class="st-proj">'];
+    L.push('<div class="st-privacy" style="margin:0 0 12px">在跑的产品的报价记录：客户、订单量、成本、报价、状态。'
+      + '和「方案」不同 —— 方案是<b>一套配置</b>，台账是<b>一个产品这一单</b>。存在你自己的浏览器里，可随备份一起导出。</div>');
+    if (st.parsed && st.parts.length) {
+      L.push('<div class="st-tools" style="margin-bottom:10px">'
+        + '<button class="pill" data-jact="fromquote"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>把当前报价存进台账</button></div>');
+    }
+    if (!list.length) {
+      L.push('<div class="st-empty">还没有记录。上面那个按钮可以直接从当前报价建一条，也可以点下面「新增一行」手填。</div>');
+    } else {
+      L.push('<div class="st-ptable st-ptable-proj">');
+      L.push('<div class="st-prow st-prow-proj head"><span>产品</span><span>客户</span><span>订单量</span>'
+        + '<span>单件成本</span><span>报价</span><span>状态</span><span class="c7">毛利</span><span class="c8">操作</span></div>');
+      list.forEach(function (j) { L.push(projRowHTML(j)); });
+      L.push('</div>');
+      L.push('<div class="st-pfoot"><span class="st-privacy" style="margin:0">共 ' + list.length + ' 条'
+        + (list.length && list.some(function (x) { return x.moldCost; })
+            ? '　·　模具投入合计 ' + S.fix(list.reduce(function (a, x) { return a + (+x.moldCost || 0); }, 0), 0) + ' 元'
+            : '') + '</span></div>');
+    }
+    L.push('<div class="st-pfoot"><button class="pill" data-jact="add">新增一行</button>'
+      + (list.length ? '<button class="pill" data-jact="csv"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>导出台账 CSV</button>' : '')
+      + (list.length ? '<button class="pill" data-jact="clear">清空台账</button>' : '')
+      + '</div></div>');
+    return L.join("");
+  }
+  function projectFromQuote() {
+    var w = W(); if (!w) return;
+    var e = S.estimate(st.parts, st.params);
+    var top = null;
+    st.parts.forEach(function (p) { if (p.on && (!top || p.vol > top.vol)) top = p; });
+    w.saveProject({
+      name: st.planName || (st.info && st.info.file) || "未命名产品",
+      customer: (st.quote && st.quote.customer) || "",
+      qty: st.params.qty,
+      mat: top ? S.matById(top.mat).n : "",
+      unitCost: Math.round(e.total * 1000) / 1000,
+      moldCost: Math.round(e.moldTotal),
+      price: +st.params.target || 0,
+      status: "报价中",
+      planId: st.planId || ""
+    });
+    refreshSection("项目台账", '<h3><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>项目台账 <span class="st-h3n">在跑的产品的报价记录</span></h3>' + projectsHTML());
+  }
+  /* 按标题局部重绘某个区块（避免整页重绘丢滚动位置） */
+  function refreshSection(title, html) {
+    var secs = document.querySelectorAll("#stepBody .st-sec, #stepBody .st-sec-plain");
+    Array.prototype.forEach.call(secs, function (sec) {
+      var h = sec.querySelector("h3");
+      if (h && h.textContent.indexOf(title) >= 0) sec.innerHTML = html;
+    });
+  }
+  function projCsv() {
+    var w = W(); if (!w) return "";
+    var q = function (v) { var s = String(v === undefined || v === null ? "" : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    var L = [["产品", "客户", "订单量", "材料", "单件成本(元)", "模具费(元)", "报价(元)", "毛利(元)", "毛利率", "状态", "备注"].map(q).join(",")];
+    w.projects().forEach(function (j) {
+      var gp = j.price && j.unitCost ? j.price - j.unitCost : "";
+      L.push([j.name, j.customer, j.qty || "", j.mat || "", j.unitCost || "", j.moldCost || "", j.price || "",
+        gp === "" ? "" : S.fix(gp, 3), gp === "" ? "" : Math.round(gp / j.price * 100) + "%",
+        j.status || "", j.note || ""].map(q).join(","));
+    });
+    return L.join("\n");
+  }
+
   var viewer = null;
 
   function mount() {
@@ -783,9 +1337,23 @@
       var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
       if (f) handle(f);
     });
+    /* 继续上次的报价 / 清掉草稿 */
+    var rs = $("stResume"), rd = $("stResumeDrop"), w = W();
+    if (rs && w) rs.onclick = function () {
+      var a = w.getAuto();
+      if (a) { st.applyMsg = ""; applyPlan(a); }
+    };
+    if (rd && w) rd.onclick = function () {
+      if (!confirm("清掉自动保存的草稿？清掉后刷新页面就不能恢复这次的结果了（已保存的方案不受影响）。")) return;
+      w.clearAuto();
+      mount();
+    };
   }
 
   function handle(file) {
+    st.fileSize = file.size || 0;
+    st.applyMsg = "";
+    st.planId = ""; st.planName = "";
     var mb = file.size / 1024 / 1024;
     if (mb > 120) { st.err = "文件超过 120 MB，浏览器端解析可能失败，建议先在 CAD 里精简或分拆装配体"; }
     st.busy = true; st.busyMsg = "正在读取 " + file.name + " …";
@@ -820,7 +1388,17 @@
         tris: tris
       };
       st.parsed = true;
+      st.needMesh = false;
+      /* 同名文件：自动套用上次对它做的配置（材料 / 共模 / 开模设置） */
+      try {
+        var prev = matchSaved(file.name, file.size);
+        if (prev) {
+          var hit = applyConfigToParts(st.parts, prev);
+          if (hit) st.applyMsg = "已自动套用上次对「" + file.name + "」的配置（" + hit + " 个零件）";
+        }
+      } catch (e2) {}
       mount();
+      autoSave(400);
     }).catch(function (err) {
       st.busy = false; st.parsed = false;
       st.err = err && err.message ? err.message : "解析出错";
@@ -829,6 +1407,7 @@
   }
 
   function bindResult() {
+    bindWorkspace();
     var again = $("stAgain");
     if (again) again.onclick = function () { st.parsed = false; st.parts = []; st.sel = -1; st.err = ""; mount(); };
 
@@ -906,6 +1485,227 @@
     };
   }
 
+  /* ══════ 方案 / 单价库 / 报价单 的交互绑定 ══════ */
+  function bindWorkspace() {
+    var w = W(); if (!w) return;
+
+    /* 方案名 + 保存 */
+    var nameEl = $("stPlanName");
+    if (nameEl) nameEl.addEventListener("input", function () {
+      st.planName = nameEl.value.trim();
+      autoSave();
+    });
+    var saveBtn = $("stPlanSave");
+    if (saveBtn) saveBtn.onclick = function () {
+      var nm = (nameEl && nameEl.value.trim()) || (st.info && st.info.file) || "未命名方案";
+      var cur = st.planId ? w.getPlan(st.planId) : null;
+      var same = !!(cur && cur.name === nm);
+      var rec = packPlan(nm);
+      /* 名字没变 → 更新原来那个方案；改了名字 → 另存为新方案（否则会覆盖掉上一版） */
+      rec.id = same ? st.planId : "";
+      var saved = w.savePlan(rec);
+      st.planId = saved.id; st.planName = saved.name;
+      refreshWorkspace();
+      flash(saveBtn, same ? "已更新" : "已另存为新方案");
+    };
+
+    /* 重新选文件（恢复的方案想看 3D） */
+    var rp = $("stReloadPick"), rf = $("stFile2");
+    if (rp && rf) {
+      rp.onclick = function () { rf.click(); };
+      rf.onchange = function () { if (rf.files && rf.files[0]) handle(rf.files[0]); };
+    }
+
+    /* 报价单打印 */
+    var qp = $("stQuotePrint");
+    if (qp) qp.onclick = printQuote;
+    ["stQCustomer", "stQValid", "stQNote"].forEach(function (id) {
+      var el = $(id);
+      if (el) el.addEventListener("change", function () {
+        st.quote = {
+          customer: ($("stQCustomer") || {}).value || "",
+          valid: parseFloat(($("stQValid") || {}).value) || 30,
+          note: ($("stQNote") || {}).value || ""
+        };
+      });
+    });
+
+    bindPrice();
+    bindPlans();
+  }
+
+  /* 单价库：改一个数 → 立刻影响报价（只刷新金额区，不重绘输入框，避免失焦） */
+  function bindPrice() {
+    var w = W(); if (!w) return;
+    var box = document.querySelector(".st-price");
+    if (!box) return;
+    box.addEventListener("input", function (e) {
+      var el = e.target;
+      if (el.dataset.wp) {
+        w.setMat(el.dataset.wid, el.value === "" ? "" : parseFloat(el.value), el.dataset.wp === "den" ? "d" : "p");
+      } else if (el.dataset.wt) {
+        w.setTool(el.dataset.wt, el.value === "" ? "" : parseFloat(el.value));
+      } else if (el.dataset.wr !== undefined && el.dataset.wr !== null && el.hasAttribute("data-wr")) {
+        w.setRate(+el.dataset.wr, el.value === "" ? "" : parseFloat(el.value));
+      } else return;
+      refreshAll(true);
+      autoSave(600);
+    });
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-wreset]");
+      if (b) {
+        var sc = b.dataset.wreset;
+        if (!confirm(sc === "mat" ? "把材料单价与密度恢复成行业参考值？" : "把这一组恢复成默认值？")) return;
+        w.resetPrice(sc); mount(); return;
+      }
+      var a = e.target.closest("[data-wact2]");
+      if (!a) return;
+      var act = a.dataset.wact2;
+      if (act === "resetAll") {
+        if (!confirm("把单价库全部恢复成行业参考值？你改过的所有单价都会丢。")) return;
+        w.resetPrice("all"); mount();
+      } else if (act === "export") {
+        var data = JSON.stringify(w.exportPrice(), null, 2);
+        var blob = new Blob([data], { type: "application/json;charset=utf-8" });
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "单价库-" + today() + ".json";
+        document.body.appendChild(link); link.click();
+        setTimeout(function () { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
+      } else if (act === "import") {
+        var f = $("stPriceFile"); if (f) f.click();
+      }
+    });
+    var pf = $("stPriceFile");
+    if (pf) pf.onchange = function () {
+      var file = pf.files && pf.files[0];
+      if (!file) return;
+      var fr = new FileReader();
+      fr.onload = function () {
+        var res;
+        try { res = w.importPrice(JSON.parse(String(fr.result))); }
+        catch (e2) { res = { ok: false, msg: "文件不是有效的 JSON" }; }
+        alert(res.ok ? "已导入 " + res.n + " 项单价" : "导入失败：" + res.msg);
+        if (res.ok) mount();
+      };
+      fr.readAsText(file);
+      pf.value = "";
+    };
+  }
+
+  /* 方案列表：载入 / 改名 / 删除 / 对比 */
+  function bindPlans() {
+    var w = W(); if (!w) return;
+    var box = document.querySelector("#stepBody");
+    if (!box) return;
+    /* 台账输入：用 change 事件写回（避免每敲一个字就重绘） */
+    if (!box.dataset.projBound) {
+      box.dataset.projBound = "1";
+      box.addEventListener("change", function (e) {
+        var el = e.target.closest("[data-pj]");
+        if (!el) return;
+        var ww = W(), j = ww.getProject(el.dataset.jid);
+        if (!j) return;
+        var patch = { id: j.id, name: j.name, customer: j.customer, qty: j.qty, mat: j.mat,
+          unitCost: j.unitCost, moldCost: j.moldCost, price: j.price, status: j.status,
+          note: j.note, planId: j.planId };
+        var k2 = el.dataset.pj;
+        patch[k2] = (el.type === "number") ? parseFloat(el.value) || 0 : el.value;
+        ww.saveProject(patch);
+        refreshSection("项目台账", '<h3><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>项目台账 <span class="st-h3n">在跑的产品的报价记录</span></h3>' + projectsHTML());
+      });
+    }
+    if (box.dataset.planBound) return;
+    box.dataset.planBound = "1";
+    box.addEventListener("click", function (e) {
+      /* 联动：把这个零件带进成本估算 */
+      var pu = e.target.closest("[data-push]");
+      if (pu) { pushToCalc(+pu.dataset.push); return; }
+      /* 台账操作 */
+      var ja = e.target.closest("[data-jact]");
+      if (ja) {
+        var act2 = ja.dataset.jact, w2 = W();
+        if (act2 === "add") {
+          w2.saveProject({ name: "新产品", status: "报价中" });
+        } else if (act2 === "fromquote") {
+          projectFromQuote(); return;
+        } else if (act2 === "del") {
+          var jj = w2.getProject(ja.dataset.jid);
+          if (!confirm("删除台账里的「" + (jj ? jj.name : "") + "」？")) return;
+          w2.removeProject(ja.dataset.jid);
+        } else if (act2 === "clear") {
+          if (!confirm("清空整个项目台账？这个操作不可恢复。")) return;
+          w2.projects().forEach(function (x) { w2.removeProject(x.id); });
+        } else if (act2 === "csv") {
+          var blob2 = new Blob([projCsv()], { type: "text/csv;charset=utf-8" });
+          var a2 = document.createElement("a");
+          a2.href = URL.createObjectURL(blob2);
+          a2.download = "项目台账-" + today() + ".csv";
+          document.body.appendChild(a2); a2.click();
+          setTimeout(function () { URL.revokeObjectURL(a2.href); a2.remove(); }, 1000);
+          return;
+        }
+        refreshSection("项目台账", '<h3><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>项目台账 <span class="st-h3n">在跑的产品的报价记录</span></h3>' + projectsHTML());
+        return;
+      }
+      var b = e.target.closest("[data-pact]");
+      if (!b) return;
+      var act = b.dataset.pact, id = b.dataset.pid;
+      if (act === "load") {
+        var rec = w.getPlan(id);
+        if (!rec) return;
+        if (st.parts.length && !confirm("载入方案「" + rec.name + "」会覆盖当前的结果，继续？")) return;
+        applyPlan(rec);
+      } else if (act === "rename") {
+        var cur = w.getPlan(id);
+        var nm = prompt("新的方案名：", cur ? cur.name : "");
+        if (nm && nm.trim()) { w.renamePlan(id, nm.trim()); if (st.planId === id) st.planName = nm.trim(); refreshWorkspace(); }
+      } else if (act === "del") {
+        var r2 = w.getPlan(id);
+        if (!confirm("删除方案「" + (r2 ? r2.name : "") + "」？删了就找不回来了。")) return;
+        w.removePlan(id);
+        if (st.planId === id) { st.planId = ""; }
+        refreshWorkspace();
+      } else if (act === "compare") {
+        var ids = [];
+        Array.prototype.forEach.call(document.querySelectorAll("[data-pcmp]"), function (c) { if (c.checked) ids.push(c.dataset.pcmp); });
+        var out = $("stCompare");
+        if (out) out.innerHTML = compareHTML(ids);
+        if (ids.length < 2) alert("至少勾选 2 个方案才能对比。");
+        else if (out && out.scrollIntoView) { try { out.scrollIntoView({ block: "nearest" }); } catch (e3) {} }
+      }
+    });
+  }
+
+  /* 局部刷新：方案名与方案列表（不重绘整个结果页，避免正在输入时被打断） */
+  function refreshWorkspace() {
+    var bar = document.querySelector(".st-planbar");
+    if (bar) {
+      var inp = $("stPlanName");
+      if (inp) inp.value = st.planName || "";
+      var cnt = bar.querySelector(".st-pb-n");
+      var w = W();
+      if (cnt && w) cnt.textContent = "已存 " + w.plans().length + " 个";
+    }
+    var host = document.querySelector(".st-sec .st-privacy");
+    /* 方案区块整体重绘（它不含正在输入的控件） */
+    var secs = document.querySelectorAll("#stepBody .st-sec");
+    Array.prototype.forEach.call(secs, function (sec) {
+      var h = sec.querySelector("h3");
+      if (h && h.textContent.indexOf("方案与对比") >= 0) {
+        sec.innerHTML = '<h3><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg>方案与对比</h3>' + plansSecHTML();
+      }
+    });
+  }
+
+  /* 按钮上临时显示一个反馈文字 */
+  function flash(btn, txt) {
+    if (!btn) return;
+    if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = txt;
+    setTimeout(function () { if (btn.dataset.orig) btn.innerHTML = btn.dataset.orig; }, 1200);
+  }
+
   function copyText(txt, btn) {
     var done = function () {
       var old = btn.innerHTML;
@@ -973,6 +1773,7 @@
     } else {
       refreshTree();
     }
+    autoSave();
   }
 
   function updateCfgNote(i) {
