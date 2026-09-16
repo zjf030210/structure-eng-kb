@@ -205,7 +205,7 @@
               precision: "normal",// 精度等级
               finish: "normal",   // 表面要求
               post: 0,            // 二次加工 / 表面处理费（元/件）
-              shareWith: null,    // 与哪个零件共模（零件索引）
+              moldId: null,       // 共模组 id：同一 id 的零件拼在一套模具里（null = 独立开模）
               quote: null         // 若填了模具厂实际报价，则覆盖估算
             }
           });
@@ -228,31 +228,69 @@
 
   /* ══════════ 模具：分组 / 报价 / 周期 ══════════ */
 
-  /* 按「共模」关系把零件聚合成模具组（并查集式合并，支持链式指向） */
+  /* 按「共模」关系把零件聚合成模具组。
+     同一 moldId 的零件拼在同一套模具里（可以 2 个、3 个甚至更多）；
+     moldId 为 null 的零件各自独立开模 —— 也就是「一零件一套模具」。
+     ⚠️ 一套模具很可能装好几个零件（小件拼模是常态），所以这里是「分组」而不是「两两配对」。 */
   function moldGroups(parts) {
-    var groups = [], seen = {};
-    for (var i = 0; i < parts.length; i++) {
-      if (!parts[i].on || seen[i]) continue;
-      var members = [i]; seen[i] = 1;
-      var changed = true;
-      while (changed) {
-        changed = false;
-        for (var j = 0; j < parts.length; j++) {
-          if (!parts[j].on || seen[j]) continue;
-          var sw = parts[j].tool.shareWith;
-          if (sw === null || sw === undefined || sw === "") continue;
-          sw = +sw;
-          for (var m = 0; m < members.length; m++) {
-            if (sw === members[m] || +parts[members[m]].tool.shareWith === j) {
-              members.push(j); seen[j] = 1; changed = true; break;
-            }
-          }
-        }
-      }
-      members.sort(function (a, b) { return a - b; });
-      groups.push({ leader: members[0], parts: members, cfg: parts[members[0]].tool });
+    var map = {}, keys = [], i, k;
+    for (i = 0; i < parts.length; i++) {
+      if (!parts[i].on) continue;
+      k = parts[i].tool.moldId;
+      /* 独立件用一个「只属于自己」的私有键，天然不会与别人合并 */
+      if (k === null || k === undefined || k === "") k = "@" + i;
+      if (!map[k]) { map[k] = []; keys.push(k); }
+      map[k].push(i);
     }
+    var groups = keys.map(function (kk) {
+      var m = map[kk];
+      return { leader: m[0], parts: m, cfg: parts[m[0]].tool };
+    });
+    /* 按最小零件序号排序，保证「模 1 / 模 2」的编号稳定 */
+    groups.sort(function (a, b) { return a.leader - b.leader; });
     return groups;
+  }
+
+  var moldSeq = 0;      // 共模组 id 计数器（只增不减，保证脱离旧组的零件不会误并）
+
+  /* 与 i 同属一套模具的全部零件索引（含自身） */
+  function moldMembers(parts, i) {
+    var gs = moldGroups(parts);
+    for (var k = 0; k < gs.length; k++) if (gs[k].parts.indexOf(i) >= 0) return gs[k].parts.slice();
+    return [i];
+  }
+
+  /* 把一组零件写成一个共模组；不足 2 件则各自独立开模 */
+  function setMold(parts, ids) {
+    ids.forEach(function (x) { parts[x].tool.moldId = null; });
+    if (!ids || ids.length < 2) return null;
+    var k = "G" + (++moldSeq);
+    ids.forEach(function (x) { parts[x].tool.moldId = k; });
+    return k;
+  }
+
+  /* 多选开关：把 j 并进 i 所在的模具 / 或从该模具中移出
+     加入时若 j 原本已在别的模具里，则两套模具合并成一套 */
+  function toggleShare(parts, i, j) {
+    if (i === j) return;
+    var set = moldMembers(parts, i);
+    var at = set.indexOf(j);
+    if (at >= 0) {
+      set.splice(at, 1);
+      setMold(parts, set);
+      parts[j].tool.moldId = null;      // 被移出的零件改为独立开模
+      return;
+    }
+    moldMembers(parts, j).forEach(function (x) { if (set.indexOf(x) < 0) set.push(x); });
+    set.sort(function (a, b) { return a - b; });
+    setMold(parts, set);
+  }
+
+  /* 本件改为独立开模，原同模的其余零件仍留在同一套模具里 */
+  function leaveMold(parts, i) {
+    var rest = moldMembers(parts, i).filter(function (x) { return x !== i; });
+    setMold(parts, rest);
+    parts[i].tool.moldId = null;
   }
 
   /* 单套模具的结构化报价
@@ -441,6 +479,11 @@
   function buildPrompt(info, parts, est, P) {
     var B = String.fromCharCode(124);   // 竖线，避免转义困扰
     var rows = [], i;
+    /* 零件 → 所属模具序号与同模件数（一个模具可能装好几个零件，必须逐件标出来） */
+    var moldNo = {}, moldSize = {};
+    est.molds.forEach(function (m, k) {
+      m.members.forEach(function (x) { moldNo[x] = k + 1; moldSize[x] = m.members.length; });
+    });
     for (i = 0; i < parts.length; i++) {
       var pt = parts[i], m = matById(pt.mat), t = pt.tool;
       var rn = byId(RUNNERS, pt.tool.runner);
@@ -455,7 +498,7 @@
         " / " + byId(STEELS, t.steel).n +
         " / " + byId(PRECISIONS, t.precision).n +
         (t.finish !== "normal" ? " / " + byId(FINISHES, t.finish).n : "") +
-        (t.shareWith !== null && t.shareWith !== undefined ? " / 与第 " + (+t.shareWith + 1) + " 号件共模" : "") +
+        (moldSize[i] > 1 ? " / 与另 " + (moldSize[i] - 1) + " 件共模（模 " + moldNo[i] + "）" : "") +
         (t.post ? " / 二次加工 " + t.post + " 元" : "")
       );
     }
@@ -464,7 +507,7 @@
     for (mi = 0; mi < est.molds.length; mi++) {
       var md = est.molds[mi];
       molds.push(
-        "模 " + (mi + 1) + "（" + md.members.length + " 个零件：" +
+        "模 " + (mi + 1) + "（共模 " + md.members.length + " 件：" +
         md.members.map(function (x) { return parts[x].name; }).join("、") + "）" +
         "\n    投影面积 " + fix(md.area, 0) + " cm² " + B + " 基准件 " + md.main.name +
         "\n    基础价 ¥" + fix(md.base, 0) + " × 穴数系数 " + fix(md.kCav, 2) +
@@ -511,7 +554,7 @@
     L.push("【请回答】");
     L.push("1. 这套开模方案（模穴数、滑块、斜顶、浇口形式、钢材）有没有明显过度或不足的地方？逐条说明理由与调整建议。");
     L.push("2. 这个成本结构里哪一项压缩空间最大？给出具体可执行的降本方向（含预期幅度）。");
-    L.push("3. 有没有零件可以合并到同一套模具（共模）来省模具费？如果我现在没做共模，哪些适合，哪些不适合？");
+    L.push("3. 上面的模具分组（哪几个零件拼在同一套模具里）是否合理？请逐组评估：产量、材料、颜色、精度、模具尺寸是否匹配；哪些零件应该拆成单独一副模具，哪些还可以继续合并进来？");
     L.push("4. 从零件的体积/表面积比例看，是否存在壁厚过厚、可以减料或抽壳的部位？请指出具体是哪个零件。");
     L.push("5. 材料选型是否合理？哪些零件换材料后成本或性能会明显改善？（我主要做塑料灯具：小夜灯、氛围灯、补光灯，也涉及树脂一体成型、搪胶、软硅胶等小众工艺）");
     L.push("6. 前期的风险提示：哪些零件在开模前必须再确认（脱模斜度、卡扣强度、缩水、透光均匀性等）？");
@@ -529,8 +572,15 @@
     var rowOf = {}, ri;
     for (ri = 0; ri < est.perPart.length; ri++) rowOf[est.perPart[ri].i] = est.perPart[ri];
 
+    /* 零件 → 所属模具序号与同模件数（一个模具可以装好几个零件） */
+    var moldNo = {}, moldSize = {};
+    est.molds.forEach(function (m, k) {
+      m.members.forEach(function (x) { moldNo[x] = k + 1; moldSize[x] = m.members.length; });
+    });
+
     var L = [];
     L.push(["零件名称", "层级路径", "材料", "体积(cm³)", "包围盒(mm)", "重量(g)",
+      "所属模具", "共模件数",
       "模穴数", "滑块", "斜顶", "浇口形式", "钢材", "精度", "表面要求",
       "投影面积(cm²)", "锁模力(t)", "机台吨位(t)", "机时费(元/h)", "成型周期(s)",
       "材料费(元)", "加工费(元)", "二次加工(元)", "模具摊销(元)", "单件小计(元)", "是否计入"].map(q).join(","));
@@ -541,6 +591,7 @@
         pt.name, pt.path, m.n, fix(pt.vol / 1000, 3),
         pt.dim.map(function (d) { return fix(d, 1); }).join("×"),
         fix(r.netW || 0, 3),
+        "模 " + (moldNo[i] || ""), moldSize[i] || 1,
         t.cav || 1, t.slides || 0, t.lifters || 0,
         byId(RUNNERS, t.runner).n, byId(STEELS, t.steel).n,
         byId(PRECISIONS, t.precision).n, byId(FINISHES, t.finish).n,
@@ -554,12 +605,13 @@
 
     L.push("");
     L.push(["模具投入清单", "", "", "", "", ""].map(q).join(","));
-    L.push(["模具", "涉及零件", "基准件", "投影面积(cm²)", "基础价(元)", "穴数系数",
+    L.push(["模具", "共模件数", "涉及零件", "基准件", "投影面积(cm²)", "基础价(元)", "穴数系数",
       "钢材系数", "精度系数", "表面系数", "滑块(元)", "斜顶(元)", "浇口系统(元)", "模具合计(元)", "来源"].map(q).join(","));
     for (var mi = 0; mi < est.molds.length; mi++) {
       var md = est.molds[mi];
       L.push([
         "模 " + (mi + 1),
+        md.members.length,
         md.members.map(function (x) { return parts[x].name; }).join("、"),
         md.main.name, fix(md.area, 0), fix(md.base, 0), fix(md.kCav, 3),
         fix(md.steel.k, 2), fix(md.prec.k, 2), fix(md.fin.k, 2),
@@ -614,6 +666,7 @@
     matById: matById, guessMat: guessMat,
     meshStats: meshStats, flatten: flatten, estimate: estimate,
     moldGroups: moldGroups, moldCost: moldCost, cycleOf: cycleOf,
+    moldMembers: moldMembers, setMold: setMold, toggleShare: toggleShare, leaveMold: leaveMold,
     partMachine: partMachine, tiers: tiers, breakEven: breakEven, sanity: sanity,
     RECYCLE: RECYCLE,
     buildPrompt: buildPrompt, toCSV: toCSV,

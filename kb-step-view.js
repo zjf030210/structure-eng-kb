@@ -444,7 +444,7 @@
 
     /* 模具方案 */
     h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg>模具方案</h3>');
-    h.push('<div class="st-privacy" style="margin:0 0 10px">每个零件默认一套模具；小件可以在装配树里展开「开模设置」勾选共模。滑块 / 行位、斜顶、热流道都会直接抬高模具报价，并相应拉长成型周期。</div>');
+    h.push('<div class="st-privacy" style="margin:0 0 10px">每个零件默认独立开模；小件可以在装配树里展开「开模设置」，把多个零件勾选成共模拼进同一套模具（可多选）。滑块 / 行位、斜顶、热流道都会直接抬高模具报价，并相应拉长成型周期。</div>');
     h.push('<div id="stMolds">' + moldsHTML() + '</div>');
     h.push('</div>');
 
@@ -520,14 +520,44 @@
       return '<option value="' + x.id + '"' + (x.id === cur ? " selected" : "") + '>' + esc(x.n) + '</option>';
     }).join("");
   }
-  function shareOpts(i) {
-    var cur = st.parts[i].tool.shareWith;
-    var o = ['<option value=""' + (cur === null || cur === undefined ? " selected" : "") + '>独立开模</option>'];
-    for (var j = 0; j < st.parts.length; j++) {
-      if (j === i) continue;
-      o.push('<option value="' + j + '"' + (String(cur) === String(j) ? " selected" : "") + '>与「' + esc(st.parts[j].name) + '」共模</option>');
+  /* 共模多选：与本件拼在同一套模具里的零件可以勾多个 ——
+     小件拼模（一模具装好几件）是常态，所以这里是「分组」不是「两两配对」。
+       勾上  = 并入本件所在的模具（若该零件本就在别的模具里，则两套模具合并）
+       取消  = 该零件脱离本套模具、改为独立开模
+     标签上的「模 N」表示它当前还在第 N 套模具里，点一下就会并过来。 */
+  function sharePickerHTML(i) {
+    var mine = S.moldMembers(st.parts, i);
+    var e = S.estimate(st.parts, st.params);
+    var moldNo = {}, moldSize = {}, j;
+    e.molds.forEach(function (m, k) {
+      m.members.forEach(function (x) { moldNo[x] = k + 1; moldSize[x] = m.members.length; });
+    });
+    var o = ['<div class="st-share">'];
+    o.push('<div class="st-share-h"><span>共模零件</span>'
+      + '<em>可多选；勾上的零件与本件拼在同一套模具里</em>'
+      + '<b>本套模具 ' + mine.length + ' 件</b>'
+      + (mine.length > 1 ? '<button type="button" class="st-share-clr" data-shareclear="' + i + '">本件改为独立开模</button>' : '')
+      + '</div>');
+    var others = 0;
+    for (j = 0; j < st.parts.length; j++) if (j !== i && st.parts[j].on) others++;
+    if (!others) {
+      o.push('<div class="st-share-none">没有其他零件可以合并</div>');
+    } else {
+      o.push('<div class="st-share-list">');
+      for (j = 0; j < st.parts.length; j++) {
+        if (j === i || !st.parts[j].on) continue;
+        var on = mine.indexOf(j) >= 0;
+        o.push('<button type="button" class="st-share-i' + (on ? " on" : "") + '"'
+          + ' data-share="' + i + '|' + j + '"'
+          + ' title="' + esc(st.parts[j].path || st.parts[j].name) + '">'
+          + esc(st.parts[j].name)
+          + (on ? '<i class="x">×</i>' : (moldSize[j] > 1 ? '<i>模 ' + moldNo[j] + '</i>' : ''))
+          + '</button>');
+      }
+      o.push('</div>');
     }
-    return o.join("");
+    o.push('</div>');
+    return o.join('');
   }
 
   /* ══════ 成本卡 ══════ */
@@ -562,9 +592,9 @@
     g.push('<label>精度<select data-c="precision" data-i="' + i + '">' + optList(S.PRECISIONS, t.precision) + '</select></label>');
     g.push('<label>表面要求<select data-c="finish" data-i="' + i + '">' + optList(S.FINISHES, t.finish) + '</select></label>');
     g.push('<label>二次加工 (元/件)<input type="number" min="0" step="any" data-c="post" data-i="' + i + '" value="' + (t.post || 0) + '"></label>');
-    g.push('<label>共模<select data-c="shareWith" data-i="' + i + '">' + shareOpts(i) + '</select></label>');
     g.push('<label>模具厂报价 (元，留空=按估算)<input type="number" min="0" step="any" data-c="quote" data-i="' + i + '" value="' + (t.quote === null || t.quote === undefined ? "" : t.quote) + '"></label>');
     g.push('</div>');
+    g.push(sharePickerHTML(i));
     g.push('<div class="st-cfg-note">' + cfgNoteHTML(i) + '</div>');
     g.push('</div>');
     return g.join("");
@@ -589,10 +619,11 @@
     var L = ['<div class="st-molds">'];
     for (var mi = 0; mi < e.molds.length; mi++) {
       var m = e.molds[mi];
-      L.push('<div class="st-mold' + (m.quoted ? " quoted" : "") + '">');
+      L.push('<div class="st-mold' + (m.members.length > 1 ? " multi" : "") + (m.quoted ? " quoted" : "") + '">');
       L.push('<div class="st-mold-h"><b>模 ' + (mi + 1) + '</b>'
         + '<span>' + m.members.map(function (x) { return esc(st.parts[x].name); }).join('、')
-        + '（' + m.members.length + ' 件' + (m.cfg.cav > 1 ? ' · ' + m.cfg.cav + ' 穴' : '') + '）</span>'
+        + '（' + (m.members.length > 1 ? '共模 ' + m.members.length + ' 件' : '单件模')
+        + (m.cfg.cav > 1 ? ' · ' + m.cfg.cav + ' 穴' : '') + '）</span>'
         + '<em>' + S.money(m.total) + '</em></div>');
       L.push('<div class="st-mold-b">'
         + '<span>基准件 ' + esc(m.main.name) + '　投影 ' + S.fix(m.area, 0) + ' cm²</span>'
@@ -817,6 +848,16 @@
       });
       /* 点击：勾选 / 展开开模设置 */
       tree.addEventListener("click", function (e) {
+        /* 共模多选标签 */
+        var sh = e.target.closest("[data-share]");
+        if (sh) {
+          var ab = sh.dataset.share.split("|");
+          S.toggleShare(st.parts, +ab[0], +ab[1]);
+          refreshAll();
+          return;
+        }
+        var cl = e.target.closest("[data-shareclear]");
+        if (cl) { S.leaveMold(st.parts, +cl.dataset.shareclear); refreshAll(); return; }
         if (e.target.closest(".st-sel") || e.target.closest("[data-c]")) return;
         var tg = e.target.closest("[data-toggle]");
         if (tg) {
@@ -942,9 +983,7 @@
   /* 把开模设置里的一项写回零件并刷新 */
   function applyCfg(el) {
     var i = +el.dataset.i, k = el.dataset.c, v;
-    if (k === "shareWith") {
-      v = el.value === "" ? null : +el.value;
-    } else if (k === "quote") {
+    if (k === "quote") {
       v = el.value === "" ? null : +el.value;
       if (v !== null && (!isFinite(v) || v < 0)) return;
     } else if (k === "cav" || k === "slides" || k === "lifters" || k === "post") {

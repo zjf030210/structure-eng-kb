@@ -931,18 +931,53 @@
   .st-cfg-grid label{display:block; font-size:var(--fs-caption); color:var(--tx-faint);}
   .st-cfg-grid input,.st-cfg-grid select{width:100%; margin-top:3px; padding:4px 6px; border:1px solid var(--border);
     border-radius:var(--r-xs); background:var(--card); color:var(--text); font-size:var(--fs-xs); font-variant-numeric:tabular-nums;}
+  /* 共模多选 */
+  .st-share{margin-top:10px;}
+  .st-share-h{display:flex; align-items:baseline; flex-wrap:wrap; gap:3px var(--sp-5);
+    font-size:var(--fs-caption); color:var(--tx-faint); margin-bottom:5px;}
+  .st-share-h span{font-weight:600; color:var(--tx-soft); flex-shrink:0;}
+  .st-share-h em{font-style:normal; flex:1; min-width:0;}
+  .st-share-h b{font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; flex-shrink:0;}
+  .st-share-clr{padding:2px 8px; border:1px solid var(--border); border-radius:var(--r-xs);
+    background:var(--card); color:var(--tx-soft); font-family:inherit; font-size:var(--fs-caption);
+    cursor:pointer; flex-shrink:0;
+    transition:border-color .16s cubic-bezier(.4,0,.2,1), color .16s cubic-bezier(.4,0,.2,1);}
+  .st-share-clr:hover{border-color:var(--primary); color:var(--primary);}
+  .st-share-list{display:flex; flex-wrap:wrap; gap:3px 5px; max-height:134px; overflow-y:auto;
+    padding:7px 8px; background:var(--card); border:1px solid var(--border); border-radius:var(--r-xs);}
+  .st-share-i{display:inline-flex; align-items:center; gap:4px; padding:3px 8px; max-width:100%;
+    overflow-wrap:anywhere; text-align:left;
+    border:1px solid var(--border); border-radius:var(--r-sm); background:var(--bg-sub);
+    color:var(--tx-body); font-family:inherit; font-size:var(--fs-caption); cursor:pointer;
+    transition:border-color .16s cubic-bezier(.4,0,.2,1), color .16s cubic-bezier(.4,0,.2,1),
+      background .16s cubic-bezier(.4,0,.2,1);}
+  .st-share-i:hover{border-color:var(--primary); color:var(--primary);}
+  .st-share-i.on{background:var(--primary-weak); border-color:var(--primary); color:var(--primary); font-weight:600;}
+  .st-share-i i{font-style:normal; font-weight:400; font-size:var(--fs-caption);
+    color:var(--tx-faint); font-variant-numeric:tabular-nums;}
+  .st-share-i.on i{color:var(--primary);}
+  .st-share-none{font-size:var(--fs-caption); color:var(--tx-faint); padding:6px 8px;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--r-xs);}
   .st-cfg-note{margin-top:10px; padding:7px 10px; background:var(--card); border:1px solid var(--border);
     border-radius:var(--r-xs); font-size:var(--fs-caption); color:var(--tx-soft); line-height:var(--lh-base);
     font-variant-numeric:tabular-nums;}
 
   /* 模具投入清单 */
-  .st-molds{display:grid; gap:var(--sp-5);}
-  .st-mold{border:1px solid var(--border); border-radius:var(--r-md); padding:11px 14px; background:var(--card);}
+  /* ⚠️ 必须写 minmax(0,1fr)：只写 display:grid 时 auto 轨道按最宽子项的 max-content 撑开，
+     共模后零件名一长就会把卡片顶出容器（手机上表现为整页横向滚动） */
+  .st-molds{display:grid; grid-template-columns:minmax(0,1fr); gap:var(--sp-5);}
+  .st-mold{border:1px solid var(--border); border-radius:var(--r-md); padding:11px 14px;
+    background:var(--card); min-width:0;}
   .st-mold.quoted{border-color:var(--ok-bd); background:var(--ok-bg);}
   .st-mold-h{display:flex; align-items:baseline; gap:var(--sp-5); font-size:var(--fs-sm);}
   .st-mold-h b{font-weight:600; color:var(--primary); flex-shrink:0;}
   .st-mold-h span{flex:1; min-width:0; color:var(--tx-body); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .st-mold-h em{font-style:normal; font-weight:700; color:var(--tx-strong); font-variant-numeric:tabular-nums; flex-shrink:0;}
+  /* 共模（≥2 件）时零件名允许换行 —— 拼模就是要看清是哪几件拼在一套 */
+  .st-mold.multi .st-mold-h{align-items:flex-start;}
+  .st-mold.multi .st-mold-h span{white-space:normal; overflow:visible; text-overflow:clip;
+    overflow-wrap:anywhere; line-height:var(--lh-base);}
+  .st-mold.multi .st-mold-h b, .st-mold.multi .st-mold-h em{margin-top:1px;}
   .st-mold-b{margin-top:var(--sp-4); display:flex; flex-wrap:wrap; gap:var(--sp-3) var(--sp-7);
     font-size:var(--fs-caption); color:var(--tx-faint); font-variant-numeric:tabular-nums;}
 
@@ -964,6 +999,8 @@
 
   @media (max-width:640px){
     .st-cfg-grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));}
+    .st-share-list{max-height:104px;}
+    .st-share-h em{display:none;}
     .st-tier{grid-template-columns:1fr auto 74px; padding:7px 11px; font-size:var(--fs-xs);}
   }
 
