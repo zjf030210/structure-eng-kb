@@ -77,6 +77,7 @@ const lvFilter = document.getElementById("lvFilter");
 const stFilter = document.getElementById("stFilter");
 const backBtn = document.getElementById("backBtn");
 const homeView = document.getElementById("homeView");
+const stepView = document.getElementById("stepView");
 const domainView = document.getElementById("domainView");
 const searchView = document.getElementById("searchView");
 const domainsEl = document.getElementById("domains");
@@ -116,7 +117,8 @@ const KB_VIEWS = [homeView, domainView, searchView];
 const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossView, path:pathView,
                    map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView,
                    select:selectView, formula:formulaView, wrong:wrongView, stats:statsView,
-                   tpl:tplView, fav:favView, daily:dailyView, review:reviewView, compare:compareView};
+                   tpl:tplView, fav:favView, daily:dailyView, review:reviewView, compare:compareView,
+                   step:stepView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -206,6 +208,8 @@ function applyTheme(){
   if(b) b.innerHTML = theme === "dark"
     ? '<svg class=ic aria-hidden=true><use href=#i-sun /></svg>'
     : '<svg class=ic aria-hidden=true><use href=#i-moon /></svg>';
+  /* 3D 预览的画布不受 CSS 变量影响，需要主动通知重绘 */
+  if(typeof window.KB_STEP_THEME === "function") window.KB_STEP_THEME(theme === "dark");
 }
 applyTheme();
 
@@ -2749,6 +2753,7 @@ function renderAll(){
     else if(activeModule==="daily") renderDaily20();
     else if(activeModule==="review") renderReview();
     else if(activeModule==="compare") renderCompare();
+    else if(activeModule==="step") renderStep();
     else if(activeModule==="calc") renderCalc();
     else if(activeModule==="field") renderField();
     else if(activeModule==="gallery") renderGallery();
@@ -3357,7 +3362,7 @@ document.getElementById("statsBody").addEventListener("click", e=>{
 
 /* ══════════ 键盘快捷键 ══════════ */
 (function(){
-  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily","review","compare"];
+  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily","review","compare","step"];
   document.addEventListener("keydown", e=>{
     const tag = (e.target.tagName || "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;

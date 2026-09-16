@@ -9,10 +9,12 @@
  *       图片内容基本不变且数量多，命中缓存直接秒出
  *   · 跨域资源（B站 / 访问统计）     → 不接管
  * ============================================================ */
-const CACHE = "struct-kb-v5";
+const CACHE = "struct-kb-v6";
 const CORE = ["./", "./index.html", "./app.js", "./favicon.svg",
   "./images/qr-wechat.jpg", "./images/qr-alipay.jpg"];
-const IMG = /\.(jpe?g|png|gif|webp|svg|ico|bmp|avif)$/i;
+/* wasm 与图片一样走缓存优先：解析引擎 7.6 MB，不该每次访问都重新验证。
+   它刻意不放进 CORE —— 首屏不会下载，只有真正打开 STEP 模块时才拉取。 */
+const IMG = /\.(jpe?g|png|gif|webp|svg|ico|bmp|avif|wasm)$/i;
 
 self.addEventListener("install", e => {
   e.waitUntil(
