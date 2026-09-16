@@ -39,16 +39,69 @@
   ];
 
   /* ══════════ 工艺参数默认值（与「塑料件成本估算」计算器一致）══════════ */
+  /* 模穴数与机时费改为按零件 / 模具自动推算，不再用全局固定值；
+     这里只保留跨零件共用的基础参数 */
   var PARAMS = {
     loss:   { l: "材料损耗 (%)",     v: 4 },
-    rate:   { l: "机时费 (元/h)",    v: 60 },
-    cycle:  { l: "成型周期 (s)",     v: 30 },
-    cav:    { l: "模穴数",           v: 2 },
+    cycle:  { l: "基础成型周期 (s)",  v: 30 },
     yield:  { l: "良率 (%)",         v: 95 },
-    extra:  { l: "表处+包装 (元/件)", v: 1.5 },
-    mold:   { l: "模具总价 (元)",    v: 60000 },
-    qty:    { l: "订单量 (件)",      v: 100000 }
+    rateK:  { l: "机时费系数 (×)",    v: 1 },
+    pack:   { l: "包装费 (元/件)",    v: 0.8 },
+    asm:    { l: "组装费 (元/件)",    v: 1.0 },
+    qty:    { l: "订单量 (件)",      v: 100000 },
+    target: { l: "目标售价 (元/件)",  v: 0 }
   };
+
+  /* ══════════ 模具结构选项 ══════════
+   * k 为相对系数（用于乘在「基础价 × 穴数系数」上）
+   * 价格口径参考：深圳 / 台州模具厂 2026 公开报价区间
+   */
+  var STEELS = [
+    { id: "p20",   n: "P20 预硬钢",     k: 1.00, life: "30-50 万模次",  price: "45-60 元/kg" },
+    { id: "718",   n: "718H",          k: 1.15, life: "50-80 万模次",  price: "65-85 元/kg" },
+    { id: "nak80", n: "NAK80 镜面钢",   k: 1.35, life: "80-100 万模次", price: "90-120 元/kg" },
+    { id: "s136",  n: "S136 耐蚀钢",    k: 1.50, life: "100 万模次+",   price: "120-180 元/kg" },
+    { id: "h13",   n: "H13 淬火钢",     k: 1.40, life: "300 万模次+",   price: "90-130 元/kg" }
+  ];
+  var PRECISIONS = [
+    { id: "normal", n: "常规 ±0.05",  k: 1.00 },
+    { id: "fine",   n: "较精密 ±0.02", k: 1.15 },
+    { id: "high",   n: "精密 ±0.01",  k: 1.35 }
+  ];
+  var FINISHES = [
+    { id: "normal", n: "普通抛光",       k: 1.00, note: "" },
+    { id: "gloss",  n: "高光",           k: 1.12, note: "外观面要求高" },
+    { id: "mirror", n: "镜面 Ra<0.1",    k: 1.30, note: "透明件 / 导光件常用" }
+  ];
+  /* scrap = 水口料占净重的比例（冷流道最大，热流道几乎为零） */
+  var RUNNERS = [
+    { id: "cold",  n: "冷流道（两板模）",   scrap: 0.22, add: 0,    note: "结构最简单" },
+    { id: "three", n: "三板模（点进胶）",   scrap: 0.14, add: 4000, note: "自动断水口" },
+    { id: "hot",   n: "热流道",            scrap: 0.02, add: 0,    note: "无水口，模具贵但省料" }
+  ];
+  /* 锁模力系数 t/cm²（与站内「锁模力估算」计算器口径一致） */
+  var MOLD_COEF = {
+    abs: 0.35, pcabs: 0.38, pc: 0.40, pcfr: 0.40, pmma: 0.40, pp: 0.35,
+    pom: 0.40, pa6: 0.40, hips: 0.32, petg: 0.38, tpu: 0.30, silic: 0.30,
+    pvc: 0.35, epoxy: 0.40, al: 0.50, pcb: 0, none: 0
+  };
+  /* 注塑机机时费（含人工/电费/折旧的参考值） */
+  var RATE_TABLE = [[80, 35], [150, 45], [250, 60], [400, 80], [650, 110], [Infinity, 160]];
+  /* 水口料回收可按新料的多少折价抵扣 */
+  var RECYCLE = 0.62;
+
+  function byId(list, id) {
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return list[0];
+  }
+  function moldCoefOf(matId) {
+    var v = MOLD_COEF[matId];
+    return v === undefined ? 0.38 : v;
+  }
+  function machineRate(tonnage) {
+    for (var i = 0; i < RATE_TABLE.length; i++) if (tonnage <= RATE_TABLE[i][0]) return RATE_TABLE[i][1];
+    return 160;
+  }
 
   /* 默认材料猜测：按零件名关键词给一个合理初值 */
   var GUESS = [
@@ -141,7 +194,20 @@
             vol: st.vol, area: st.area, tris: st.tris, dim: st.dim,
             min: st.min, max: st.max,        // 自身包围盒的角点（原始坐标，3D 画线框用）
             mat: guessMat(name + " " + (m.name || "")),
-            on: true
+            on: true,
+            /* 模具与工艺配置（默认按体积给一个合理初值，可在界面上逐项改） */
+            tool: {
+              cav: st.vol / 1000 < 5 ? 4 : (st.vol / 1000 < 50 ? 2 : 1),
+              slides: 0,          // 滑块 / 行位数量
+              lifters: 0,         // 斜顶数量
+              runner: "cold",     // 浇口类型
+              steel: "p20",       // 钢材等级
+              precision: "normal",// 精度等级
+              finish: "normal",   // 表面要求
+              post: 0,            // 二次加工 / 表面处理费（元/件）
+              shareWith: null,    // 与哪个零件共模（零件索引）
+              quote: null         // 若填了模具厂实际报价，则覆盖估算
+            }
           });
         }
       }
@@ -160,35 +226,189 @@
     return { parts: parts, tree: tree };
   }
 
+  /* ══════════ 模具：分组 / 报价 / 周期 ══════════ */
+
+  /* 按「共模」关系把零件聚合成模具组（并查集式合并，支持链式指向） */
+  function moldGroups(parts) {
+    var groups = [], seen = {};
+    for (var i = 0; i < parts.length; i++) {
+      if (!parts[i].on || seen[i]) continue;
+      var members = [i]; seen[i] = 1;
+      var changed = true;
+      while (changed) {
+        changed = false;
+        for (var j = 0; j < parts.length; j++) {
+          if (!parts[j].on || seen[j]) continue;
+          var sw = parts[j].tool.shareWith;
+          if (sw === null || sw === undefined || sw === "") continue;
+          sw = +sw;
+          for (var m = 0; m < members.length; m++) {
+            if (sw === members[m] || +parts[members[m]].tool.shareWith === j) {
+              members.push(j); seen[j] = 1; changed = true; break;
+            }
+          }
+        }
+      }
+      members.sort(function (a, b) { return a - b; });
+      groups.push({ leader: members[0], parts: members, cfg: parts[members[0]].tool });
+    }
+    return groups;
+  }
+
+  /* 单套模具的结构化报价
+     基础价按模具最大投影面积估；穴数、钢材、精度、表面用系数相乘；
+     滑块 / 斜顶 / 热流道按行业单价直接叠加 */
+  function moldCost(parts, group) {
+    var members = group.parts.map(function (i) { return parts[i]; });
+    var main = members[0];
+    for (var i = 1; i < members.length; i++) {
+      var a = members[i].dim.slice().sort(function (x, y) { return y - x; });
+      var b = main.dim.slice().sort(function (x, y) { return y - x; });
+      if (a[0] * a[1] > b[0] * b[1]) main = members[i];
+    }
+    var d = main.dim.slice().sort(function (x, y) { return y - x; });
+    var area = d[0] * d[1] / 100;                                  // mm² → cm²
+    var base = 8500 * Math.pow(Math.max(area, 5) / 25, 0.55);      // 经验式：面积越小越便宜
+    base = Math.min(base, 350000);                                 // 软上限，避免超大面积外推过度
+
+    var cfg = group.cfg;
+    var steel = byId(STEELS, cfg.steel), prec = byId(PRECISIONS, cfg.precision), fin = byId(FINISHES, cfg.finish);
+    var cav = Math.max(cfg.cav || 1, 1);
+    var kCav = Math.pow(cav, 0.75);                                // 多腔成本递减（非线性）
+    var core = base * kCav * steel.k * prec.k * fin.k;
+    var slideCost = (cfg.slides || 0) * 5000;                      // 滑块 / 行位：每组 5,000 元
+    var liftCost = (cfg.lifters || 0) * 3000;                      // 斜顶：每个 3,000 元
+    var runCost = 0;
+    if (cfg.runner === "three") runCost = 4000;
+    else if (cfg.runner === "hot") runCost = 8000 + 1500 * cav;    // 热流道按点数
+
+    var est = core + slideCost + liftCost + runCost;
+    var quoted = cfg.quote !== null && cfg.quote !== undefined && +cfg.quote > 0;
+    return {
+      leader: group.leader, members: group.parts, cfg: cfg, main: main,
+      area: area, base: base, kCav: kCav, cav: cav,
+      core: core, slideCost: slideCost, liftCost: liftCost, runCost: runCost,
+      steel: steel, prec: prec, fin: fin,
+      est: est, total: quoted ? +cfg.quote : est, quoted: quoted
+    };
+  }
+
+  /* 滑块 / 斜顶会让开合模多出侧向抽芯动作，周期随之变长 */
+  function cycleOf(part, baseCycle) {
+    var c = part.tool;
+    var k = 1 + 0.08 * (c.slides || 0) + 0.05 * (c.lifters || 0);
+    if (c.runner === "three") k *= 1.10;
+    else if (c.runner === "hot") k *= 0.96;
+    return baseCycle * Math.min(k, 1.6);
+  }
+
+  /* 零件投影面积 → 锁模力 → 机台吨位 → 机时费 */
+  function partMachine(part, rateK) {
+    var d = part.dim.slice().sort(function (x, y) { return y - x; });
+    var area = d[0] * d[1] / 100;                       // cm²
+    var clamp = area * moldCoefOf(part.mat);            // t
+    var tonnage = clamp * 1.2;                          // 含 20% 余量
+    return { area: area, clamp: clamp, tonnage: tonnage, rate: machineRate(tonnage) * rateK };
+  }
+
   /* ══════════ 成本模型 ══════════ */
   function estimate(parts, P) {
-    var loss = +P.loss / 100, rate = +P.rate, cycle = +P.cycle;
-    var cav = Math.max(+P.cav || 1, 1), yld = Math.max(+P.yield || 1, 1) / 100;
-    var extra = +P.extra, mold = +P.mold, qty = Math.max(+P.qty || 1, 1);
+    var loss = +P.loss / 100;
+    var yld = Math.max(+P.yield || 1, 1) / 100;
+    var rateK = +P.rateK || 1;
+    var qty = Math.max(+P.qty || 1, 1);
+    var pack = +P.pack || 0, asm = +P.asm || 0;
 
-    var mat = 0, weight = 0, volSum = 0, areaSum = 0, n = 0, perPart = [];
+    /* 先按共模关系聚合模具，算出每套模具的报价 */
+    var groups = moldGroups(parts);
+    var molds = groups.map(function (g) { return moldCost(parts, g); });
+    var moldTotal = 0;
+    molds.forEach(function (m) { moldTotal += m.total; });
+    var moldOf = {};
+    molds.forEach(function (m) { m.members.forEach(function (pi) { moldOf[pi] = m; }); });
+
+    var mat = 0, mach = 0, post = 0, amort = 0, weight = 0, volSum = 0, areaSum = 0, n = 0;
+    var perPart = [];
+
     for (var i = 0; i < parts.length; i++) {
-      var pt = parts[i];
-      var m = matById(pt.mat);
-      var w = m.d > 0 ? (pt.vol / 1000) * m.d : 0;          // mm³ → cm³ × g/cm³ = g
-      var c = w * m.p / 1000 * (1 + loss);                   // 材料费
-      if (!pt.on) { perPart.push({ pt: pt, w: w, mat: c, mach: 0 }); continue; }
-      mat += c; weight += w; volSum += pt.vol; areaSum += pt.area; n++;
-      perPart.push({ pt: pt, w: w, mat: c, mach: 0 });
+      var pt = parts[i], m = matById(pt.mat);
+      var netW = m.d > 0 ? (pt.vol / 1000) * m.d : 0;                 // 净重 g
+      var rn = byId(RUNNERS, pt.tool.runner);
+      var scrapW = netW * rn.scrap;                                   // 水口料重
+      /* 材料费 = 净重(含损耗) 全价 + 水口料按回收折价后计入 */
+      var matCost = (netW * (1 + loss) + scrapW * (1 - RECYCLE)) * m.p / 1000;
+
+      var mi = partMachine(pt, rateK);
+      var cycle = cycleOf(pt, +P.cycle);
+      var cav = Math.max(pt.tool.cav || 1, 1);
+      var machCost = mi.rate * cycle / 3600 / cav;                    // 按模穴分摊
+
+      var mm = moldOf[i];
+      /* 模具摊销：该套模具价 ÷ 订单量 ÷ 组内零件数 */
+      var amortCost = mm ? mm.total / qty / mm.members.length : 0;
+
+      var row = {
+        pt: pt, i: i, netW: netW, scrapW: scrapW, mat: matCost, mach: machCost,
+        post: +pt.tool.post || 0, amort: amortCost,
+        area: mi.area, clamp: mi.clamp, tonnage: mi.tonnage, rate: mi.rate,
+        cycle: cycle, cav: cav, mold: mm
+      };
+      perPart.push(row);
+
+      if (pt.on) {
+        mat += matCost; mach += machCost; post += (+pt.tool.post || 0);
+        amort += amortCost; weight += netW;
+        volSum += pt.vol; areaSum += pt.area; n++;
+      }
     }
-    var mach = rate * cycle / 3600 / cav * n;                // 每个零件各注塑一次
-    var amort = mold / qty;
+
     var sub = mat + mach;
-    var total = sub / yld + extra + amort;
+    var total = sub / yld + post + pack + asm + amort;
 
     return {
       weighted: weight, volSum: volSum, areaSum: areaSum, n: n,
-      mat: mat, mach: mach, amort: amort,
+      mat: mat, mach: mach, post: post, pack: pack, asm: asm, amort: amort,
       yldLoss: sub * (1 / yld - 1),
-      extra: extra,
-      total: total, perPart: perPart,
-      machEach: rate * cycle / 3600 / cav
+      total: total,
+      molds: molds, moldTotal: moldTotal, qty: qty,
+      perPart: perPart
     };
+  }
+
+  /* 常规注塑范围检查：超出行业常见范围的数值要给出提示，避免误读 */
+  function sanity(parts, est) {
+    var warn = [];
+    for (var i = 0; i < est.perPart.length; i++) {
+      var r = est.perPart[i];
+      if (r.netW > 20000) warn.push(r.pt.name + " 单件重 " + fix(r.netW / 1000, 1) + " kg，超出常规注塑范围（常见 ≤20 kg）");
+      if (r.clamp > 2500) warn.push(r.pt.name + " 需锁模力 " + fix(r.clamp, 0) + " t，超出常规注塑机（常见 ≤2500 t）");
+      if (r.area > 10000) warn.push(r.pt.name + " 投影面积 " + fix(r.area, 0) + " cm²，超出常规注塑机台板尺寸");
+    }
+    var big = parts.filter(function (p) { return p.on; }).sort(function (a, b) { return b.vol - a.vol; })[0];
+    if (big && big.vol / 1000 > 20000) warn.push("最大件体积 " + fix(big.vol / 1000, 0) + " cm³，模具尺寸与机台需专项评估");
+    return warn.slice(0, 4);
+  }
+
+  /* 阶梯价：同一套零件在不同订单量下的单件成本 */
+  function tiers(parts, P, qtys) {
+    var out = [];
+    for (var i = 0; i < qtys.length; i++) {
+      var P2 = {};
+      for (var k in P) if (P.hasOwnProperty(k)) P2[k] = P[k];
+      P2.qty = qtys[i];
+      var e = estimate(parts, P2);
+      out.push({ qty: qtys[i], unit: e.total, amort: e.amort, moldTotal: e.moldTotal });
+    }
+    return out;
+  }
+
+  /* 回本点：模具投入要多少件才能靠单件毛利收回来 */
+  function breakEven(e, target) {
+    if (!target || +target <= 0) return null;
+    var variable = e.total - e.amort;          // 不含模具摊销的单件成本
+    var gross = +target - variable;            // 单件毛利
+    if (gross <= 0) return { ok: false, variable: variable, gross: gross };
+    return { ok: true, qty: Math.ceil(e.moldTotal / gross), variable: variable, gross: gross };
   }
 
   /* ══════════ 格式化 ══════════ */
@@ -219,18 +439,46 @@
 
   /* ══════════ AI 提示词 ══════════ */
   function buildPrompt(info, parts, est, P) {
+    var B = String.fromCharCode(124);   // 竖线，避免转义困扰
     var rows = [], i;
     for (i = 0; i < parts.length; i++) {
-      var pt = parts[i], m = matById(pt.mat);
+      var pt = parts[i], m = matById(pt.mat), t = pt.tool;
+      var rn = byId(RUNNERS, pt.tool.runner);
       rows.push(
         (i + 1) + ". " + pt.name +
-        " | 材料 " + (pt.on ? m.n : "（未计入）") +
-        " | 体积 " + fix(pt.vol / 1000, 2) + " cm³" +
-        " | 表面积 " + fix(pt.area / 100, 1) + " cm²" +
-        " | 包围盒 " + pt.dim.map(function (d) { return fix(d, 1); }).join("×") + " mm" +
-        " | 面片 " + pt.tris
+        " " + B + " 材料 " + (pt.on ? m.n : "（未计入）") +
+        " " + B + " 体积 " + fix(pt.vol / 1000, 2) + " cm³" +
+        " " + B + " 包围盒 " + pt.dim.map(function (d) { return fix(d, 1); }).join("×") + " mm" +
+        " " + B + " 模具 " + (t.cav || 1) + " 穴 / " + rn.n +
+        (t.slides ? " / 滑块 " + t.slides : "") +
+        (t.lifters ? " / 斜顶 " + t.lifters : "") +
+        " / " + byId(STEELS, t.steel).n +
+        " / " + byId(PRECISIONS, t.precision).n +
+        (t.finish !== "normal" ? " / " + byId(FINISHES, t.finish).n : "") +
+        (t.shareWith !== null && t.shareWith !== undefined ? " / 与第 " + (+t.shareWith + 1) + " 号件共模" : "") +
+        (t.post ? " / 二次加工 " + t.post + " 元" : "")
       );
     }
+
+    var molds = [], mi;
+    for (mi = 0; mi < est.molds.length; mi++) {
+      var md = est.molds[mi];
+      molds.push(
+        "模 " + (mi + 1) + "（" + md.members.length + " 个零件：" +
+        md.members.map(function (x) { return parts[x].name; }).join("、") + "）" +
+        "\n    投影面积 " + fix(md.area, 0) + " cm² " + B + " 基准件 " + md.main.name +
+        "\n    基础价 ¥" + fix(md.base, 0) + " × 穴数系数 " + fix(md.kCav, 2) +
+        " × 钢材 " + fix(md.steel.k, 2) + " × 精度 " + fix(md.prec.k, 2) + " × 表面 " + fix(md.fin.k, 2) +
+        " = ¥" + fix(md.core, 0) +
+        "，滑块 ¥" + fix(md.slideCost, 0) + "，斜顶 ¥" + fix(md.liftCost, 0) + "，浇口系统 ¥" + fix(md.runCost, 0) +
+        "\n    合计 ¥" + fix(md.total, 0) + "" + (md.quoted ? "（已按模具厂实际报价覆盖）" : "（系统估算）")
+      );
+    }
+
+    var tl = tiers(parts, P, [10000, 50000, 100000, 300000, 500000]);
+    var tierTxt = tl.map(function (x) { return fix(x.qty, 0) + " 件 → " + fix(x.unit, 3) + " 元/件"; }).join("；");
+    var be = breakEven(est, P.target);
+
     var L = [];
     L.push("我是一名灯具结构工程师，正在做项目前期成本评估。");
     L.push("下面是一份从 STEP 装配体自动提取的零件清单（体积由三角网格按散度定理积分得到，与 CAD 实测值可对齐），请帮我就「成本」和「工艺可行性」做分析。");
@@ -243,20 +491,30 @@
     L.push("· 总重量：" + fix(est.weighted, 2) + " g（" + grams(est.weighted) + "）");
     L.push("· 总表面积：" + fix(est.areaSum / 100, 1) + " cm²");
     L.push("");
-    L.push("【零件清单】");
+    L.push("【零件清单（含各自的开模方案）】");
     L.push(rows.join("\n"));
     L.push("");
-    L.push("【已按注塑工艺做的初步估算】");
-    L.push("· 工艺参数：材料损耗 " + P.loss + "%，机时费 " + P.rate + " 元/h，成型周期 " + P.cycle + " s，模穴数 " + P.cav + "，良率 " + P.yield + "%，表处+包装 " + P.extra + " 元/件");
-    L.push("· 模具总价 " + P.mold + " 元，订单量 " + P.qty + " 件 → 单件摊销 " + fix(est.amort, 3) + " 元");
-    L.push("· 材料费合计 " + fix(est.mat, 3) + " 元；加工费合计 " + fix(est.mach, 3) + " 元");
-    L.push("· 单件估算成本 " + fix(est.total, 3) + " 元");
+    L.push("【模具投入清单（共 " + est.molds.length + " 套模具，合计 ¥" + fix(est.moldTotal, 0) + "）】");
+    L.push(molds.join("\n"));
+    L.push("");
+    L.push("【成本估算（按注塑工艺）】");
+    L.push("· 全局参数：材料损耗 " + P.loss + "%，基础成型周期 " + P.cycle + " s，良率 " + P.yield + "%，机时费系数 " + P.rateK + "×");
+    L.push("· 机时费与水口比例按每套模具的机台吨位与浇口形式分别推算；滑块/斜顶会相应延长成型周期");
+    L.push("· 订单量 " + fix(P.qty, 0) + " 件 → 模具摊销 " + fix(est.amort, 4) + " 元/件");
+    L.push("· 材料费合计 " + fix(est.mat, 3) + " 元；加工费合计 " + fix(est.mach, 3) + " 元；良率损失 " + fix(est.yldLoss, 3) + " 元");
+    L.push("· 二次加工 " + fix(est.post, 3) + " 元/件；包装 " + fix(est.pack, 3) + " 元/件；组装 " + fix(est.asm, 3) + " 元/件");
+    L.push("· **单件估算成本 " + fix(est.total, 3) + " 元**");
+    L.push("· 阶梯价：" + tierTxt);
+    if (be && be.ok) L.push("· 目标售价 " + P.target + " 元时，模具投入需 " + be.qty.toLocaleString() + " 件才能收回（单件毛利 " + fix(be.gross, 3) + " 元）");
+    else if (be && !be.ok) L.push("· ⚠️ 目标售价 " + P.target + " 元低于不含摊销的单件成本 " + fix(be.variable, 3) + " 元，模具永远收不回来");
     L.push("");
     L.push("【请回答】");
-    L.push("1. 这个成本结构里，哪一项的压缩空间最大？给出具体可执行的降本方向（含预期幅度）。");
-    L.push("2. 从零件的体积/表面积比例看，是否存在壁厚过厚、可以减料或抽壳的部位？请指出具体是哪个零件。");
-    L.push("3. 材料选型是否合理？哪些零件换材料后成本或性能会明显改善？（我主要做塑料灯具：小夜灯、氛围灯、补光灯，也涉及树脂一体成型、搪胶、软硅胶等小众工艺）");
-    L.push("4. 前期的风险提示：哪些零件在开模前必须再确认（脱模斜度、卡扣强度、缩水、透光均匀性等）？");
+    L.push("1. 这套开模方案（模穴数、滑块、斜顶、浇口形式、钢材）有没有明显过度或不足的地方？逐条说明理由与调整建议。");
+    L.push("2. 这个成本结构里哪一项压缩空间最大？给出具体可执行的降本方向（含预期幅度）。");
+    L.push("3. 有没有零件可以合并到同一套模具（共模）来省模具费？如果我现在没做共模，哪些适合，哪些不适合？");
+    L.push("4. 从零件的体积/表面积比例看，是否存在壁厚过厚、可以减料或抽壳的部位？请指出具体是哪个零件。");
+    L.push("5. 材料选型是否合理？哪些零件换材料后成本或性能会明显改善？（我主要做塑料灯具：小夜灯、氛围灯、补光灯，也涉及树脂一体成型、搪胶、软硅胶等小众工艺）");
+    L.push("6. 前期的风险提示：哪些零件在开模前必须再确认（脱模斜度、卡扣强度、缩水、透光均匀性等）？");
     L.push("");
     L.push("如果信息不足，请先说明你需要补充什么，不要凭空假设尺寸或结构细节。");
     return L.join("\n");
@@ -265,38 +523,99 @@
   /* ══════════ CSV 导出 ══════════ */
   function toCSV(info, parts, est, P) {
     var q = function (v) {
-      var s = String(v === undefined || v === null ? "" : v);
-      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      var sv = String(v === undefined || v === null ? "" : v);
+      return /[",\n]/.test(sv) ? '"' + sv.replace(/"/g, '""') + '"' : sv;
     };
+    var rowOf = {}, ri;
+    for (ri = 0; ri < est.perPart.length; ri++) rowOf[est.perPart[ri].i] = est.perPart[ri];
+
     var L = [];
-    L.push(["零件名称", "层级路径", "材料", "密度(g/cm³)", "单价(元/kg)", "体积(cm³)", "表面积(cm²)", "包围盒(mm)", "重量(g)", "材料费(元)", "是否计入"].map(q).join(","));
+    L.push(["零件名称", "层级路径", "材料", "体积(cm³)", "包围盒(mm)", "重量(g)",
+      "模穴数", "滑块", "斜顶", "浇口形式", "钢材", "精度", "表面要求",
+      "投影面积(cm²)", "锁模力(t)", "机台吨位(t)", "机时费(元/h)", "成型周期(s)",
+      "材料费(元)", "加工费(元)", "二次加工(元)", "模具摊销(元)", "单件小计(元)", "是否计入"].map(q).join(","));
+
     for (var i = 0; i < parts.length; i++) {
-      var pt = parts[i], m = matById(pt.mat);
-      var w = m.d > 0 ? (pt.vol / 1000) * m.d : 0;
-      var c = w * m.p / 1000 * (1 + (+P.loss) / 100);
-      L.push([pt.name, pt.path, m.n, m.d, m.p, fix(pt.vol / 1000, 3), fix(pt.area / 100, 2),
+      var pt = parts[i], m = matById(pt.mat), t = pt.tool, r = rowOf[i] || {};
+      L.push([
+        pt.name, pt.path, m.n, fix(pt.vol / 1000, 3),
         pt.dim.map(function (d) { return fix(d, 1); }).join("×"),
-        fix(w, 3), fix(c, 4), pt.on ? "是" : "否"].map(q).join(","));
+        fix(r.netW || 0, 3),
+        t.cav || 1, t.slides || 0, t.lifters || 0,
+        byId(RUNNERS, t.runner).n, byId(STEELS, t.steel).n,
+        byId(PRECISIONS, t.precision).n, byId(FINISHES, t.finish).n,
+        fix(r.area || 0, 1), fix(r.clamp || 0, 1), fix(r.tonnage || 0, 0),
+        fix(r.rate || 0, 1), fix(r.cycle || 0, 1),
+        fix(r.mat || 0, 4), fix(r.mach || 0, 4), fix(r.post || 0, 4), fix(r.amort || 0, 4),
+        fix((r.mat || 0) + (r.mach || 0) + (r.post || 0) + (r.amort || 0), 4),
+        pt.on ? "是" : "否"
+      ].map(q).join(","));
     }
+
     L.push("");
-    L.push(["汇总", "", "", "", "", "", "", "", "", ""].map(q).join(","));
+    L.push(["模具投入清单", "", "", "", "", ""].map(q).join(","));
+    L.push(["模具", "涉及零件", "基准件", "投影面积(cm²)", "基础价(元)", "穴数系数",
+      "钢材系数", "精度系数", "表面系数", "滑块(元)", "斜顶(元)", "浇口系统(元)", "模具合计(元)", "来源"].map(q).join(","));
+    for (var mi = 0; mi < est.molds.length; mi++) {
+      var md = est.molds[mi];
+      L.push([
+        "模 " + (mi + 1),
+        md.members.map(function (x) { return parts[x].name; }).join("、"),
+        md.main.name, fix(md.area, 0), fix(md.base, 0), fix(md.kCav, 3),
+        fix(md.steel.k, 2), fix(md.prec.k, 2), fix(md.fin.k, 2),
+        fix(md.slideCost, 0), fix(md.liftCost, 0), fix(md.runCost, 0),
+        fix(md.total, 0), md.quoted ? "模具厂报价" : "系统估算"
+      ].map(q).join(","));
+    }
+    L.push(["模具合计", "", "", "", "", "", "", "", "", "", "", "", fix(est.moldTotal, 0), ""].map(q).join(","));
+
+    L.push("");
+    L.push(["成本汇总", "金额 / 数值"].map(q).join(","));
     var S = [
-      ["参与计价零件数", est.n], ["总体积(cm³)", fix(est.volSum / 1000, 2)], ["总表面积(cm²)", fix(est.areaSum / 100, 1)],
-      ["总重量(g)", fix(est.weighted, 2)], ["材料费合计(元)", fix(est.mat, 4)], ["加工费合计(元)", fix(est.mach, 4)],
-      ["良率损失(元)", fix(est.yldLoss, 4)], ["模具摊销(元/件)", fix(est.amort, 4)], ["表处包装(元/件)", fix(est.extra, 4)],
+      ["参与计价零件数", est.n],
+      ["模具套数", est.molds.length],
+      ["模具总投入(元)", fix(est.moldTotal, 0)],
+      ["总体积(cm³)", fix(est.volSum / 1000, 2)],
+      ["总重量(g)", fix(est.weighted, 2)],
+      ["总表面积(cm²)", fix(est.areaSum / 100, 1)],
+      ["材料费合计(元)", fix(est.mat, 4)],
+      ["加工费合计(元)", fix(est.mach, 4)],
+      ["良率损失(元/件)", fix(est.yldLoss, 4)],
+      ["二次加工(元/件)", fix(est.post, 4)],
+      ["包装(元/件)", fix(est.pack, 4)],
+      ["组装(元/件)", fix(est.asm, 4)],
+      ["模具摊销(元/件)", fix(est.amort, 4)],
       ["单件成本(元)", fix(est.total, 4)]
     ];
     for (var k = 0; k < S.length; k++) L.push([S[k][0], S[k][1]].map(q).join(","));
+
     L.push("");
-    L.push(["工艺参数", "值"].map(q).join(","));
+    L.push(["阶梯价（不同订单量下的单件成本）", ""].map(q).join(","));
+    L.push(["订单量(件)", "单件成本(元)", "其中模具摊销(元)"].map(q).join(","));
+    var tl = tiers(parts, P, [10000, 50000, 100000, 300000, 500000]);
+    for (var ti = 0; ti < tl.length; ti++) {
+      L.push([fix(tl[ti].qty, 0), fix(tl[ti].unit, 4), fix(tl[ti].amort, 4)].map(q).join(","));
+    }
+    var be = breakEven(est, P.target);
+    if (be) {
+      L.push(["回本点", be.ok ? (be.qty + " 件（单件毛利 " + fix(be.gross, 4) + " 元）") : "目标售价低于可变成本，无法回本"].map(q).join(","));
+    }
+
+    L.push("");
+    L.push(["全局工艺参数", "值"].map(q).join(","));
     for (var key in P) if (P.hasOwnProperty(key)) L.push([P[key].l, P[key].v].map(q).join(","));
     return "\uFEFF" + L.join("\n");   // BOM 让 Excel 正确识别中文
   }
 
   window.KB_STEP = {
     MATS: MATS, PARAMS: PARAMS,
+    STEELS: STEELS, PRECISIONS: PRECISIONS, FINISHES: FINISHES, RUNNERS: RUNNERS,
+    byId: byId, moldCoefOf: moldCoefOf, machineRate: machineRate,
     matById: matById, guessMat: guessMat,
     meshStats: meshStats, flatten: flatten, estimate: estimate,
+    moldGroups: moldGroups, moldCost: moldCost, cycleOf: cycleOf,
+    partMachine: partMachine, tiers: tiers, breakEven: breakEven, sanity: sanity,
+    RECYCLE: RECYCLE,
     buildPrompt: buildPrompt, toCSV: toCSV,
     fix: fix, vol: vol, area: area, grams: grams, money: money
   };

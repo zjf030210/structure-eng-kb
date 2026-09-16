@@ -924,6 +924,49 @@
   .st-prompt{background:var(--bg-sub); border:1px solid var(--border); border-radius:var(--r-md);
     padding:14px; font-size:var(--fs-xs); line-height:var(--lh-relaxed); color:var(--tx-body);
     max-height:300px; overflow-y:auto; white-space:pre-wrap; font-family:var(--font-mono, ui-monospace, monospace);}
+
+  /* 开模设置面板（点零件行展开） */
+  .st-cfg{padding:10px 12px 12px; background:var(--bg-sub); border-bottom:1px solid var(--bd-row);}
+  .st-cfg-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:var(--sp-5);}
+  .st-cfg-grid label{display:block; font-size:var(--fs-caption); color:var(--tx-faint);}
+  .st-cfg-grid input,.st-cfg-grid select{width:100%; margin-top:3px; padding:4px 6px; border:1px solid var(--border);
+    border-radius:var(--r-xs); background:var(--card); color:var(--text); font-size:var(--fs-xs); font-variant-numeric:tabular-nums;}
+  .st-cfg-note{margin-top:10px; padding:7px 10px; background:var(--card); border:1px solid var(--border);
+    border-radius:var(--r-xs); font-size:var(--fs-caption); color:var(--tx-soft); line-height:var(--lh-base);
+    font-variant-numeric:tabular-nums;}
+
+  /* 模具投入清单 */
+  .st-molds{display:grid; gap:var(--sp-5);}
+  .st-mold{border:1px solid var(--border); border-radius:var(--r-md); padding:11px 14px; background:var(--card);}
+  .st-mold.quoted{border-color:var(--ok-bd); background:var(--ok-bg);}
+  .st-mold-h{display:flex; align-items:baseline; gap:var(--sp-5); font-size:var(--fs-sm);}
+  .st-mold-h b{font-weight:600; color:var(--primary); flex-shrink:0;}
+  .st-mold-h span{flex:1; min-width:0; color:var(--tx-body); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .st-mold-h em{font-style:normal; font-weight:700; color:var(--tx-strong); font-variant-numeric:tabular-nums; flex-shrink:0;}
+  .st-mold-b{margin-top:var(--sp-4); display:flex; flex-wrap:wrap; gap:var(--sp-3) var(--sp-7);
+    font-size:var(--fs-caption); color:var(--tx-faint); font-variant-numeric:tabular-nums;}
+
+  /* 阶梯价 */
+  .st-tiers{border:1px solid var(--border); border-radius:var(--r-md); overflow:hidden; margin-bottom:var(--sp-6);}
+  .st-tier{display:grid; grid-template-columns:1fr auto 96px; gap:var(--sp-5); align-items:baseline;
+    padding:8px 14px; border-bottom:1px solid var(--bd-row); font-size:var(--fs-sm);}
+  .st-tier:last-child{border-bottom:0;}
+  .st-tier.head{background:var(--bg-sub); font-size:var(--fs-caption); color:var(--tx-soft); font-weight:600;}
+  .st-tier.on{background:var(--primary-weak);}
+  .st-tier b{font-weight:600; color:var(--primary); font-variant-numeric:tabular-nums; text-align:right;}
+  .st-tier span:last-child{text-align:right; color:var(--tx-faint); font-size:var(--fs-caption); font-variant-numeric:tabular-nums;}
+
+  /* 提示条 */
+  .st-note{margin-top:var(--sp-6); padding:10px 12px; border-radius:var(--r-sm); font-size:var(--fs-xs);
+    line-height:var(--lh-base); background:var(--bg-sub); border:1px solid var(--border); color:var(--tx-body);}
+  .st-note.warn{background:var(--warn-bg); border-color:var(--warn-bd); color:var(--warn-tx);}
+  .st-note b{font-weight:600;}
+
+  @media (max-width:640px){
+    .st-cfg-grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));}
+    .st-tier{grid-template-columns:1fr auto 74px; padding:7px 11px; font-size:var(--fs-xs);}
+  }
+
   @media (max-width:900px){ .st-grid{grid-template-columns:minmax(0,1fr);} }
   @media (max-width:640px){
     .st-stage canvas{height:250px;}

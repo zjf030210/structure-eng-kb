@@ -35,7 +35,8 @@
   /* ══════════════ 状态 ══════════════ */
   var st = {
     parts: [], tree: [], params: {}, info: null,
-    sel: -1, parsed: false, busy: false, err: ""
+    sel: -1, parsed: false, busy: false, err: "",
+    open: {}          // 展开了「开模设置」的零件索引
   };
   for (var k in S.PARAMS) st.params[k] = S.PARAMS[k].v;
 
@@ -438,6 +439,18 @@
     h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-coins"/></svg>成本估算</h3>');
     h.push('<div class="st-params">' + paramsHTML() + '</div>');
     h.push('<div id="stCost">' + costHTML() + '</div>');
+    h.push('<div id="stSanity">' + sanityHTML() + '</div>');
+    h.push('</div>');
+
+    /* 模具方案 */
+    h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-wrench"/></svg>模具方案</h3>');
+    h.push('<div class="st-privacy" style="margin:0 0 10px">每个零件默认一套模具；小件可以在装配树里展开「开模设置」勾选共模。滑块 / 行位、斜顶、热流道都会直接抬高模具报价，并相应拉长成型周期。</div>');
+    h.push('<div id="stMolds">' + moldsHTML() + '</div>');
+    h.push('</div>');
+
+    /* 报价分析 */
+    h.push('<div class="st-sec"><h3><svg class="ic" aria-hidden="true"><use href="#i-trending-up"/></svg>报价分析</h3>');
+    h.push('<div id="stTiers">' + tiersHTML() + '</div>');
     h.push('</div>');
 
     /* 导出区 */
@@ -453,7 +466,7 @@
 
   function treeHTML() {
     var rows = [], i;
-    rows.push('<div class="st-tr head"><div class="st-nm"><span>装配结构 / 零件</span></div>'
+    rows.push('<div class="st-tr head"><div class="st-nm"><span>装配结构 / 零件（点击可展开开模设置）</span></div>'
       + '<div class="st-b">包围盒 mm</div><div class="st-v">体积</div><div class="st-w">重量</div></div>');
     for (i = 0; i < st.tree.length; i++) {
       var t = st.tree[i];
@@ -466,6 +479,7 @@
     }
     for (i = 0; i < st.parts.length; i++) {
       rows.push(partRowHTML(i));
+      if (st.open[i]) rows.push(cfgRowHTML(i));
     }
     return rows.join("");
   }
@@ -500,19 +514,138 @@
     return out.join("");
   }
 
+  /* 下拉选项 */
+  function optList(list, cur) {
+    return list.map(function (x) {
+      return '<option value="' + x.id + '"' + (x.id === cur ? " selected" : "") + '>' + esc(x.n) + '</option>';
+    }).join("");
+  }
+  function shareOpts(i) {
+    var cur = st.parts[i].tool.shareWith;
+    var o = ['<option value=""' + (cur === null || cur === undefined ? " selected" : "") + '>独立开模</option>'];
+    for (var j = 0; j < st.parts.length; j++) {
+      if (j === i) continue;
+      o.push('<option value="' + j + '"' + (String(cur) === String(j) ? " selected" : "") + '>与「' + esc(st.parts[j].name) + '」共模</option>');
+    }
+    return o.join("");
+  }
+
+  /* ══════ 成本卡 ══════ */
   function costHTML() {
     var e = S.estimate(st.parts, st.params);
     var L = [];
     L.push('<div class="st-cost">');
-    L.push('<div class="st-line"><span>材料费<span class="st-sub">' + e.n + ' 个零件 · 含损耗 ' + st.params.loss + '%</span></span><b>' + S.money(e.mat) + '</b></div>');
-    L.push('<div class="st-line"><span>加工费<span class="st-sub">' + S.fix(e.machEach, 3) + ' 元/件 × ' + e.n + '</span></span><b>' + S.money(e.mach) + '</b></div>');
+    L.push('<div class="st-line"><span>材料费<span class="st-sub">' + e.n + ' 个零件 · 含损耗 ' + st.params.loss + '% · 水口料按回收折价抵扣</span></span><b>' + S.money(e.mat) + '</b></div>');
+    L.push('<div class="st-line"><span>加工费<span class="st-sub">按各零件的机台吨位与模穴数分别推算</span></span><b>' + S.money(e.mach) + '</b></div>');
     L.push('<div class="st-line"><span>良率损失<span class="st-sub">良率 ' + st.params.yield + '%</span></span><b>' + S.money(e.yldLoss) + '</b></div>');
-    L.push('<div class="st-line"><span>模具摊销<span class="st-sub">' + S.fix(st.params.mold, 0) + ' 元 ÷ ' + S.fix(st.params.qty, 0) + ' 件</span></span><b>' + S.money(e.amort) + '</b></div>');
-    L.push('<div class="st-line"><span>表处 + 包装</span><b>' + S.money(e.extra) + '</b></div>');
+    L.push('<div class="st-line"><span>二次加工 / 表面处理<span class="st-sub">在零件上逐件设置</span></span><b>' + S.money(e.post) + '</b></div>');
+    L.push('<div class="st-line"><span>包装</span><b>' + S.money(e.pack) + '</b></div>');
+    L.push('<div class="st-line"><span>组装</span><b>' + S.money(e.asm) + '</b></div>');
+    L.push('<div class="st-line"><span>模具摊销<span class="st-sub">模具总投入 ' + S.fix(e.moldTotal, 0) + ' 元 ÷ ' + S.fix(e.qty, 0) + ' 件</span></span><b>' + S.money(e.amort) + '</b></div>');
     L.push('<div class="st-total"><span>单件估算成本</span><span class="st-num">' + S.money(e.total) + '</span></div>');
-    L.push('<div class="st-privacy" style="margin-top:10px">材料密度与单价为行业参考值，请按实际供应商报价在下方参数中调整；加工费按每个零件各注塑一次计。</div>');
+    L.push('<div class="st-privacy" style="margin-top:10px">材料密度与单价、模具结构单价均为行业参考值，请按实际供应商报价调整。</div>');
     L.push('</div>');
     return L.join("");
+  }
+
+  /* ══════ 零件：开模设置面板 ══════ */
+  function cfgRowHTML(i) {
+    var p = st.parts[i], t = p.tool;
+    var g = [];
+    g.push('<div class="st-cfg" data-i="' + i + '">');
+    g.push('<div class="st-cfg-grid">');
+    g.push('<label>模穴数<input type="number" min="1" max="64" step="1" data-c="cav" data-i="' + i + '" value="' + (t.cav || 1) + '"></label>');
+    g.push('<label>滑块 / 行位<input type="number" min="0" max="20" step="1" data-c="slides" data-i="' + i + '" value="' + (t.slides || 0) + '"></label>');
+    g.push('<label>斜顶<input type="number" min="0" max="20" step="1" data-c="lifters" data-i="' + i + '" value="' + (t.lifters || 0) + '"></label>');
+    g.push('<label>浇口形式<select data-c="runner" data-i="' + i + '">' + optList(S.RUNNERS, t.runner) + '</select></label>');
+    g.push('<label>钢材<select data-c="steel" data-i="' + i + '">' + optList(S.STEELS, t.steel) + '</select></label>');
+    g.push('<label>精度<select data-c="precision" data-i="' + i + '">' + optList(S.PRECISIONS, t.precision) + '</select></label>');
+    g.push('<label>表面要求<select data-c="finish" data-i="' + i + '">' + optList(S.FINISHES, t.finish) + '</select></label>');
+    g.push('<label>二次加工 (元/件)<input type="number" min="0" step="any" data-c="post" data-i="' + i + '" value="' + (t.post || 0) + '"></label>');
+    g.push('<label>共模<select data-c="shareWith" data-i="' + i + '">' + shareOpts(i) + '</select></label>');
+    g.push('<label>模具厂报价 (元，留空=按估算)<input type="number" min="0" step="any" data-c="quote" data-i="' + i + '" value="' + (t.quote === null || t.quote === undefined ? "" : t.quote) + '"></label>');
+    g.push('</div>');
+    g.push('<div class="st-cfg-note">' + cfgNoteHTML(i) + '</div>');
+    g.push('</div>');
+    return g.join("");
+  }
+
+  /* 该零件当前的推算结论（改任一配置项后只刷新这一行） */
+  function cfgNoteHTML(i) {
+    var e = S.estimate(st.parts, st.params);
+    var r = null;
+    for (var k = 0; k < e.perPart.length; k++) if (e.perPart[k].i === i) r = e.perPart[k];
+    if (!r) return "";
+    return '推算：投影 ' + S.fix(r.area, 1) + ' cm² → 锁模力 ' + S.fix(r.clamp, 1) + ' t → 机台 '
+      + S.fix(r.tonnage, 0) + ' t（' + r.rate + ' 元/h）｜周期 ' + S.fix(r.cycle, 1) + ' s｜' + r.cav + ' 穴'
+      + '｜材料 ' + S.money(r.mat) + '　加工 ' + S.money(r.mach) + '　模具摊销 ' + S.money(r.amort)
+      + (r.mold ? '｜所属：模 ' + (e.molds.indexOf(r.mold) + 1) + '（' + S.money(r.mold.total) + '）' : '');
+  }
+
+  /* ══════ 模具投入清单 ══════ */
+  function moldsHTML() {
+    var e = S.estimate(st.parts, st.params);
+    if (!e.molds.length) return '<div class="st-privacy">暂无参与计价的零件</div>';
+    var L = ['<div class="st-molds">'];
+    for (var mi = 0; mi < e.molds.length; mi++) {
+      var m = e.molds[mi];
+      L.push('<div class="st-mold' + (m.quoted ? " quoted" : "") + '">');
+      L.push('<div class="st-mold-h"><b>模 ' + (mi + 1) + '</b>'
+        + '<span>' + m.members.map(function (x) { return esc(st.parts[x].name); }).join('、')
+        + '（' + m.members.length + ' 件' + (m.cfg.cav > 1 ? ' · ' + m.cfg.cav + ' 穴' : '') + '）</span>'
+        + '<em>' + S.money(m.total) + '</em></div>');
+      L.push('<div class="st-mold-b">'
+        + '<span>基准件 ' + esc(m.main.name) + '　投影 ' + S.fix(m.area, 0) + ' cm²</span>'
+        + '<span>' + S.fix(m.base, 0) + ' × 穴数 ' + S.fix(m.kCav, 2) + ' × 钢材 ' + S.fix(m.steel.k, 2)
+        + ' × 精度 ' + S.fix(m.prec.k, 2) + ' × 表面 ' + S.fix(m.fin.k, 2) + ' = ' + S.fix(m.core, 0) + ' 元</span>'
+        + (m.slideCost ? '<span>滑块 / 行位 +' + S.fix(m.slideCost, 0) + ' 元</span>' : '')
+        + (m.liftCost ? '<span>斜顶 +' + S.fix(m.liftCost, 0) + ' 元</span>' : '')
+        + (m.runCost ? '<span>浇口系统 +' + S.fix(m.runCost, 0) + ' 元</span>' : '')
+        + '<span>' + (m.quoted ? '模具厂实际报价' : '系统估算') + '</span>'
+        + '</div>');
+      L.push('</div>');
+    }
+    L.push('</div>');
+    L.push('<div class="st-privacy">模具总投入 <b>' + S.money(e.moldTotal) + '</b>　共 ' + e.molds.length + ' 套　'
+      + '（明细可在上方装配树里逐件调整；模具厂给了实际报价后填进去即可覆盖估算）</div>');
+    return L.join("");
+  }
+
+  /* ══════ 报价分析：阶梯价 + 回本点 ══════ */
+  function tiersHTML() {
+    var e = S.estimate(st.parts, st.params);
+    var tl = S.tiers(st.parts, st.params, [10000, 50000, 100000, 300000, 500000]);
+    var cur = +st.params.qty;
+    var L = ['<div class="st-tiers">'];
+    L.push('<div class="st-tier head"><span>订单量</span><b>单件成本</b><span>其中模具摊销</span></div>');
+    for (var i = 0; i < tl.length; i++) {
+      var on = Math.abs(tl[i].qty - cur) < 1;
+      L.push('<div class="st-tier' + (on ? " on" : "") + '"><span>' + tl[i].qty.toLocaleString() + ' 件'
+        + (on ? '（当前）' : '') + '</span><b>' + S.money(tl[i].unit) + '</b>'
+        + '<span>' + S.fix(tl[i].amort, 3) + ' 元</span></div>');
+    }
+    L.push('</div>');
+    var be = S.breakEven(e, st.params.target);
+    if (be && be.ok) {
+      L.push('<div class="st-note">按目标售价 ' + S.money(st.params.target) + '：单件毛利 ' + S.money(be.gross)
+        + '，模具投入 <b>' + S.money(e.moldTotal) + '</b> 需要 <b>' + be.qty.toLocaleString() + ' 件</b>才能收回</div>');
+    } else if (be && !be.ok) {
+      L.push('<div class="st-note warn">目标售价 ' + S.money(st.params.target) + ' 低于不含模具摊销的单件成本 '
+        + S.money(be.variable) + '，模具投入永远收不回来</div>');
+    } else {
+      L.push('<div class="st-note">在下面「目标售价」里填一个价格，就能算出模具投入需要多少件收回</div>');
+    }
+    return L.join("");
+  }
+
+  /* ══════ 合理性提示 ══════ */
+  function sanityHTML() {
+    var e = S.estimate(st.parts, st.params);
+    var w = S.sanity(st.parts, e);
+    if (!w.length) return "";
+    return '<div class="st-note warn" style="margin-top:12px">'
+      + '<b>超出常规注塑范围，结果仅作量级参考：</b><br>'
+      + w.map(function (x) { return "· " + esc(x); }).join("<br>") + '</div>';
   }
 
   /* ══════════════ 渲染与事件 ══════════════ */
@@ -670,29 +803,36 @@
 
     var tree = $("stTree");
     if (tree) {
+      /* 材料下拉 */
       tree.addEventListener("change", function (e) {
         var sel = e.target.closest(".st-sel");
-        if (!sel) return;
-        var i = +sel.dataset.mat;
-        st.parts[i].mat = sel.value;
-        refreshCost();
+        if (sel) { st.parts[+sel.dataset.mat].mat = sel.value; refreshAll(); return; }
+        var c = e.target.closest("[data-c]");
+        if (c) applyCfg(c);
       });
+      /* 开模设置里的数字输入 */
+      tree.addEventListener("input", function (e) {
+        var c = e.target.closest("[data-c]");
+        if (c && e.target.tagName === "INPUT") applyCfg(c);
+      });
+      /* 点击：勾选 / 展开开模设置 */
       tree.addEventListener("click", function (e) {
+        if (e.target.closest(".st-sel") || e.target.closest("[data-c]")) return;
         var tg = e.target.closest("[data-toggle]");
         if (tg) {
-          var i = +tg.dataset.toggle;
-          st.parts[i].on = !st.parts[i].on;
-          tree.innerHTML = treeHTML();
-          updateSelection();
-          refreshCost();
+          var it = +tg.dataset.toggle;
+          st.parts[it].on = !st.parts[it].on;
+          refreshAll();
           return;
         }
         var row = e.target.closest(".st-tr.part");
-        if (row && viewer) {
-          st.sel = (+row.dataset.i === st.sel) ? -1 : +row.dataset.i;   // 再点一次取消
-          updateSelection();
-          tree.innerHTML = treeHTML();
-        }
+        if (!row) return;
+        var i = +row.dataset.i;
+        if (st.open[i]) { delete st.open[i]; } else { st.open[i] = 1; }   // 再点一次收起
+        st.sel = st.open[i] ? i : -1;
+        refreshTree();
+        updateSelection();
+        refreshAll(true);
       });
     }
 
@@ -700,7 +840,7 @@
     Array.prototype.forEach.call(pp, function (inp) {
       inp.addEventListener("input", function () {
         var v = parseFloat(inp.value);
-        if (isFinite(v)) { st.params[inp.dataset.p] = v; refreshCost(); }
+        if (isFinite(v)) { st.params[inp.dataset.p] = v; refreshAll(true); }
       });
     });
 
@@ -761,9 +901,8 @@
     }
   }
 
-  function refreshCost() {
-    var box = $("stCost");
-    if (box) box.innerHTML = costHTML();
+  /* 只更新概览卡片 */
+  function refreshMeta() {
     var meta = document.querySelector(".st-meta");
     if (meta) {
       var e = S.estimate(st.parts, st.params);
@@ -774,6 +913,49 @@
         + '<div><span>三角形</span><b>' + st.info.tris + '</b></div>'
         + '<div><span>包围盒 (mm)</span><b>' + st.info.bbox + '</b></div>';
     }
+  }
+
+  function refreshTree() {
+    var t = $("stTree");
+    if (t) t.innerHTML = treeHTML();
+  }
+
+  /* keepTree = true 时不重绘装配树，避免正在输入的输入框失焦 */
+  function refreshAll(keepTree) {
+    var c = $("stCost"); if (c) c.innerHTML = costHTML();
+    var m = $("stMolds"); if (m) m.innerHTML = moldsHTML();
+    var ti = $("stTiers"); if (ti) ti.innerHTML = tiersHTML();
+    var sa = $("stSanity"); if (sa) sa.innerHTML = sanityHTML();
+    refreshMeta();
+    if (keepTree) {
+      for (var k in st.open) if (st.open.hasOwnProperty(k)) updateCfgNote(+k);
+    } else {
+      refreshTree();
+    }
+  }
+
+  function updateCfgNote(i) {
+    var el = document.querySelector('.st-cfg[data-i="' + i + '"] .st-cfg-note');
+    if (el) el.innerHTML = cfgNoteHTML(i);
+  }
+
+  /* 把开模设置里的一项写回零件并刷新 */
+  function applyCfg(el) {
+    var i = +el.dataset.i, k = el.dataset.c, v;
+    if (k === "shareWith") {
+      v = el.value === "" ? null : +el.value;
+    } else if (k === "quote") {
+      v = el.value === "" ? null : +el.value;
+      if (v !== null && (!isFinite(v) || v < 0)) return;
+    } else if (k === "cav" || k === "slides" || k === "lifters" || k === "post") {
+      v = el.value === "" ? 0 : +el.value;
+      if (!isFinite(v) || v < 0) return;
+      if (k === "cav" && v < 1) v = 1;
+    } else {
+      v = el.value;
+    }
+    st.parts[i].tool[k] = v;
+    refreshAll(true);
   }
 
   /* 主入口：由 app.js 的 renderAll 调用 */
