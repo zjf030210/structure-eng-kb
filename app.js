@@ -2892,42 +2892,41 @@ document.getElementById("imgModal").addEventListener("click", e=>{
         days   同一访客最少间隔几天再弹一次。改成 0 = 每次打开都弹
      · 访客点「不再提示」后永久不再弹
      · 自己看效果：链接后加 ?donate=1 强制弹；?donate=0 关掉本轮 */
-  const DONATE_AUTO = { on: true, delay: 1600, days: 3 };
-  const LS_DONATE_TS = "kb-donate-ts", LS_DONATE_OFF = "kb-donate-off";
+  const DONATE_AUTO = { on: true, delay: 1600 };
+
+  /* 本次打开是否已经弹过（或访客说过「本次不再提示」）
+     ⚠️ 只存在内存里、不写 localStorage —— 所以：
+        · 一次打开最多弹一次（访客关掉后不会再冒出来）
+        · 关掉浏览器/刷新后再打开，仍然会弹（不做「几天内只弹一次」的频率限制）
+        · 点「本次不再提示」只对这一次有效，下次打开照弹 */
+  let donateShown = false;
 
   (function autoPopup(){
     if(!DONATE_AUTO.on) return;
-    let forced = false;
     try{
-      const q = new URLSearchParams(location.search).get("donate");
-      if(q === "0") return;                    // ?donate=0 → 本轮不弹
-      forced = (q === "1");                    // ?donate=1 → 强制弹（跳过频率限制）
+      if(new URLSearchParams(location.search).get("donate") === "0") return;   // ?donate=0 → 本轮不弹
     }catch(e){}
-    if(!forced){
-      if(lsGet(LS_DONATE_OFF, false)) return;                       // 访客点过「不再提示」
-      const last = +lsGet(LS_DONATE_TS, 0) || 0;
-      if(last && Date.now() - last < DONATE_AUTO.days * 864e5) return;   // 距上次弹出还不够久
-    }
     let tries = 0;
     const tick = ()=>{
-      /* 页面在后台、或访客正开着别的弹窗时不打扰（且不消耗这次的弹出机会） */
+      if(donateShown) return;
+      /* 页面在后台、或访客正开着别的弹窗时先避让，稍后补弹（不会两个弹窗叠一起） */
       const busy = document.visibilityState === "hidden"
         || document.getElementById("imgModal").classList.contains("open")
         || document.getElementById("aiModal").classList.contains("open")
         || modal.classList.contains("open");
       if(busy){
-        if(tries++ < 8) setTimeout(tick, 4000);
+        if(tries++ < 20) setTimeout(tick, 3000);
         return;
       }
+      donateShown = true;
       open();
-      if(!forced) lsSet(LS_DONATE_TS, Date.now());   // 强制预览时不占用的名额
     };
     setTimeout(tick, Math.max(0, DONATE_AUTO.delay));
   })();
 
-  /* 「不再提示」：记一个永久标记，之后不再自动弹出（仍可手动点按钮打开） */
+  /* 「本次不再提示」：只抑制这一次打开，不写入任何持久化标记 */
   const neverBtn = document.getElementById("donateNeverBtn");
-  if(neverBtn) neverBtn.addEventListener("click", ()=>{ lsSet(LS_DONATE_OFF, true); close(); });
+  if(neverBtn) neverBtn.addEventListener("click", ()=>{ donateShown = true; close(); });
 })();
 
 /* ══════════════ 模块导航与交互绑定 ══════════════ */
