@@ -139,6 +139,7 @@
             name: pname,
             rawName: m.name || name || "",
             vol: st.vol, area: st.area, tris: st.tris, dim: st.dim,
+            min: st.min, max: st.max,        // 自身包围盒的角点（原始坐标，3D 画线框用）
             mat: guessMat(name + " " + (m.name || "")),
             on: true
           });
@@ -268,12 +269,13 @@
       return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
     };
     var L = [];
-    L.push(["零件名称", "层级路径", "材料", "密度(g/cm³)", "单价(元/kg)", "体积(cm³)", "表面积(cm²)", "重量(g)", "材料费(元)", "是否计入"].map(q).join(","));
+    L.push(["零件名称", "层级路径", "材料", "密度(g/cm³)", "单价(元/kg)", "体积(cm³)", "表面积(cm²)", "包围盒(mm)", "重量(g)", "材料费(元)", "是否计入"].map(q).join(","));
     for (var i = 0; i < parts.length; i++) {
       var pt = parts[i], m = matById(pt.mat);
       var w = m.d > 0 ? (pt.vol / 1000) * m.d : 0;
       var c = w * m.p / 1000 * (1 + (+P.loss) / 100);
       L.push([pt.name, pt.path, m.n, m.d, m.p, fix(pt.vol / 1000, 3), fix(pt.area / 100, 2),
+        pt.dim.map(function (d) { return fix(d, 1); }).join("×"),
         fix(w, 3), fix(c, 4), pt.on ? "是" : "否"].map(q).join(","));
     }
     L.push("");

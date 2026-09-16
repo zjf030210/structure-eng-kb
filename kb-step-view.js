@@ -65,6 +65,25 @@
     var PVS = "attribute vec3 aPos; uniform mat4 uMVP; uniform float uScale; void main(){ gl_Position = uMVP * vec4(aPos * uScale, 1.0); }";
     var PFS = "precision mediump float; uniform vec3 uId; void main(){ gl_FragColor = vec4(uId, 1.0); }";
 
+    /* 包围盒线框：单位立方体（12 条边）经 uCenter/uSize 变换到目标零件的位置 */
+    var WVS = "attribute vec3 aPos; uniform mat4 uMVP; uniform vec3 uCenter; uniform vec3 uSize; uniform float uScale;"
+            + " void main(){ vec3 p = uCenter + aPos * uSize; gl_Position = uMVP * vec4(p * uScale, 1.0); }";
+    var WFS = "precision mediump float; uniform vec3 uColor; void main(){ gl_FragColor = vec4(uColor, 1.0); }";
+    var UNIT_BOX = new Float32Array([
+      -0.5, -0.5, -0.5,  0.5, -0.5, -0.5,
+       0.5, -0.5, -0.5,  0.5,  0.5, -0.5,
+       0.5,  0.5, -0.5, -0.5,  0.5, -0.5,
+      -0.5,  0.5, -0.5, -0.5, -0.5, -0.5,
+      -0.5, -0.5,  0.5,  0.5, -0.5,  0.5,
+       0.5, -0.5,  0.5,  0.5,  0.5,  0.5,
+       0.5,  0.5,  0.5, -0.5,  0.5,  0.5,
+      -0.5,  0.5,  0.5, -0.5, -0.5,  0.5,
+      -0.5, -0.5, -0.5, -0.5, -0.5,  0.5,
+       0.5, -0.5, -0.5,  0.5, -0.5,  0.5,
+       0.5,  0.5, -0.5,  0.5,  0.5,  0.5,
+      -0.5,  0.5, -0.5, -0.5,  0.5,  0.5
+    ]);
+
     function sh(type, src) {
       var s = gl.createShader(type);
       gl.shaderSource(s, src); gl.compileShader(s);
@@ -78,8 +97,8 @@
       gl.linkProgram(p);
       return gl.getProgramParameter(p, gl.LINK_STATUS) ? p : null;
     }
-    var P = prog(VS, FS), PP = prog(PVS, PFS);
-    if (!P || !PP) return null;
+    var P = prog(VS, FS), PP = prog(PVS, PFS), PW = prog(WVS, WFS);
+    if (!P || !PP || !PW) return null;
 
     /* 大模型单个零件顶点常超过 65535，Uint16 索引会静默出错 */
     var uintExt = gl.getExtension("OES_element_index_uint");
@@ -98,6 +117,18 @@
       uScale: gl.getUniformLocation(PP, "uScale"),
       uId: gl.getUniformLocation(PP, "uId")
     };
+    var wLoc = {
+      aPos: gl.getAttribLocation(PW, "aPos"),
+      uMVP: gl.getUniformLocation(PW, "uMVP"),
+      uCenter: gl.getUniformLocation(PW, "uCenter"),
+      uSize: gl.getUniformLocation(PW, "uSize"),
+      uScale: gl.getUniformLocation(PW, "uScale"),
+      uColor: gl.getUniformLocation(PW, "uColor")
+    };
+    var boxBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, boxBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, UNIT_BOX, gl.STATIC_DRAW);
+    var boxMin = null, boxMax = null;
 
     var bufs = [];       // 每个零件：{pos, nrm, idx, count, color}
     var center = [0, 0, 0], radius = 1;
@@ -239,6 +270,27 @@
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b.idx);
         gl.drawElements(gl.TRIANGLES, b.count, IDX_GL, 0);
       }
+
+      /* 选中零件的包围盒线框（拾取用的那趟不画，免得干扰 id 颜色） */
+      if (!pick && boxMin && boxMax) {
+        gl.useProgram(PW);
+        gl.uniformMatrix4fv(wLoc.uMVP, false, m.m);
+        gl.uniform1f(wLoc.uScale, sc);
+        gl.uniform3f(wLoc.uCenter,
+          (boxMin[0] + boxMax[0]) / 2 - center[0],
+          (boxMin[1] + boxMax[1]) / 2 - center[1],
+          (boxMin[2] + boxMax[2]) / 2 - center[2]);
+        /* 略微外扩，避免与零件表面重叠时被 z-fighting 吃掉 */
+        gl.uniform3f(wLoc.uSize,
+          Math.max(boxMax[0] - boxMin[0], 1e-3) * 1.004,
+          Math.max(boxMax[1] - boxMin[1], 1e-3) * 1.004,
+          Math.max(boxMax[2] - boxMin[2], 1e-3) * 1.004);
+        gl.uniform3f(wLoc.uColor, 0.94, 0.44, 0.09);
+        gl.bindBuffer(gl.ARRAY_BUFFER, boxBuf);
+        gl.enableVertexAttribArray(wLoc.aPos);
+        gl.vertexAttribPointer(wLoc.aPos, 3, gl.FLOAT, false, 0, 0);
+        gl.drawArrays(gl.LINES, 0, 24);
+      }
     }
 
     var bg = [0.96, 0.97, 0.99];
@@ -259,6 +311,8 @@
     return {
       upload: upload, draw: function () { drawTo(null, false); },
       pick: pickAt, mvp: mvp, setBg: setBg,
+      /* 传 null 取消线框；坐标是模型的原始坐标系（与 parts 的 min/max 一致） */
+      setBox: function (mn, mx) { boxMin = mn; boxMax = mx; },
       rot: function () { return [rotX, rotY]; }, setRot: setRot, setZoom: setZoom,
       getZoom: function () { return zoom; },
       dispose: function () { gl.getExtension("WEBGL_lose_context") && gl.getExtension("WEBGL_lose_context").loseContext(); }
@@ -363,7 +417,7 @@
       + '<div class="st-btns">'
       + '<button class="st-mini" id="stReset" title="复位视角" aria-label="复位视角"><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg></button>'
       + '</div>'
-      + '<div class="st-hint">拖拽旋转 · 滚轮缩放 · 点击零件定位</div></div>');
+      + '<div class="st-hint" id="stHint">拖拽旋转 · 滚轮缩放 · 点击零件查看该零件包围盒</div></div>');
     h.push('<div class="st-meta">'
       + '<div><span>零件数</span><b>' + e.n + ' 个</b></div>'
       + '<div><span>总体积</span><b>' + S.vol(e.volSum) + '</b></div>'
@@ -400,14 +454,14 @@
   function treeHTML() {
     var rows = [], i;
     rows.push('<div class="st-tr head"><div class="st-nm"><span>装配结构 / 零件</span></div>'
-      + '<div class="st-v">体积</div><div class="st-w">重量</div></div>');
+      + '<div class="st-b">包围盒 mm</div><div class="st-v">体积</div><div class="st-w">重量</div></div>');
     for (i = 0; i < st.tree.length; i++) {
       var t = st.tree[i];
       if (!t.isPart) {
         rows.push('<div class="st-tr' + (t.depth ? ' off' : '') + '">'
           + '<div class="st-nm" style="padding-left:' + (t.depth * 12) + 'px">'
           + '<svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg><span>' + esc(t.name) + '</span></div>'
-          + '<div class="st-v"></div><div class="st-w"></div></div>');
+          + '<div class="st-b"></div><div class="st-v"></div><div class="st-w"></div></div>');
       }
     }
     for (i = 0; i < st.parts.length; i++) {
@@ -427,6 +481,8 @@
       + '<div class="st-nm" style="padding-left:' + ((p.depth + 1) * 12) + 'px">'
       + '<i style="background:rgb(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ')"></i>'
       + '<span title="' + esc(p.path) + '">' + esc(p.name) + '</span></div>'
+      + '<div class="st-b" title="该零件的自身包围盒">'
+      + p.dim.map(function (d) { return S.fix(d, 1); }).join("×") + '</div>'
       + '<div class="st-v">' + S.vol(p.vol) + '</div>'
       + '<div class="st-w">' + S.grams(w) + '</div>'
       + '<select class="st-sel" data-mat="' + i + '">' + opts + '</select>'
@@ -514,7 +570,7 @@
         var r = cv.getBoundingClientRect();
         var hit = viewer.pick(x - r.left, y - r.top);
         st.sel = (hit >= 0 && hit < st.parts.length) ? hit : -1;
-        viewer.draw();
+        updateSelection();
         var tree = $("stTree");
         if (tree) {
           tree.innerHTML = treeHTML();
@@ -627,14 +683,14 @@
           var i = +tg.dataset.toggle;
           st.parts[i].on = !st.parts[i].on;
           tree.innerHTML = treeHTML();
-          if (viewer) viewer.draw();
+          updateSelection();
           refreshCost();
           return;
         }
         var row = e.target.closest(".st-tr.part");
         if (row && viewer) {
-          st.sel = +row.dataset.i;
-          viewer.draw();
+          st.sel = (+row.dataset.i === st.sel) ? -1 : +row.dataset.i;   // 再点一次取消
+          updateSelection();
           tree.innerHTML = treeHTML();
         }
       });
@@ -684,6 +740,24 @@
       document.body.appendChild(ta); ta.select();
       try { document.execCommand("copy"); done(); } catch (e) {}
       ta.remove();
+    }
+  }
+
+  /* 选中零件 → 3D 里画出它的包围盒线框，并在提示行显示尺寸 */
+  function updateSelection() {
+    var p = st.sel >= 0 ? st.parts[st.sel] : null;
+    if (viewer) {
+      viewer.setBox(p ? p.min : null, p ? p.max : null);
+      viewer.draw();
+    }
+    var h = $("stHint");
+    if (h) {
+      h.textContent = p
+        ? "已选：" + p.name
+          + "　包围盒 " + p.dim.map(function (d) { return S.fix(d, 1); }).join(" × ")
+          + " mm（最大 " + S.fix(Math.max(p.dim[0], p.dim[1], p.dim[2]), 1) + "）"
+          + "　体积 " + S.vol(p.vol) + "　（再点空白处取消）"
+        : "拖拽旋转 · 滚轮缩放 · 点击零件查看该零件包围盒";
     }
   }
 
