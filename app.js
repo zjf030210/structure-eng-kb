@@ -8,7 +8,7 @@
  * ══════════════════════════════════════════════════════════════════ */
 (function(){
   try{
-    const BATCH = ["", "2", "3"];
+    const BATCH = ["", "2", "3", "4"];
 
     /* ① 条目并入 KB_ITEMS */
     const has = new Set(KB_ITEMS.map(x=>x.name));
@@ -559,6 +559,12 @@ document.addEventListener("keydown", e => {
     else if(dm && dm.classList.contains("open")) dm.classList.remove("open");
     else if(am && am.classList.contains("open")) am.classList.remove("open");
     else if(document.body.classList.contains("detail-open")) closeDetail();
+    /* 搜索视图下按 Esc：先关搜索历史，再按一次清空关键词退回上一屏（通行习惯） */
+    else if(searchView && searchView.style.display !== "none"){
+      const hist = document.getElementById("searchHist");
+      if(hist && hist.classList.contains("on")) hideSearchHist();   // 下拉靠 .on 类控制，不看 offsetParent
+      else { kw.value = ""; browseAll = false; renderAll(); }
+    }
   }
 });
 
@@ -935,8 +941,15 @@ function renderSearch(){
   searchStatsEl.innerHTML = q
     ? `全局搜索「${esc(q)}」：共 <b>${list.length}</b> 条 · 已掌握 <b>${s2}</b>${extra}`
     : `${browseAll && lvFilter.value==="1" ? "<svg class=ic aria-hidden=true><use href=#i-flame /></svg>核心必会总览" : "<svg class=ic aria-hidden=true><use href=#i-book /></svg>全部知识点"}：共 <b>${list.length}</b> 条（按优先级排序） · 已掌握 <b>${s2}</b>`;
-  if(!list.length){ searchTbody.innerHTML=""; searchEmptyEl.style.display="block"; searchEmptyEl.innerHTML = noHitHTML(q); }
+  /* 无结果时连表头一起收起 —— 否则会留一个空表格（序号/领域/优先级…）在那儿发愣 */
+  const searchCard = document.getElementById("searchCard");
+  if(!list.length){
+    searchTbody.innerHTML="";
+    if(searchCard) searchCard.style.display = "none";
+    searchEmptyEl.style.display="block"; searchEmptyEl.innerHTML = noHitHTML(q);
+  }
   else {
+    if(searchCard) searchCard.style.display = "";
     searchEmptyEl.style.display="none";
     currentList = list.map(x=>x.name);
     searchTbody.innerHTML = list.map((it,i)=>{
