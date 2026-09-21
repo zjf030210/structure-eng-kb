@@ -1809,6 +1809,11 @@
   .wx-box .wx-tip{font-size:var(--fs-caption); color:var(--faint); margin-top:9px;}
   .wx-box .wx-price{font-size:var(--fs-sm); color:var(--tx-body); margin-top:9px;
     padding-top:9px; border-top:1px dashed var(--bd-row); line-height:var(--lh-relaxed);}
+  /* 明码标价：价格数字要一眼看到，说明文字降级为辅 */
+  .wx-box .wp-num{font-size:var(--fs-xl); font-weight:700; color:var(--primary);
+    font-variant-numeric:tabular-nums; margin-right:3px;}
+  .wx-box .wp-unit{font-size:var(--fs-sm); color:var(--sub);}
+  .wx-box .wp-desc{display:block; margin-top:5px;}
 </style>
 </head>
 <body>
@@ -1876,10 +1881,10 @@
     </div>
     <!-- 职业咨询入口：放在导航栏最后一行，全站每个页面都看得到 -->
     <div class="nav-row nav-row-cta">
-      <button class="nav-cta" id="adviceBtn" type="button" title="付费职业咨询：一对一规划 / 简历与作品集诊断">
+      <button class="nav-cta" id="adviceBtn" type="button" title="职业咨询：一对一规划 / 简历与作品集诊断 · ¥66 / 次">
         <svg class="ic" aria-hidden="true"><use href="#i-compass"/></svg>
         <b>职业咨询</b>
-        <span>一对一规划 · 简历诊断 · 加微信沟通</span>
+        <span>一对一规划 · 简历诊断 · ¥66 / 次</span>
       </button>
     </div>
     <div class="nav-row">
@@ -2094,7 +2099,7 @@
       <div class="ac-main">
         <h3>需要针对个人情况的建议？</h3>
         <p>一对一职业规划咨询 · 简历与作品集诊断。塑料灯具结构设计方向尤其熟悉，也可以聊转行与入行。</p>
-        <div class="ac-tags"><span>职业方向</span><span>能力盘点</span><span>简历诊断</span><span>加微信沟通</span></div>
+        <div class="ac-tags"><span>职业方向</span><span>能力盘点</span><span>简历诊断</span><span>¥66 / 次</span></div>
       </div>
       <div class="ac-act">
         <button class="primary" id="advCardBtn" type="button">看服务详情</button>
@@ -2431,8 +2436,9 @@
           <span class="wx-id" id="wxId" data-a="q3075595" data-b="24"></span>
           <button class="primary" id="wxCopy" type="button">复制微信号</button>
         </div>
-        <div class="wx-tip">手机上复制后到微信「添加朋友」里粘贴搜索。<!-- 价格与档期：想明码标价就改下面这行 --></div>
-        <div class="wx-price">价格与档期加微信沟通 —— 说明你的情况，我会先判断能不能帮上，不合适我会直说。</div>
+        <div class="wx-tip">手机上复制后到微信「添加朋友」里粘贴搜索。<!-- 价格：改下面这行里的数字即可 --></div>
+        <div class="wx-price"><span class="wp-num">¥66</span><span class="wp-unit">/ 次</span>
+          <span class="wp-desc">两项服务同价。先说你的具体情况，我会先判断能不能帮上 —— 不合适我直说，不浪费你钱。</span></div>
       </div>
     </div>
 
