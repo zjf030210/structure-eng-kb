@@ -376,8 +376,9 @@ function renderNumRel(it){
   }
   // 动手练习
   const tSec = document.getElementById("dpTaskSec"), tBox = document.getElementById("dpTask");
-  const task = (window.KB_TASK || {})[it.name];
-  if(task){
+  const taskRaw = (window.KB_TASK || {})[it.name];
+  if(taskRaw){
+    const task = normTask(taskRaw);
     tSec.style.display = "";
     tBox.innerHTML = `<div class="task-box">
       <div class="tb-t">${esc(task.t)}</div>
@@ -387,6 +388,24 @@ function renderNumRel(it){
   }else{
     tSec.style.display = "none";
   }
+}
+/* KB_TASK 历史上出现过三种写法：{t,d,k} 对象、纯字符串、字符串数组。
+ * 后两批新增用了字符串/数组，旧渲染层读 task.t 得到 undefined → esc() 返回空串，
+ * 结果是「动手练习」区块显示成一个空框（不报错，所以一直没被发现）。
+ * 这里统一归一化成 {t,d,k}，并把「验收：」之后的部分自动拆成验收点。 */
+function normTask(x){
+  const split = s => {
+    const str = String(s == null ? "" : s).trim();
+    const i = str.search(/验收[：:]/);
+    if(i < 0) return { d: str, k: [] };
+    const rest = str.slice(i).replace(/^验收[：:]\s*/, "");
+    const parts = rest.split(/\s*(?=[\u2460-\u2473])|\s+(?=\d[)）])/)
+      .map(t => t.replace(/^[\u2460-\u2473]\s*/, "").trim()).filter(Boolean);
+    return { d: str.slice(0, i).trim(), k: parts.length ? parts : [rest] };
+  };
+  if(typeof x === "string"){ const r = split(x); return { t: "动手练习", d: r.d, k: r.k }; }
+  if(Array.isArray(x)) return { t: "动手练习", d: "逐项完成，每项都要留下可验证的结果（数据 / 图纸 / 结论）：", k: x.map(s => String(s).trim()) };
+  return { t: x.t || "动手练习", d: x.d || "", k: x.k || [] };
 }
 function openItemByName(name){
   const it = KB_ITEMS.find(x=>x.name===name);
@@ -1322,7 +1341,7 @@ let d20ExpandAll = false;    // 每日20题：一次展开全部
    基库 120 题的解析与干扰说明原本分散：解析在 KB_QUIZ_EXP[pid|i].e，
    干扰说明现在补在 KB_QUIZ_WHY[pid|i]（数组，与选项等长、答案位为空串），
    这里合并成 KB_QUIZ_EXP[pid|i].w，渲染层只认一个入口。 */
-(function mergeQuizWhy(){
+function mergeQuizWhy(){
   var WHY = window.KB_QUIZ_WHY;
   if(!WHY) return;
   var EXP = window.KB_QUIZ_EXP || (window.KB_QUIZ_EXP = {});
@@ -1330,8 +1349,76 @@ let d20ExpandAll = false;    // 每日20题：一次展开全部
     var cur = EXP[k] || (EXP[k] = {});
     if(!cur.w) cur.w = WHY[k];
   });
-})();
+}
+mergeQuizWhy();
 
+/* ══════════ 按需加载：非首屏模块的数据脚本 ══════════
+ * 全站 57 个脚本、约 1.8MB 源码里，有 526KB 是「首页完全用不到、进对应模块才需要」的：
+ *   · 题库 12 个文件（402KB）：被 题库 / 每日20题 / 错题本 / 复习计划 / 学习数据 五个模块共用
+ *   · STEP 成本评估 2 个文件（124KB）：自带几何解析引擎，只在打开该模块时用
+ * 它们改为「首屏渲染完成后后台预取 + 进模块时兜底等待」，首屏传输随之下降约四分之一。
+ *
+ * ⚠️ 顺序敏感：kb-quiz-add-1~6 用 Object.assign 写同一批领域键，后加载的会覆盖前面的，
+ *    所以下面的清单顺序必须与原先 index.html 的 <script> 顺序完全一致，且用 async=false 保序。
+ * ⚠️ 为什么只拆这两组：其余数据（选型 / 公式 / 模板 / 案例 / 术语…）被首页统计数字与
+ *    全站搜索直接读取，拆出去会让首页显示 0、搜索结果缺分组，得不偿失。
+ * ════════════════════════════════════════════════════ */
+const LAZY_MODS = {
+  quiz: ["kb-quiz-why.js","kb-quiz-exp-1.js","kb-quiz-exp-2.js",
+         "kb-quiz-add-1.js","kb-quiz-add-2.js","kb-quiz-add-3.js","kb-quiz-add-4.js",
+         "kb-quiz-add-5.js","kb-quiz-add-6.js","kb-quiz-lv.js",
+         "kb-quiz-add-7.js","kb-quiz-add-8.js"],
+  step: ["kb-step.js","kb-step-view.js"],
+};
+const MOD_DATA = { quiz:"quiz", daily:"quiz", wrong:"quiz", review:"quiz", stats:"quiz", step:"step" };
+const _scriptP = {};    // src → Promise（同一文件只加载一次）
+const _dataDone = {};   // 数据集 → 是否已就绪
+
+function loadScript(src){
+  if(!_scriptP[src]) _scriptP[src] = new Promise(function(res){
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = false;                 // 保序：见文件头说明
+    s.onload = function(){ res(true); };
+    s.onerror = function(){ res(false); };   // 失败也 resolve，避免界面卡在加载态
+    document.head.appendChild(s);
+  });
+  return _scriptP[src];
+}
+function dataReady(mod){ const k = MOD_DATA[mod]; return !k || !!_dataDone[k]; }
+function ensureData(mod){
+  const k = MOD_DATA[mod];
+  if(!k || _dataDone[k]) return Promise.resolve(true);
+  if(_pending[k]) return _pending[k];
+  showLazyNote(true);
+  _pending[k] = Promise.all(LAZY_MODS[k].map(loadScript)).then(function(){
+    _dataDone[k] = true;
+    delete _pending[k];
+    showLazyNote(false);
+    if(k === "quiz") afterQuizData();
+    return true;
+  });
+  return _pending[k];
+}
+const _pending = {};
+function showLazyNote(on){
+  let el = document.getElementById("lazyNote");
+  if(on){
+    if(!el){
+      el = document.createElement("div");
+      el.id = "lazyNote";
+      el.className = "lazy-note";
+      el.textContent = "正在加载题库数据…";
+      document.body.appendChild(el);
+    }
+    el.style.display = "";
+  }else if(el){ el.style.display = "none"; }
+}
+/* 题库数据到位后补做依赖它的收尾：干扰分析合并 + 角标数字 */
+function afterQuizData(){
+  try{ mergeQuizWhy(); }catch(e){}
+  try{ refreshBadges(); }catch(e){}
+}
 function quizExtra(p){ return (window.KB_QUIZ_ADD || {})[p.id] || []; }
 function quizTotal(p){ return p.questions.length + quizExtra(p).length; }
 function quizAt(p, i){
@@ -3076,6 +3163,12 @@ function clearAllData(){
 }
 
 function renderAll(){
+  /* 当前模块的数据若还没到位：先用现有数据渲染一次让界面立刻响应，
+     同时后台补齐，完成后自动重渲染（首屏省下那 526KB 靠的就是这段） */
+  if(!dataReady(activeModule)){
+    const want = activeModule;
+    ensureData(want).then(function(){ if(activeModule === want) renderAll(); });
+  }
   if(activeModule !== "daily") d20ViewDate = "";   // 离开「每日20题」就回到今天的卷子
   navbar.querySelectorAll(".nav-tab").forEach(b=>{
     const on = b.dataset.mod === activeModule;
@@ -3144,7 +3237,13 @@ function renderAll(){
 }
 
 // 事件
-kw.addEventListener("input", ()=>{ if(kw.value.trim()) browseAll=false; renderAll(); });
+kw.addEventListener("input", ()=>{
+  const q = kw.value.trim();
+  if(q) browseAll = false;
+  /* 全站搜索会索引题库解析（KB_QUIZ_EXP），所以首次搜索时把题库数据补上 */
+  if(q && !dataReady("quiz")) ensureData("quiz").then(function(){ if(kw.value.trim()) renderAll(); });
+  renderAll();
+});
 lvFilter.addEventListener("change", renderAll);
 stFilter.addEventListener("change", renderAll);
 backBtn.onclick = ()=>{
@@ -4047,4 +4146,26 @@ document.addEventListener("click", e => {
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("./sw.js").catch(function(){ /* 注册失败不影响使用 */ });
   });
+})();
+
+/* ══════════ 首屏之后：用空闲时间把按需数据后台取回来 ══════════
+ * 首屏 load 后 0.6s 起，按「题库 → STEP」的顺序串行预取，每取完一组再等下一次空闲。
+ * 这样用户点进学习模块时数据通常已就绪，几乎看不到加载提示 ——
+ * 既拿到首屏速度，又不牺牲「点进去就能用」的体验。 */
+(function preloadLazy(){
+  function kick(){
+    const ORDER = ["quiz", "step"];
+    let i = 0;
+    (function next(){
+      if(i >= ORDER.length) return;
+      const k = ORDER[i++];
+      Promise.all(LAZY_MODS[k].map(loadScript)).then(function(){
+        _dataDone[k] = true;
+        if(k === "quiz") afterQuizData();
+        (window.requestIdleCallback || function(f){ setTimeout(f, 500); })(next);
+      });
+    })();
+  }
+  if(document.readyState === "complete") setTimeout(kick, 600);
+  else window.addEventListener("load", function(){ setTimeout(kick, 600); });
 })();

@@ -1747,6 +1747,11 @@
   /* ── 「我的疑问」标记 ── */
   .doubt-ic{color:var(--warn-tx, #b45309); opacity:.85; margin-left:5px; vertical-align:-2px;}
   #dpDoubt.on{border-color:var(--warn-bd, #e6d3a3); color:var(--warn-tx, #b45309); background:var(--warn-bg, #faf7ee);}
+
+  /* 数据按需加载时的轻提示（首屏后会后台预取，通常看不到它） */
+  .lazy-note{position:fixed; left:50%; top:76px; transform:translateX(-50%); z-index:98;
+    padding:6px 14px; border-radius:999px; background:var(--card); border:1px solid var(--bd-row);
+    box-shadow:var(--shadow-sm); font-size:var(--fs-xs); color:var(--sub);}
 </style>
 </head>
 <body>
@@ -2371,7 +2376,6 @@
 <script src="kb-tools.js" defer></script>
 <script src="kb-cases.js" defer></script>
 <script src="kb-quiz.js" defer></script>
-<script src="kb-quiz-why.js" defer></script>
 <script src="kb-map.js" defer></script>
 <script src="kb-field.js" defer></script>
 <script src="kb-task-1.js" defer></script>
@@ -2385,21 +2389,11 @@
 <script src="kb-select.js" defer></script>
 <script src="kb-mistake.js" defer></script>
 <script src="kb-formula.js" defer></script>
-<script src="kb-quiz-exp-1.js" defer></script>
-<script src="kb-quiz-exp-2.js" defer></script>
-<script src="kb-quiz-add-1.js" defer></script>
-<script src="kb-quiz-add-2.js" defer></script>
-<script src="kb-quiz-add-3.js" defer></script>
-<script src="kb-quiz-add-4.js" defer></script>
-<script src="kb-quiz-add-5.js" defer></script>
-<script src="kb-quiz-add-6.js" defer></script>
-<script src="kb-quiz-lv.js" defer></script>
 <script src="kb-gloss-1.js" defer></script>
 <script src="kb-gloss-2.js" defer></script>
 <script src="kb-quick-add.js" defer></script>
 <script src="kb-map-cap.js" defer></script>
 <script src="kb-case-dfm.js" defer></script>
-<script src="kb-quiz-add-7.js" defer></script>
 <script src="kb-domain-plus.js" defer></script>
 <script src="kb-path-plus.js" defer></script>
 <script src="kb-quick2.js" defer></script>
@@ -2409,13 +2403,28 @@
 <script src="kb-plus.js" defer></script>
 <script src="kb-plus2.js" defer></script>
 <script src="kb-plus2-extra.js" defer></script>
+<script src="kb-plus3.js" defer></script>
 <script src="kb-quick3.js" defer></script>
-<script src="kb-quiz-add-8.js" defer></script>
 <script src="kb-cases2.js" defer></script>
 <script src="kb-changelog.js" defer></script>
 <script src="kb-workspace.js" defer></script>
-<script src="kb-step.js" defer></script>
-<script src="kb-step-view.js" defer></script>
+<!-- ⚐ 以下 14 个脚本改为「按需加载」（题库 402KB + STEP 124KB）：
+     首屏用不到，由 app.js 的 LAZY_MODS 在首屏渲染完成后后台预取、进模块时兜底等待。
+     顺序敏感，清单必须与本文件原先的顺序一致 —— kb-quiz-add-1~6 用 Object.assign 写同一批领域键。
+       kb-quiz-why.js
+       kb-quiz-exp-1.js
+       kb-quiz-exp-2.js
+       kb-quiz-add-1.js
+       kb-quiz-add-2.js
+       kb-quiz-add-3.js
+       kb-quiz-add-4.js
+       kb-quiz-add-5.js
+       kb-quiz-add-6.js
+       kb-quiz-lv.js
+       kb-quiz-add-7.js
+       kb-quiz-add-8.js
+       kb-step.js
+       kb-step-view.js -->
 <script src="app.js" defer></script>
 
 <!-- 访问统计：不蒜子（加载失败会自动隐藏，不影响使用） -->
