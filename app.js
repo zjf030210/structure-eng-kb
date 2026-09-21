@@ -304,6 +304,31 @@ const DEEP_DEF = {
   f:{t:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>常见错误与避坑",     c:"#dc2626", bg:"#fef2f2"},
   s:{t:"<svg class=ic aria-hidden=true><use href=#i-book /></svg>相关标准与术语",     c:"#d97706", bg:"#fffbeb"}
 };
+/* ══════════════ 三句话速览：把「要点 + 关键数值 + 实操提醒」前置 ══════════════
+   内容全部来自已有数据（points / KB_DEEP 的 k、e、f），不新增未经核实的信息 ——
+   知识库的可信度比字数重要。 */
+function renderBrief(it){
+  const sec = document.getElementById("dpBriefSec"), box = document.getElementById("dpBrief");
+  if(!sec || !box) return;
+  const d = (window.KB_DEEP || {})[it.name] || {};
+  const clip = (s, n) => {
+    s = String(s || "").trim();
+    return s.length > n ? s.slice(0, n).replace(/[，,、；;]$/, "") + "…" : s;
+  };
+  const rows = [];
+  /* 01 取「原理」而非 points —— points 在下方「核心要点」已有，重复展示没有信息增量 */
+  const p0 = (Array.isArray(d.p) && d.p[0]);
+  if(p0) rows.push({ k: "核心原理", t: clip(String(p0).replace(/^[^:：]{1,10}[：:]s*/, ""), 96) });
+  const k0 = (Array.isArray(d.k) && d.k[0]);
+  if(k0) rows.push({ k: "关键数值", t: clip(k0, 96) });
+  const e0 = (Array.isArray(d.e) && d.e[0]) || (Array.isArray(d.f) && d.f[0]);
+  if(e0) rows.push({ k: "实操提醒", t: clip(e0, 96) });
+  if(rows.length < 2){ sec.style.display = "none"; return; }
+  sec.style.display = "";
+  box.innerHTML = rows.map((r, i) =>
+    "<div class=\"bf-item\"><span class=\"bf-n\">" + String(i + 1).padStart(2, "0") + "</span><div>"
+    + "<span class=\"bf-k\">" + esc(r.k) + "</span>" + esc(r.t) + "</div></div>").join("");
+}
 function renderDeep(it){
   const sec = document.getElementById("dpDeepSec"), box = document.getElementById("dpDeep");
   const d = it.deep || (window.KB_DEEP || {})[it.name];
@@ -390,6 +415,7 @@ function openDetail(it){
   const memoSec = document.getElementById("dpMemoSec");
   if(memo){ memoSec.style.display = ""; document.getElementById("dpMemo").textContent = memo; }
   else { memoSec.style.display = "none"; }
+  renderBrief(it);
   renderDeep(it);
   renderNumRel(it);
   // 视频列表
@@ -773,6 +799,18 @@ function buildChips(d){
     ch.onclick = ()=>{ activeSub = ch.dataset.id; buildChips(d); renderDomain(); };
   });
 }
+/* 从深度解析里抽一句「一句话结论」，显示在知识点列表行里 */
+function deepLead(name){
+  const d = (window.KB_DEEP || {})[name];
+  if(!d) return "";
+  const src = (Array.isArray(d.p) && d.p.length) ? String(d.p[0]) : "";
+  if(!src) return "";
+  /* 取到第一个句末标点为止；过长再截 */
+  const m = src.match(/^[\s\S]{6,90}?[。；;]/);
+  let t = m ? m[0] : src;
+  if(t.length > 78) t = t.slice(0, 78).replace(/[，,、]$/, "") + "…";
+  return t;
+}
 function rowHTML(it, i, q, catLabel, catStyle){
   const stv = getSt(it.name);
   const rc = refCount(it.name);
@@ -794,7 +832,7 @@ function rowHTML(it, i, q, catLabel, catStyle){
     <td><span class="st st${stv}" data-name="${esc(it.name)}" title="点击切换：待学习 → 学习中 → 已掌握"><span class="dot"></span>${ST_TXT[stv]}</span></td>
     <td>${imgCell}</td>
     <td>${vSum}</td>
-    <td>${hl(it.points, q)}</td>
+        <td>${hl(it.points, q)}${(()=>{ const L = deepLead(it.name); return L ? `<div class=td-lead><svg class=ic aria-hidden=true><use href=#i-compass /></svg><span>${hl(L, q)}</span></div>` : ""; })()}</td>
     <td>${hl(it.usage, q)}</td>
   </tr>`;
 }
@@ -1169,27 +1207,47 @@ function renderGloss(){
 }
 
 /* ══════════════ 模块五：学习路径 ══════════════ */
+/* 30 天路径的完成记录：{"周序|天序": 1} */
+const LS_PATHDONE = "kb-path-done-v1";
+let pathDone = lsGet(LS_PATHDONE, {});
+function pathSave(){ lsSet(LS_PATHDONE, pathDone); }
 function renderPath(){
-  document.getElementById("pathBody").innerHTML = KB_PATH.map(w=>`
-    <div class="wk-card">
+  let wi = -1;
+  document.getElementById("pathBody").innerHTML = KB_PATH.map(w=>{
+    wi++;
+    const tot = w.days.length;
+    let dn = 0;
+    for(let di = 0; di < tot; di++) if(pathDone[wi + "|" + di]) dn++;
+    const allDone = tot > 0 && dn === tot;
+    const pct = tot ? Math.round(dn / tot * 100) : 0;
+    return `
+    <div class="wk-card${allDone ? " all-done" : ""}">
       <div class="wk-head">
         <div class="wi">${w.icon}</div>
         <div><h3>${esc(w.title)}</h3><div class="wg"><svg class=ic aria-hidden=true><use href=#i-target /></svg>${esc(w.goal)}</div></div>
+        <div class="wk-prog"><span>${dn}/${tot} 完成</span><i><b style="width:${pct}%"></b></i></div>
       </div>
       <div class="wk-body">
-        ${w.days.map(d=>`
-          <div class="pd">
+        ${w.days.map((d, di)=>{
+          const done = !!pathDone[wi + "|" + di];
+          return `
+          <div class="pd${done ? " done" : ""}">
+            <button class="pd-done${done ? " on" : ""}" data-pdone="${wi}|${di}" title="${done ? "点一下取消完成" : "标记这一天已完成"}"><svg class=ic aria-hidden=true><use href=#i-check-square /></svg></button>
             <div class="pdd">${esc(d.d)}</div>
             <div class="pdc">
               <div class="pdt">${esc(d.t)}</div>
               <ul>${d.tasks.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
               <div class="rel-chips">${(d.items||[]).map(n=>`<button class="rel-chip" data-rel="${esc(n)}">${esc(n)}</button>`).join("")}</div>
             </div>
-          </div>`).join("")}
+          </div>`;
+        }).join("")}
         <div class="wk-out">✅ 本周产出：${esc(w.output)}</div>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
+
+
 
 /* ══════════════ 模块六：学习地图 ══════════════ */
 function renderMap(){
@@ -1230,6 +1288,24 @@ const QUIZ_LEV = ["基础", "进阶", "易错"];
 const QUIZ_TYPE = { choice:"选择题", tf:"判断题", calc:"计算题", scene:"情景题" };
 let quizLevFilter = "全部";
 let quizTypeFilter = "全部";
+let quizFocus = null;        // 逐题模式：当前展开的题号（null = 全部折叠）
+let quizExpandAll = false;   // 浏览模式：一次展开全部题目
+let d20Focus = null;         // 每日20题：当前展开的题号（null = 全部折叠）
+let d20ExpandAll = false;    // 每日20题：一次展开全部
+
+/* 把「逐项干扰分析」并入 KB_QUIZ_EXP ----------
+   基库 120 题的解析与干扰说明原本分散：解析在 KB_QUIZ_EXP[pid|i].e，
+   干扰说明现在补在 KB_QUIZ_WHY[pid|i]（数组，与选项等长、答案位为空串），
+   这里合并成 KB_QUIZ_EXP[pid|i].w，渲染层只认一个入口。 */
+(function mergeQuizWhy(){
+  var WHY = window.KB_QUIZ_WHY;
+  if(!WHY) return;
+  var EXP = window.KB_QUIZ_EXP || (window.KB_QUIZ_EXP = {});
+  Object.keys(WHY).forEach(function(k){
+    var cur = EXP[k] || (EXP[k] = {});
+    if(!cur.w) cur.w = WHY[k];
+  });
+})();
 
 function quizExtra(p){ return (window.KB_QUIZ_ADD || {})[p.id] || []; }
 function quizTotal(p){ return p.questions.length + quizExtra(p).length; }
@@ -1256,7 +1332,9 @@ function quizExpHTML(pid, q, i, chosen){
       ? `<div class="qw-row"><span class="qw-l">${"ABCD"[j]}</span><span class="qw-o">${esc(o)}</span><span class="qw-w">${esc(wArr[j])}</span></div>` : "").join("");
     if(rows) w = `<div class="q-why"><div class="qw-t">其他选项为什么不对</div>${rows}</div>`;
   }
-  return `<div class="q-exp"><b>${head}</b> — ${esc(e)}</div>${w}`;
+  /* 默认收起：解析只露 2 行、干扰分析隐藏 —— 否则「答完自动全展开」反而比不答更长 */
+  return `<div class="q-exps"><div class="q-exp"><b>${head}</b> — ${esc(e)}</div>${w}`
+    + `<button class="qr-exp" data-qexp="1">展开解析</button></div>`;
 }
 
 function renderQuiz(){
@@ -1322,6 +1400,7 @@ function renderQuiz(){
   document.getElementById("quizActions").innerHTML = `
     <button class="mini-btn" data-qact="wrong"><svg class=ic aria-hidden=true><use href=#i-repeat /></svg> 重做错题</button>
     <button class="mini-btn" data-qact="reset">清空本卷</button>
+    <button class="mini-btn" data-qact="expand">${quizExpandAll ? "逐题模式" : "展开全部"}</button>
     ${done===tot && tot ? `<span class="mini-btn ${pct>=80?'ok':''}" style="cursor:default">${
       pct>=80 ? '🎉 掌握良好，可以进入下一领域'
       : pct>=60 ? '📖 基本掌握，建议把错题再过一遍'
@@ -1332,6 +1411,18 @@ function renderQuiz(){
     if(quizTypeFilter!=="全部" && quizTypeOf(q)!==quizTypeFilter) continue;
     idxs.push(i);
   }
+  /* 答题卡：题号导航（已答复选题会收起，靠它跳题） */
+  document.getElementById("quizSheet").innerHTML = idxs.length ? `
+    <span class="qs-cap"><svg class=ic aria-hidden=true><use href=#i-grid /></svg>答题卡</span>
+    ${idxs.map(i=>{
+      const a = ans[i], qq = quizAt(p,i);
+      const cls = a === undefined ? "" : (a === qq.a ? " ok" : " no");
+      const tip = "第 " + (i+1) + " 题" + (a === undefined ? "（未作答）" : (a === qq.a ? "（答对）" : "（答错）"));
+      return `<button class="qs-i${cls}" data-qjump="${i}" title="${tip}">${i+1}</button>`;
+    }).join("")}
+    <span class="qs-leg">
+      <span><i class="ql ok"></i>答对</span><span><i class="ql no"></i>答错</span><span><i class="ql"></i>未做</span>
+    </span>` : "";
   document.getElementById("quizBody").innerHTML = idxs.length ? idxs.map(i=>{
     const q = quizAt(p,i), chosen = ans[i], answered = chosen !== undefined;
     const opts = q.opts.map((o,j)=>{
@@ -1343,14 +1434,36 @@ function renderQuiz(){
       }
       return `<div class="${cls}" data-q="${i}" data-o="${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`;
     }).join("");
+    /* 已答的题：默认收起 4 个选项，只留一行结果 —— 否则 35 题会铺出近 1 万 px */
+    const optsHTML = answered
+      ? `<div class="q-res ${chosen===q.a?"ok":"no"}">
+           <span class="qr-i">${chosen===q.a?"✓":"✕"}</span>
+           <span>你选 <b>${"ABCD"[chosen]||"—"}</b>${chosen===q.a?"　正确":`　·　正确答案 <b>${"ABCD"[q.a]}</b>`}</span>
+           <button class="qr-more" data-qmore="${i}">看选项</button>
+           ${(()=>{ for(let k=1;k<=tot;k++){ const j=(i+k)%tot; if(ans[j]===undefined && quizAt(p,j)) return `<button class="qr-more qr-next" data-qjump="${j}">下一题 →</button>`; } return ""; })()}
+         </div>
+         <div class="qopts" hidden>${opts}</div>`
+      : opts;
     const lv = quizLvAt(p,i), tp = quizTypeOf(q);
-    return `<div class="quiz-q">
+    /* 逐题模式：默认只留题干一行，点开才展开选项（一次一题）—— 这是 9956px 降到 2000px 量级的关键 */
+    if(!(quizExpandAll || i === quizFocus)){
+      return `<div class="quiz-q q-collapsed" data-qi="${i}" data-qopen="${i}">
+        <div class="qq-title"><div class="qq-no">${i+1}</div>
+          <div class="qq-main">${esc(q.q)}</div>
+          <div class="qq-tags">${lv?`<span class="qq-lv l-${QUIZ_LEV.indexOf(lv)}">${lv}</span>`:""}${
+            tp!=="choice"?`<span class="qq-tp">${QUIZ_TYPE[tp]||tp}</span>`:""}
+            <span class="qq-state${answered?(chosen===q.a?" ok":" no"):""}">${answered?(chosen===q.a?"✓ 答对":"✕ 答错"):"未作答"}</span></div>
+        </div>
+        ${answered?`<div class="q-res-mini">你选 <b>${"ABCD"[chosen]||"—"}</b>　·　正确答案 <b>${"ABCD"[q.a]}</b></div>`:""}
+      </div>`;
+    }
+    return `<div class="quiz-q" data-qi="${i}">
       <div class="qq-title"><div class="qq-no">${i+1}</div>
         <div class="qq-main">${esc(q.q)}</div>
         <div class="qq-tags">${lv?`<span class="qq-lv l-${QUIZ_LEV.indexOf(lv)}">${lv}</span>`:""}${
           tp!=="choice"?`<span class="qq-tp">${QUIZ_TYPE[tp]||tp}</span>`:""}</div>
       </div>
-      ${opts}
+      ${optsHTML}
       ${answered?quizExpHTML(p.id, q, i, chosen):""}
     </div>`;
   }).join("") : `<div class="card"><div class="empty">当前筛选条件下没有题目，换个难度或题型试试～</div></div>`;
@@ -1938,7 +2051,7 @@ function renderWrong(){
       <div class="wn">${d.p.icon} ${esc(d.p.name)}</div>
       <div class="wb"><i style="width:${d.pct}%;background:${barBg(d.pct)}"></i></div>
       <div class="wv">${d.pct}%　${d.wrong} 错</div>
-    </div>`).join("") : `<div class="empty" style="padding:18px 0">还没有作答记录，先去「🎯 自测题库」做几题～</div>`;
+    </div>`).join("") : geHTML({ mini: true, icon: "i-trending-up", title: "还没有作答记录", desc: "这条曲线只统计你实际做过的题。做起题来之后，它会按「错得最多」排序，告诉你该先补哪一块。", acts: [["quiz", "去做 20 题", "i-play"]] });
 
   document.getElementById("wrongActions").innerHTML = list.length ? `
     <button class="mini-btn" data-wact="redo"><svg class=ic aria-hidden=true><use href=#i-repeat /></svg> 重做全部错题（清空这些题的选择）</button>
@@ -1972,7 +2085,25 @@ function renderWrong(){
       }).join("")}
       <div class="q-exp" style="margin-top:10px"><b>解析</b> — ${esc(exp)}</div>
     </div>`;
-  }).join("") : `<div class="card"><div class="empty">${list.length ? "该领域暂无错题" : "🎉 目前没有错题，保持住！"} 去「🎯 自测题库」继续练习 →</div></div>`;
+  }).join("") : `<div class="card">${geHTML({ icon: list.length ? "i-check-square" : "i-award", title: list.length ? "这个领域暂时没有错题" : "还没有错题 —— 先去答题，错的题会自动进这里", desc: list.length ? "换个领域看看，或者去做更多题。" : "错题本会自动收拢你答错的题，并按「哪个领域错得多」排序；答对之后会自动移出去。", steps: list.length ? [] : ["去自测题库做题", "错的自动进本页", "复习计划会排期提醒"], acts: [["quiz", "去自测题库", "i-play"]] })}</div>`;
+}
+
+/* ══════════════ 引导式空态（零数据时替代空白图表） ══════════════ */
+/* o = {mini, icon, title, desc, steps:[], acts:[[mod, text], ...]} */
+function geHTML(o){
+  o = o || {};
+  const steps = (o.steps || []).length
+    ? `<div class="ge-steps">${o.steps.map((s, i) => `<div class="ge-step"><i>${i + 1}</i>${esc(s)}</div>`).join("")}</div>`
+    : "";
+  const acts = (o.acts || []).length
+    ? `<div class="ge-act">${o.acts.map(a => `<button class="mini-btn" data-go="${esc(a[0])}">${a[2] ? `<svg class=ic aria-hidden=true><use href=#${esc(a[2])} /></svg>` : ""}${esc(a[1])}</button>`).join("")}</div>`
+    : "";
+  return `<div class="ge${o.mini ? " ge-mini" : ""}">`
+    + (o.icon ? `<div class="ge-ic"><svg class=ic-lg aria-hidden=true><use href=#${esc(o.icon)} /></svg></div>` : "")
+    + `<div class="ge-t">${esc(o.title || "")}</div>`
+    + (o.desc ? `<div class="ge-d">${o.desc}</div>` : "")
+    + steps + acts
+    + `</div>`;
 }
 
 /* ══════════════ 模块十三：学习数据（纯 SVG 图表） ══════════════ */
@@ -2060,27 +2191,38 @@ function renderStats(){
 
   const col = v => v < 0 ? "var(--st0)" : v >= 80 ? "#059669" : v >= 60 ? "#d97706" : "#dc2626";
 
+  /* 零数据态：图表全是空的，看着没意义 → 换成「怎么让它亮起来」的引导 */
+  const zeroQuiz = answeredQ === 0, zeroMaster = mastered === 0;
+  const zeroCard = (t, d) => geHTML({ mini: true, icon: "i-compass", title: t, desc: d });
+
   document.getElementById("statsBody").innerHTML = `
   <div class="ch-grid">
+    ${zeroQuiz && zeroMaster ? `<div class="ch-card" style="grid-column:1/-1">${geHTML({
+      icon: "i-rocket",
+      title: "这里还是一片空地 —— 先做 20 题，它就会长出来",
+      desc: "下面的雷达、正确率、薄弱领域、打卡，全部来自你的真实动作：答题、标「已掌握」、勾清单、收藏、写笔记。现在还没有记录，所以先给你三条最快的路。",
+      steps: ["去自测题库答 20 题（约 6 分钟）", "回来看雷达图找短板", "错题自动进复习计划"],
+      acts: [["quiz", "去做第一组题", "i-play"], ["kb", "先标 5 条已掌握", "i-book"], ["path", "照 30 天上手路径走", "i-compass"]]
+    })}</div>` : ""}
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-target /></svg>知识点掌握雷达</h3>
       <div class="chd">12 个领域的「已掌握」占比（在知识库里把状态标成「已掌握」才会算进去）</div>
-      ${radarSVG(domRows)}
+      ${zeroMaster ? zeroCard("还没有标过「已掌握」", "打开任意知识点，把状态从「待学习」切到「已掌握」，雷达图就会按 12 个领域长出形状。") : radarSVG(domRows)}
     </div>
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-table /></svg>各领域答题正确率</h3>
       <div class="chd">按自测题库的实际作答计算；「未作答」表示这一领域还没做题</div>
-      ${barsSVG(doms.map(d=>({label:d.p.name, v:d.pct})), col)}
+      ${zeroQuiz ? zeroCard("还没有作答记录", "答完题这里会按 12 个领域列出正确率，一眼看出哪一块最弱、该先补哪里。") : barsSVG(doms.map(d=>({label:d.p.name, v:d.pct})), col)}
     </div>
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-box /></svg> 难度维度正确率</h3>
       <div class="chd">基础 / 进阶 / 易错三档的答题表现——易错档偏低是正常的，但要重点补</div>
-      ${barsSVG(["基础","进阶","易错"].map(k=>({label:k, v:pctOf(lvRight[k]||0, lvDone[k]||0)})), col)}
+      ${zeroQuiz ? zeroCard("按难度看你的表现", "作答后这里会分成基础 / 进阶 / 易错三档，告诉你「是底子不牢，还是会背不会用」。") : barsSVG(["基础","进阶","易错"].map(k=>({label:k, v:pctOf(lvRight[k]||0, lvDone[k]||0)})), col)}
     </div>
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-ruler /></svg>题型维度正确率</h3>
       <div class="chd">选择题、判断题、计算题、情景题——计算题与情景题偏低说明「会背不会用」</div>
-      ${barsSVG(["choice","tf","calc","scene"].map(k=>({label:QUIZ_TYPE[k], v:pctOf(tRight[k]||0, tDone[k]||0)})), col)}
+      ${zeroQuiz ? zeroCard("按题型看你的表现", "计算题与情景题偏低，通常说明「会背不会用」；选择题高而计算题低，就该去动手算一遍。") : barsSVG(["choice","tf","calc","scene"].map(k=>({label:QUIZ_TYPE[k], v:pctOf(tRight[k]||0, tDone[k]||0)})), col)}
     </div>
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-book /></svg>知识库进度</h3>
@@ -2098,7 +2240,7 @@ function renderStats(){
     <div class="ch-card">
       <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>题库作答覆盖度</h3>
       <div class="chd">每个领域已作答的题数占比——覆盖面比正确率更优先，先做全再做好</div>
-      ${barsSVG(doms.map(d=>({label:d.p.name, v:d.total? Math.round(d.done/d.total*100):0})), v=>v>=80?"#2563eb":v>=40?"#7c3aed":"#94a3b8")}
+      ${zeroQuiz ? zeroCard("覆盖面还是 0%", "建议先每个领域都做几题，把覆盖面铺开，再回头攻正确率——顺序反了容易钻牛角尖。") : barsSVG(doms.map(d=>({label:d.p.name, v:d.total? Math.round(d.done/d.total*100):0})), v=>v>=80?"#2563eb":v>=40?"#7c3aed":"#94a3b8")}
     </div>
     ${timeCardHTML()}
     <div class="ch-card">
@@ -2207,7 +2349,7 @@ function renderFav(){
         <span class="fi-t">${d ? esc(d.name) : ""}</span>
         <button class="mini-btn" data-unfav="${esc(n)}" style="margin-left:12px">移出</button>
       </div>`;
-    }).join("") : `<div class="card"><div class="empty">还没有收藏。打开任意知识点，点右上角的「☆ 收藏」即可加入这里。</div></div>`;
+    }).join("") : `<div class="card">${geHTML({ icon: "i-star", title: "还没有收藏", desc: "收藏是给「以后还要翻」的条目用的 —— 常用的材料参数、容易忘的公差表、天天要查的标准。", steps: ["打开任意知识点", "点右上「☆ 收藏」", "回这里随时翻"], acts: [["kb", "去知识库逛逛", "i-book"]] })}</div>`;
   } else {
     const list = Object.entries(notes).filter(([,v])=>v && v.trim()).sort((a,b)=>(b[1].length - a[1].length));
     box.innerHTML = list.length ? list.map(([n, v])=>{
@@ -2220,7 +2362,7 @@ function renderFav(){
         </div>
         <button class="mini-btn" data-unfav="${esc(n)}" data-nodelete="1" style="margin-left:12px">删除笔记</button>
       </div>`;
-    }).join("") : `<div class="card"><div class="empty">还没有笔记。打开任意知识点，在「📝 我的笔记」里写下你的理解，就会出现在这里。</div></div>`;
+    }).join("") : `<div class="card">${geHTML({ icon: "i-edit", title: "还没有笔记", desc: "笔记写在各知识点的详情里，会汇总到这一页 —— 试模踩过的坑、供应商给的经验值、跟客户确认过的口径，都值得记一句。", steps: ["打开任意知识点", "翻到「我的笔记」", "写一句保存即可"], acts: [["kb", "去写第一条", "i-book"]] })}</div>`;
   }
 }
 
@@ -2420,6 +2562,7 @@ function renderDaily20(){
     (cur.isToday ? `<button class="mini-btn" data-d20="redo"><svg class=ic aria-hidden=true><use href=#i-repeat /></svg> 重做今日错题</button>
     <button class="mini-btn" data-d20="reset"><svg class=ic aria-hidden=true><use href=#i-refresh /></svg> 清空今日作答</button>` : "") +
     `<button class="mini-btn" data-d20="print"><svg class=ic aria-hidden=true><use href=#i-printer /></svg> 打印这套卷子</button>
+    <button class="mini-btn" data-d20="expand">${d20ExpandAll ? "逐题模式" : "展开全部"}</button>
     <span class="mini-btn ${(st.done===tot && st.pct>=80) ? "ok" : ""}" style="cursor:default">${
       !cur.isToday ? "📖 历史卷面（只读）"
       : st.done === tot ? (st.pct >= 80 ? "🎉 今日完成，正确率优秀" : st.pct >= 60 ? "📖 今日完成，建议把错题再过一遍" : "⚠️ 今日完成，建议回知识库补一补")
@@ -2439,6 +2582,17 @@ function renderDaily20(){
       }
       return `<div class="${cls}" data-dq="${k}" data-do="${j}"><div class="ol">${"ABCD"[j]}</div><div>${esc(o)}</div></div>`;
     }).join("");
+    /* 逐题模式：默认只留题干一行，点题号（或点这行）才展开 */
+    if(!(d20ExpandAll || k === d20Focus)){
+      return `<div class="quiz-q q-collapsed" id="d20q-${k}" data-d20open="${k}">
+        <div class="qq-title"><div class="qq-no">${k+1}</div>
+          <div class="qq-main">${esc(q.q)}<div class="d20-from">${p.icon} ${esc(p.name)} · 该领域第 ${r.i+1} 题</div></div>
+          <div class="qq-tags">${lv?`<span class="qq-lv l-${QUIZ_LEV.indexOf(lv)}">${lv}</span>`:""}${
+            tp!=="choice"?`<span class="qq-tp">${QUIZ_TYPE[tp]||tp}</span>`:""}
+            <span class="qq-state${answered?(chosen===q.a?" ok":" no"):""}">${answered?(chosen===q.a?"✓ 答对":"✕ 答错"):"未作答"}</span></div>
+        </div>
+      </div>`;
+    }
     return `<div class="quiz-q" id="d20q-${k}">
       <div class="qq-title"><div class="qq-no">${k+1}</div>
         <div class="qq-main">${esc(q.q)}<div class="d20-from">${p.icon} ${esc(p.name)} · 该领域第 ${r.i+1} 题${
@@ -2577,10 +2731,10 @@ function renderReview(){
   const show = list.concat(sess.filter(s => !list.some(x => x.k === s.k)));
   const body = document.getElementById("rvBody");
   if(!show.length){
-    body.innerHTML = `<div class="card"><div class="empty" style="padding:26px 0">${
-      que ? "今天没有到期的复习题 —— 去「🎯 自测题库」或「📅 每日20题」做几道，答过的题会自动排进复习计划。"
-          : "复习队列还是空的。先去做几道题，之后这里会按记忆规律提醒你回头复习。"
-    }</div></div>`;
+    body.innerHTML = `<div class="card">${que
+      ? geHTML({ icon: "i-check-square", title: "今天没有到期的复习题 —— 保持住", desc: "复习按艾宾浩斯间隔排期：答对 1 次 1 天后、答对 2 次 4 天后……没到期就不打扰你。", acts: [["quiz", "再练几题", "i-play"]] })
+      : geHTML({ icon: "i-calendar", title: "复习队列还是空的", desc: "做过的题会自动排进队列，之后按记忆规律提醒你回头复习 —— 不用自己记什么时候该复习。", steps: ["去自测题库做题", "答过的题自动排期", "到期在这里提醒你"], acts: [["quiz", "去做题", "i-play"]] })
+    }</div>`;
   }else{
     body.innerHTML = show.map((x, idx)=>{
       const chosen = rvAnswered[x.k], answered = chosen !== undefined;
@@ -2815,6 +2969,7 @@ function timeCardHTML(){
 /* ══════════════ 学习数据备份与恢复 ══════════════ */
 const LS_ALL = ["kb-progress-v1","kb-check-v2","kb-quiz-v1","kb-fav-v1","kb-note-v1","kb-tpl-v1",
                 "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1","kb-daily20-v1","kb-review-v1","kb-time-v1","kb-goal-v1",
+                "kb-path-done-v1",
                 /* 工作台（kb-workspace.js）：单价库 / 报价方案 / 计算器记忆 / 项目台账 / 首页快捷 */
                 "kb-ws-price-v1","kb-ws-plan-v1","kb-ws-calc-v1","kb-ws-proj-v1","kb-ws-short-v1","kb-ws-auto-v1"];
 function exportData(){
@@ -3165,13 +3320,26 @@ document.getElementById("mapTabs").addEventListener("click", e=>{
 // 自测题库
 document.getElementById("quizTabs").addEventListener("click", e=>{
   const b = e.target.closest("[data-quiz]"); if(!b) return;
-  activeQuiz = b.dataset.quiz; quizLevFilter = "全部"; quizTypeFilter = "全部";
+  activeQuiz = b.dataset.quiz; quizLevFilter = "全部"; quizTypeFilter = "全部"; quizFocus = null;
   renderQuiz(); window.scrollTo({top:0, behavior:"smooth"});
 });
 document.getElementById("quizLev").addEventListener("click", e=>{
   const l = e.target.closest("[data-qlv]"), t = e.target.closest("[data-qtype]");
-  if(l){ quizLevFilter = l.dataset.qlv; renderQuiz(); }
-  else if(t){ quizTypeFilter = t.dataset.qtype; renderQuiz(); }
+  if(l){ quizLevFilter = l.dataset.qlv; quizFocus = null; renderQuiz(); }
+  else if(t){ quizTypeFilter = t.dataset.qtype; quizFocus = null; renderQuiz(); }
+});
+/* 「下一题 →」按钮：和答题卡跳题同样的行为 */
+document.getElementById("quizBody").addEventListener("click", e=>{
+  const b = e.target.closest(".qr-next[data-qjump]"); if(!b) return;
+  goQuiz(+b.dataset.qjump);
+});
+
+/* 折叠态：点一下展开该题（一次只开一题） */
+document.getElementById("quizBody").addEventListener("click", e=>{
+  const card = e.target.closest(".quiz-q.q-collapsed[data-qopen]");
+  if(!card) return;
+  quizFocus = +card.dataset.qopen;
+  renderQuiz();
 });
 document.getElementById("quizBody").addEventListener("click", e=>{
   const o = e.target.closest(".q-opt[data-q]"); if(!o) return;
@@ -3180,13 +3348,44 @@ document.getElementById("quizBody").addEventListener("click", e=>{
   const qi = +o.dataset.q, oi = +o.dataset.o;
   quizAnsOf(p.id)[qi] = oi;
   quizSave();
+  const ansNow = quizAnsOf(p.id);
   const qq = quizAt(p, qi);
   if(qq) rvGrade(p.id, qi, oi === qq.a);      // 登记到复习计划
-  markStudy(1); renderQuiz(); refreshBadges();
+  markStudy(1);
+  /* 逐题模式：答完仍保持这题展开 —— 要让学生当场看到解析，而不是立刻被折叠掉 */
+  quizFocus = qi;
+  renderQuiz(); refreshBadges();
 });
+/* 答题卡 / 「下一题」：展开该题并滚动过去（元素是重绘出来的，用委托） */
+function goQuiz(idx){
+  quizFocus = idx;
+  renderQuiz();
+  setTimeout(()=>{
+    const el = document.querySelector('#quizBody .quiz-q[data-qi="' + idx + '"]');
+    if(!el) return;
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+    el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+    setTimeout(()=>el.classList.remove("flash"), 1200);
+  }, 60);
+}
+document.getElementById("quizSheet").addEventListener("click", e=>{
+  const b = e.target.closest("[data-qjump]"); if(!b) return;
+  goQuiz(+b.dataset.qjump);
+});
+
+/* 已答题的「看选项」：展开/收起原来的 4 个选项 */
+document.getElementById("quizBody").addEventListener("click", e=>{
+  const b = e.target.closest("[data-qmore]"); if(!b) return;
+  const wrap = b.closest(".quiz-q").querySelector(".qopts");
+  if(!wrap) return;
+  if(wrap.hasAttribute("hidden")){ wrap.removeAttribute("hidden"); b.textContent = "收起选项"; }
+  else { wrap.setAttribute("hidden", ""); b.textContent = "看选项"; }
+});
+
 document.getElementById("quizActions").addEventListener("click", e=>{
   const b = e.target.closest("[data-qact]"); if(!b) return;
   const p = KB_QUIZ.find(x=>x.id===activeQuiz); if(!p) return;
+  if(b.dataset.qact === "expand"){ quizExpandAll = !quizExpandAll; quizFocus = null; renderQuiz(); return; }
   if(b.dataset.qact === "reset"){ quizState[p.id] = {}; }
   else{
     const a = quizAnsOf(p.id);
@@ -3196,6 +3395,13 @@ document.getElementById("quizActions").addEventListener("click", e=>{
 });
 
 // 计算器
+/* 30 天路径：勾选/取消某一天 */
+document.getElementById("pathBody").addEventListener("click", e=>{
+  const b = e.target.closest("[data-pdone]"); if(!b) return;
+  const k = b.dataset.pdone;
+  if(pathDone[k]) delete pathDone[k]; else { pathDone[k] = 1; markStudy(1); }
+  pathSave(); renderPath(); refreshBadges();
+});
 document.getElementById("calcBody").addEventListener("input", e=>{
   const el = e.target.closest("input[data-calc]"); if(!el) return;
   const c = CALCS.find(x=>x.id===el.dataset.calc); if(c) runCalc(c);
@@ -3243,6 +3449,20 @@ document.getElementById("fmTabs").addEventListener("click", e=>{
 });
 document.getElementById("fmSearch").addEventListener("input", ()=>{ renderFormula(); });
 
+/* 引导空态里的行动按钮：跳到指定模块（全局委托，元素后生成也有效） */
+/* 解析展开/收起：三处调用（题库 / 每日20题 / 复习计划）共用，走全局委托 */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-qexp]"); if(!b) return;
+  const wrap = b.closest(".q-exps"); if(!wrap) return;
+  const open = !wrap.classList.contains("open");
+  wrap.classList.toggle("open", open);
+  b.textContent = open ? "收起解析" : "展开解析";
+});
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-go]"); if(!b) return;
+  switchMod(b.dataset.go);
+});
 navbar.addEventListener("click", e=>{
   const b = e.target.closest(".nav-tab"); if(!b) return;
   activeModule = b.dataset.mod;
@@ -3442,6 +3662,13 @@ document.getElementById("randBtn").addEventListener("click", ()=>{
 });
 
 /* ══════════ 每日 20 题 ══════════ */
+/* 折叠态：点这一行展开该题（一次只开一题） */
+document.getElementById("d20Body").addEventListener("click", e=>{
+  const card = e.target.closest(".quiz-q.q-collapsed[data-d20open]");
+  if(!card) return;
+  d20Focus = +card.dataset.d20open;
+  renderDaily20();
+});
 document.getElementById("d20Body").addEventListener("click", e=>{
   const o = e.target.closest("[data-dq]"); if(!o) return;
   const k = +o.dataset.dq, oi = +o.dataset.do;
@@ -3454,6 +3681,7 @@ document.getElementById("d20Body").addEventListener("click", e=>{
   const ans = quizAnsOf(x.p.id); ans[x.i] = oi; quizSave();
   rvGrade(x.p.id, x.i, oi === x.q.a);      // 登记到复习计划
   markStudy(1);
+  d20Focus = k;            // 答完保持展开，能当场看解析
   renderDaily20();
   refreshBadges();
 });
@@ -3462,6 +3690,7 @@ document.getElementById("d20Actions").addEventListener("click", e=>{
   const b = e.target.closest("[data-d20]"); if(!b) return;
   const act = b.dataset.d20, cur = d20Day();
   if(act === "print"){ window.print(); return; }
+  if(act === "expand"){ d20ExpandAll = !d20ExpandAll; d20Focus = null; renderDaily20(); return; }
   if(!cur.isToday) return;
   if(act === "redo"){
     let n = 0;
@@ -3487,13 +3716,18 @@ document.getElementById("d20Actions").addEventListener("click", e=>{
 document.getElementById("d20Plan").addEventListener("click", e=>{
   const s = e.target.closest("[data-d20go]");
   if(s){
-    const el = document.getElementById("d20q-" + s.dataset.d20go);
-    if(el && el.scrollIntoView) try{ el.scrollIntoView({ behavior: "smooth", block: "center" }); }catch(err){}
+    d20Focus = +s.dataset.d20go;
+    renderDaily20();
+    setTimeout(()=>{
+      const el = document.getElementById("d20q-" + d20Focus);
+      if(el && el.scrollIntoView) try{ el.scrollIntoView({ behavior: "smooth", block: "center" }); }catch(err){}
+    }, 60);
     return;
   }
   const back = e.target.closest("[data-d20day]");
   if(back){
     d20ViewDate = (back.dataset.d20day === todayStr()) ? "" : back.dataset.d20day;
+    d20Focus = null;
     renderDaily20(); window.scrollTo({ top: 0, behavior: "smooth" });
   }
 });
