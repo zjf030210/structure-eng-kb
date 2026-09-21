@@ -3348,7 +3348,60 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   if(!modal || !btn) return;
   const open = ()=> modal.classList.add("open");
   const close = ()=> modal.classList.remove("open");
-  btn.addEventListener("click", open);
+
+  /* ── 两个页签（职业咨询 / 赞赏支持）──────────────────────
+     合成一个弹窗而不是两个：自动弹出时只弹一次，用户不会连着被打扰两回。
+     打开时默认停在「职业咨询」，点导航栏或首页卡片进来的也走这里。 */
+  const tabs = Array.prototype.slice.call(document.querySelectorAll("#dmTabs .dm-tab"));
+  const panes = Array.prototype.slice.call(document.querySelectorAll(".dm-pane"));
+  const showTab = key => {
+    tabs.forEach(t=>{
+      const on = t.dataset.dm === key;
+      t.classList.toggle("on", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    panes.forEach(pn=>{ pn.style.display = pn.dataset.dmp === key ? "" : "none"; });
+  };
+  tabs.forEach(t=> t.addEventListener("click", ()=> showTab(t.dataset.dm)));
+  const openAdvice = ()=> { showTab("advice"); open(); };
+
+  /* 微信号不直接写在 HTML 里（分两段拼），挡掉只会抓静态页面的采集脚本。
+     ⚠️ 这只是「防君子」——会执行 JS 的爬虫照样能拿到。 */
+  (function fillWx(){
+    const el = document.getElementById("wxId");
+    if(el) el.textContent = (el.dataset.a || "") + (el.dataset.b || "");
+  })();
+
+  /* 复制微信号：优先用剪贴板 API，失败回退到 execCommand */
+  const wxCopy = document.getElementById("wxCopy");
+  if(wxCopy) wxCopy.addEventListener("click", ()=>{
+    const el = document.getElementById("wxId");
+    const txt = el ? el.textContent.trim() : "";
+    if(!txt) return;
+    const done = ()=>{
+      if(!wxCopy.dataset.orig) wxCopy.dataset.orig = wxCopy.textContent;
+      wxCopy.textContent = "已复制 · 去微信粘贴";
+      setTimeout(()=>{ if(wxCopy.dataset.orig) wxCopy.textContent = wxCopy.dataset.orig; }, 1800);
+    };
+    const fallback = ()=>{
+      const ta = document.createElement("textarea");
+      ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); done(); }
+      catch(e){ alert("复制失败，请手动选中微信号复制：\n" + txt); }
+      ta.remove();
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback);
+    else fallback();
+  });
+
+  /* 打赏入口要直接停在「赞赏支持」页签 —— 否则点了「赞赏」却看到咨询内容 */
+  btn.addEventListener("click", ()=>{ showTab("donate"); open(); });
+  /* 导航栏与首页卡片的入口：直接停在「职业咨询」页签 */
+  ["adviceBtn", "advCardBtn"].forEach(id=>{
+    const b2 = document.getElementById(id);
+    if(b2) b2.addEventListener("click", openAdvice);
+  });
   const closeBtn = document.getElementById("donateCloseBtn");
   if(closeBtn) closeBtn.addEventListener("click", close);
   // 点遮罩关闭
@@ -3395,6 +3448,7 @@ document.getElementById("imgModal").addEventListener("click", e=>{
         return;
       }
       donateShown = true;
+      showTab("advice");   // 自动弹时默认停在职业咨询页签
       open();
     };
     setTimeout(tick, Math.max(0, DONATE_AUTO.delay));

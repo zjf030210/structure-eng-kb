@@ -1752,6 +1752,63 @@
   .lazy-note{position:fixed; left:50%; top:76px; transform:translateX(-50%); z-index:98;
     padding:6px 14px; border-radius:999px; background:var(--card); border:1px solid var(--bd-row);
     box-shadow:var(--shadow-sm); font-size:var(--fs-xs); color:var(--sub);}
+
+  /* ── 职业咨询：导航入口 / 首页卡片 / 弹窗页签 ── */
+  .nav-row-cta{border-top:1px dashed var(--border); margin-top:6px; padding-top:8px;}
+  .nav-cta{display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:var(--r-md);
+    border:1px solid var(--primary); background:var(--primary-weak); color:var(--primary);
+    font-size:var(--fs-sm); font-weight:600; cursor:pointer; font-family:inherit;
+    transition:all .16s cubic-bezier(.4,0,.2,1); white-space:nowrap;}
+  .nav-cta:hover{background:var(--primary); color:var(--tx-inv); transform:translateY(-1px);}
+  .nav-cta b{font-size:var(--fs-sm);}
+  .nav-cta span{font-weight:400; opacity:.85;}
+
+  .adv-card{display:flex; align-items:flex-start; gap:16px; padding:18px 20px; margin:22px 0 0;
+    background:linear-gradient(120deg,var(--primary-weak),var(--accent-bg));
+    border:1px solid var(--bd-row); border-radius:var(--r-lg); box-shadow:var(--shadow-sm);}
+  .adv-card .ac-ic{flex:0 0 auto; width:46px; height:46px; border-radius:var(--r-md);
+    display:flex; align-items:center; justify-content:center; background:var(--card); color:var(--primary);}
+  .adv-card .ac-main{flex:1; min-width:0;}
+  .adv-card h3{font-size:var(--fs-md); font-weight:700; color:var(--tx-strong); margin-bottom:5px;}
+  .adv-card p{font-size:var(--fs-sm); color:var(--tx-body); line-height:var(--lh-relaxed);}
+  .adv-card .ac-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:9px;}
+  .adv-card .ac-tags span{font-size:var(--fs-caption); padding:2px 9px; border-radius:var(--r-md);
+    background:var(--card); border:1px solid var(--bd-row); color:var(--sub);}
+  .adv-card .ac-act{flex:0 0 auto; align-self:center;}
+  @media (max-width:640px){
+    .adv-card{flex-wrap:wrap; gap:12px;}
+    .adv-card .ac-act{width:100%;}
+    .adv-card .ac-act button{width:100%;}
+  }
+
+  .dm-tabs{display:flex; gap:6px; margin:2px 0 14px; border-bottom:1px solid var(--border);}
+  .dm-tab{padding:8px 16px; border:0; background:transparent; cursor:pointer; font-family:inherit;
+    font-size:var(--fs-sm); font-weight:600; color:var(--sub); border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition:all .16s cubic-bezier(.4,0,.2,1);}
+  .dm-tab:hover{color:var(--primary);}
+  .dm-tab.on{color:var(--primary); border-bottom-color:var(--primary);}
+  .dm-pane .donate-sub{margin-bottom:14px;}
+  .dm-pane .hl{color:var(--primary);}
+
+  .adv-list{list-style:none; margin:0 0 14px; padding:0; display:grid; gap:9px;}
+  .adv-list li{background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--r-md);
+    padding:11px 14px; font-size:var(--fs-sm);}
+  .adv-list li b{display:block; color:var(--tx-strong); font-weight:700; margin-bottom:3px;}
+  .adv-list li span{color:var(--sub); line-height:var(--lh-base);}
+  .adv-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+  .adv-tags span{font-size:var(--fs-caption); padding:3px 10px; border-radius:var(--r-md);
+    background:var(--primary-weak); color:var(--primary); border:1px solid var(--bd-row);}
+
+  .wx-box{background:var(--bg-soft); border:1px solid var(--border); border-radius:var(--r-lg); padding:14px 16px;}
+  .wx-box .wx-h{display:flex; align-items:center; gap:7px; font-size:var(--fs-sm); font-weight:700;
+    color:var(--tx-strong); margin-bottom:10px;}
+  .wx-box .wx-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .wx-box .wx-id{font-size:var(--fs-lg); font-weight:700; color:var(--primary); letter-spacing:.04em;
+    font-family:ui-monospace,Menlo,Consolas,monospace; background:var(--card); border:1px dashed var(--primary);
+    border-radius:var(--r-md); padding:8px 16px; user-select:all;}
+  .wx-box .wx-tip{font-size:var(--fs-caption); color:var(--faint); margin-top:9px;}
+  .wx-box .wx-price{font-size:var(--fs-sm); color:var(--tx-body); margin-top:9px;
+    padding-top:9px; border-top:1px dashed var(--bd-row); line-height:var(--lh-relaxed);}
 </style>
 </head>
 <body>
@@ -1816,6 +1873,14 @@
       <button class="nav-tab" data-mod="field"><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>实战宝典<span class="nb" id="nbField"></span></button>
       <button class="nav-tab" data-mod="compare"><svg class="ic" aria-hidden="true"><use href="#i-columns"/></svg>知识点对比<span class="nb" id="nbCompare"></span></button>
       <button class="nav-tab" data-mod="step"><svg class="ic" aria-hidden="true"><use href="#i-cube"/></svg>STEP成本评估<span class="nb" id="nbStep"></span></button>
+    </div>
+    <!-- 职业咨询入口：放在导航栏最后一行，全站每个页面都看得到 -->
+    <div class="nav-row nav-row-cta">
+      <button class="nav-cta" id="adviceBtn" type="button" title="付费职业咨询：一对一规划 / 简历与作品集诊断">
+        <svg class="ic" aria-hidden="true"><use href="#i-compass"/></svg>
+        <b>职业咨询</b>
+        <span>一对一规划 · 简历诊断 · 加微信沟通</span>
+      </button>
     </div>
     <div class="nav-row">
       <span class="nav-cap">我的</span>
@@ -2023,6 +2088,19 @@
       </div>
       <div class="hero-stats" id="homeStats"></div>
     </div>
+    <!-- 职业咨询服务卡：首页显眼位置，点开就是弹窗的「职业咨询」页签 -->
+    <div class="adv-card" id="advCard">
+      <div class="ac-ic"><svg class="ic-lg" aria-hidden="true"><use href="#i-compass"/></svg></div>
+      <div class="ac-main">
+        <h3>需要针对个人情况的建议？</h3>
+        <p>一对一职业规划咨询 · 简历与作品集诊断。塑料灯具结构设计方向尤其熟悉，也可以聊转行与入行。</p>
+        <div class="ac-tags"><span>职业方向</span><span>能力盘点</span><span>简历诊断</span><span>加微信沟通</span></div>
+      </div>
+      <div class="ac-act">
+        <button class="primary" id="advCardBtn" type="button">看服务详情</button>
+      </div>
+    </div>
+
     <div id="homeQuick"></div>
     <div class="panel" id="panelDaily"></div>
     <div class="home-panels">
@@ -2331,19 +2409,48 @@
 <!-- 赞赏支持 Modal -->
 <div class="modal" id="donateModal" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
   <div class="box donate-box">
-    <h3 id="donateTitle"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg>赞赏支持</h3>
-    <p class="donate-sub">这些内容是我利用业余时间整理的，一直免费开放。<br>如果它对你的工作有帮助，欢迎请我喝杯咖啡。</p>
-    <div class="donate-grid">
-      <figure class="donate-card">
-        <img src="images/qr-wechat.jpg" alt="微信收款码" loading="lazy">
-        <figcaption class="donate-badge wx">微信支付</figcaption>
-      </figure>
-      <figure class="donate-card">
-        <img src="images/qr-alipay.jpg" alt="支付宝收款码" loading="lazy">
-        <figcaption class="donate-badge ali">支付宝</figcaption>
-      </figure>
+    <h3 id="donateTitle"><svg class="ic" aria-hidden="true"><use href="#i-compass"/></svg>职业咨询 · 赞赏支持</h3>
+    <!-- 两个页签合成一个弹窗：只弹一次，不会连着打扰两次 -->
+    <div class="dm-tabs" id="dmTabs" role="tablist">
+      <button class="dm-tab on" data-dm="advice" role="tab" aria-selected="true">职业咨询</button>
+      <button class="dm-tab" data-dm="donate" role="tab" aria-selected="false">赞赏支持</button>
     </div>
-    <div class="donate-tip">手机上长按识别，电脑上截图后扫一扫 · 点击图片可放大</div>
+
+    <div class="dm-pane" data-dmp="advice">
+      <p class="donate-sub">本站内容我会一直免费更新。如果你需要针对<tspan class="hl">个人情况</tspan>的建议，可以加我微信聊。</p>
+      <ul class="adv-list">
+        <li><b>一对一职业规划咨询</b><span>职业方向选择、目标岗位拆解、能力盘点与学习路径</span></li>
+        <li><b>简历 / 作品集诊断</b><span>看简历与项目经历，指出短板并给出具体修改方向</span></li>
+      </ul>
+      <div class="adv-tags">
+        <span>塑料灯具结构设计</span><span>小夜灯 · 氛围灯 · 补光灯</span><span>树脂一体成型 / 搪胶 / 软硅胶</span><span>转行入行</span>
+      </div>
+      <div class="wx-box">
+        <div class="wx-h"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg>加微信，先说你的情况</div>
+        <div class="wx-row">
+          <span class="wx-id" id="wxId" data-a="q3075595" data-b="24"></span>
+          <button class="primary" id="wxCopy" type="button">复制微信号</button>
+        </div>
+        <div class="wx-tip">手机上复制后到微信「添加朋友」里粘贴搜索。<!-- 价格与档期：想明码标价就改下面这行 --></div>
+        <div class="wx-price">价格与档期加微信沟通 —— 说明你的情况，我会先判断能不能帮上，不合适我会直说。</div>
+      </div>
+    </div>
+
+    <div class="dm-pane" data-dmp="donate" style="display:none">
+      <p class="donate-sub">这些内容是我利用业余时间整理的，一直免费开放。<br>如果它对你的工作有帮助，欢迎请我喝杯咖啡。</p>
+      <div class="donate-grid">
+        <figure class="donate-card">
+          <img src="images/qr-wechat.jpg" alt="微信收款码" loading="lazy">
+          <figcaption class="donate-badge wx">微信支付</figcaption>
+        </figure>
+        <figure class="donate-card">
+          <img src="images/qr-alipay.jpg" alt="支付宝收款码" loading="lazy">
+          <figcaption class="donate-badge ali">支付宝</figcaption>
+        </figure>
+      </div>
+      <div class="donate-tip">手机上长按识别，电脑上截图后扫一扫 · 点击图片可放大</div>
+    </div>
+
     <div class="modal-actions">
       <button class="donate-never" id="donateNeverBtn" type="button"
         title="这一次不再弹出（下次打开本站仍会提示）">本次不再提示</button>

@@ -9,7 +9,7 @@
  *       图片内容基本不变且数量多，命中缓存直接秒出
  *   · 跨域资源（B站 / 访问统计）     → 不接管
  * ============================================================ */
-const CACHE = "struct-kb-v17";
+const CACHE = "struct-kb-v18";
 const CORE = ["./", "./index.html", "./app.js", "./kb-plus3.js", "./kb-plus4.js", "./kb-workspace.js", "./kb-quiz-why.js", "./images/qr-site.svg", "./favicon.svg",
   "./images/qr-wechat.jpg", "./images/qr-alipay.jpg"];
 /* wasm 与图片一样走缓存优先：解析引擎 7.6 MB，不该每次访问都重新验证。
