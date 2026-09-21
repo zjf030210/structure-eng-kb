@@ -1702,6 +1702,51 @@
     font-variant-numeric:tabular-nums; opacity:.75; padding-top:3px;}
   .bf-k{display:inline-block; font-size:var(--fs-caption); font-weight:600; color:var(--primary);
     background:var(--primary-weak); border-radius:var(--r-xs); padding:1px 7px; margin-right:7px;}
+
+  /* ══════ 移动端：触控尺寸 + 宽表横滚体验（2026-09-21）══════
+     实测 390px：21 个导航标签全部只有 30px 高（拇指容易点错）；
+     速查表 460px 宽、容器 370px —— 横滚是刻意设计（列多，压扁成一列反而读不了），
+     所以这里不推翻它，而是补两件事：首列吸附 + 横滑提示。 */
+  .tbl-hint{display:none;}
+  @media (max-width:760px){
+    .tbl-hint{display:flex; align-items:center; gap:5px; font-size:var(--fs-caption); color:var(--sub);
+      margin-bottom:var(--sp-5); padding-left:2px;}
+    .tbl-hint .ic{flex:0 0 auto; opacity:.7;}
+    /* 首列吸附：左右拖动时行标签一直可见。
+       只对速查表生效 —— 知识点列表的首列是序号，固定它没意义。 */
+    #qvBody .tbl-scroll table th:first-child,
+    #qvBody .tbl-scroll table td:first-child{
+      position:sticky; left:0; z-index:2; background:var(--card);
+      box-shadow:1px 0 0 var(--border);
+    }
+    #qvBody .tbl-scroll table thead th:first-child{z-index:3;}
+  }
+  @media (max-width:640px){
+    /* 触控目标：从 30px 提到 40px 左右 */
+    .nav-tab{padding:11px 12px;}
+    .mini-btn{padding:10px 15px;}
+    .qv-tab{padding:9px 13px;}
+  }
+  @media (max-width:400px){
+    .nav-tab{padding:12px 11px;}
+  }
+
+  /* ══════ 速查表打印：让打出来的那张纸有出处（2026-09-21）══════ */
+  .print-foot{display:none;}
+  @media print{
+    /* .foot 是给开发者看的构建说明，不该印在纸上 */
+    .foot{display:none !important;}
+    .print-foot{display:flex; align-items:center; gap:10px; margin-top:9mm; padding-top:4mm;
+      border-top:1px solid #bbb; break-inside:avoid;}
+    .pf-txt{font-size:10px; line-height:1.6; color:#555;}
+    .pf-txt b{color:#111; font-size:11px;}
+    .pf-url{font-family:ui-monospace,Menlo,Consolas,monospace; color:#333;}
+    .pf-qr{width:68px; height:68px; flex:0 0 68px; margin-left:auto;}
+  }
+
+  /* ── 「我的疑问」标记 ── */
+  .doubt-ic{color:var(--warn-tx, #b45309); opacity:.85; margin-left:5px; vertical-align:-2px;}
+  #dpDoubt.on{border-color:var(--warn-bd, #e6d3a3); color:var(--warn-tx, #b45309); background:var(--warn-bg, #faf7ee);}
 </style>
 </head>
 <body>
@@ -1898,7 +1943,8 @@
         <h2>速查数据手册</h2>
         <div class="mtg">把「需要记住的数值」集中成表：选材、结构、公差、紧固、散热、安规、包装、成本，设计时随手查</div>
       </div>
-      <div class="mod-tools"><input class="mini-input" id="qvSearch" placeholder="在表格中搜索：脱模斜度、扭矩、IP…"></div>
+      <div class="mod-tools"><input class="mini-input" id="qvSearch" placeholder="在表格中搜索：脱模斜度、扭矩、IP…"><button class="mini-btn" data-print="quick" title="只打印当前这张表（A4，带站点出处）"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg> 打印这张表</button>
+        <button class="mini-btn" data-copy title="复制这张表的可分享链接"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg> 复制链接</button></div>
     </div>
     <div class="qv-tabs" id="qvTabs"></div>
     <div id="qvBody"></div>
@@ -2151,6 +2197,14 @@
   <div id="stepBody"></div>
 </div>
 
+  <!-- 打印页脚：只在打印时出现，让那张纸有出处（含站点二维码） -->
+  <div class="print-foot">
+    <div class="pf-txt">
+      <b>结构工程师知识库</b>　塑料灯具结构设计 · 198 条知识点 / 432 道自测题<br>
+      <span class="pf-url">zjf030210.github.io/structure-eng-kb</span>
+    </div>
+    <img class="pf-qr" src="images/qr-site.svg" alt="扫码打开站点" width="68" height="68">
+  </div>
   <div class="foot">
     内容与页面分离：<b>data.js</b>（主数据）+ <b>kb-plus.js</b>（新增知识点）· <b>deep.js</b>（深度解析）· <b>kb-extra-1~4.js</b>（经验数值/关联）·
     <b>kb-tools.js</b>（速查表/清单）· <b>kb-cases.js</b>（案例/术语/路径）· <b>kb-quiz*.js</b>（题库）· <b>kb-map*.js</b>（地图）·
@@ -2187,7 +2241,9 @@
     </div>
     <div class="dp-actions" id="dpActions">
       <button id="dpFavBtn"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg> 收藏</button>
+      <button id="dpDoubt" title="标为疑问"></button>
       <button id="dpNoteJump"><svg class="ic" aria-hidden="true"><use href="#i-file-text"/></svg> 写笔记</button>
+      <button data-copy title="复制这一条的可分享链接"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg> 复制链接</button>
       <button id="dpPrintBtn"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg> 打印 / 导出</button>
     </div>
   </div>

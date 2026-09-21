@@ -160,6 +160,9 @@ function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e)
 let theme = lsGet(LS_THEME, "light");
 let favs = lsGet(LS_FAV, {});          // { 条目名: 收藏时间戳 }
 let notes = lsGet(LS_NOTE, {});        // { 条目名: 文本 }
+/* 「还没搞懂」的标记：和「已掌握」是两回事 —— 那是学会了，这是还没学会 */
+const LS_DOUBT = "kb-doubt-v1";
+let doubts = lsGet(LS_DOUBT, {});      // { 条目名: 时间戳 }
 let tplDraft = lsGet(LS_TPL, {});      // { "模板id|块序号|行|列": "填写内容" }
 let recents = lsGet(LS_RECENT, []);    // [ { n:条目名, t:时间戳 } ]  最多 30 条
 let searchHist = lsGet(LS_SEARCH, []); // [ 关键词 ]  最多 12 条
@@ -167,6 +170,8 @@ let streak = lsGet(LS_STREAK, {});     // { "YYYY-MM-DD": 动作次数 }
 function favOn(n){ return !!favs[n]; }
 function favCount(){ return Object.keys(favs).length; }
 function noteCount(){ return Object.values(notes).filter(x => x && x.trim()).length; }
+function doubtCount(){ return Object.keys(doubts).length; }
+function doubtOn(name){ return !!doubts[name]; }
 function todayStr(d0){
   const d = d0 || new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
@@ -827,7 +832,7 @@ function rowHTML(it, i, q, catLabel, catStyle){
   <tr data-name="${esc(it.name)}">
     <td style="color:var(--sub); font-size:12px">${String(i+1).padStart(3,"0")}</td>
     <td><span class="cat-tag"${catStyle}>${catLabel}</span></td>
-    <td class="name">${hl(it.name, q)}</td>
+    <td class="name">${hl(it.name, q)}${doubtOn(it.name) ? `<svg class="ic doubt-ic" aria-hidden=true title="标了疑问"><use href=#i-alert /></svg>` : ""}</td>
     <td><span class="lv lv${it.lv}">${LV_TXT[it.lv]}</span></td>
     <td><span class="st st${stv}" data-name="${esc(it.name)}" title="点击切换：待学习 → 学习中 → 已掌握"><span class="dot"></span>${ST_TXT[stv]}</span></td>
     <td>${imgCell}</td>
@@ -1032,6 +1037,23 @@ function renderGlobalSearch(q){
   });
   if(dg.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-book-open /></svg>", name:"领域导读", n:dg.length, jump:"kb", items: dg});
 
+  // 检查清单（开模前评审 / 试模 / 量产转产… 共 114 项）
+  const ck = [];
+  (window.KB_CHECKS||[]).forEach(c=>(c.groups||[]).forEach(g=>(g.items||[]).forEach(x=>{
+    if(hit(x.t)||hit(x.d)) ck.push({t:x.t, d:`<b>${esc(c.name)}</b> · ${esc(g.t)}　${esc(x.d)}`, jumpChk:c.id});
+  })));
+  if(ck.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-check-square /></svg>", name:"检查清单", n:ck.length, jump:"check", items: ck.slice(0,8)});
+
+  // 实战模板（NPI 流程 / DFM 检讨表… 含表单字段）
+  const tp = [];
+  (window.KB_TEMPLATE||[]).forEach(t=>{
+    if(hit(t.name)||hit(t.desc)||hit(t.note)) tp.push({t:t.name, d:`<b>${esc(t.name)}</b>　${esc(t.desc)}`, jumpTpl:t.id});
+    (t.blocks||[]).forEach(b=>(b.fields||[]).forEach(f=>{
+      if(hit(f.l)||hit(f.ph)) tp.push({t:f.l, d:`<b>${esc(t.name)}</b> · 表单字段　${esc(f.ph)}`, jumpTpl:t.id});
+    }));
+  });
+  if(tp.length) groups.push({icon:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>", name:"实战模板", n:tp.length, jump:"tpl", items: tp.slice(0,8)});
+
   if(!groups.length){ box.innerHTML = ""; return; }
   const LIMIT = 6;
   const attr = (g,x)=>`data-jump="${g.jump}" ${g.f?`data-field="${g.f}"`:""}` +
@@ -1039,7 +1061,9 @@ function renderGlobalSearch(q){
     (x && x.jumpSel?` data-sel="${x.jumpSel}"`:"") +
     (x && x.jumpFm?` data-fm="${esc(x.jumpFm)}"`:"") +
     (x && x.openName?` data-open="${esc(x.openName)}"`:"") +
-    (x && x.jumpDom?` data-dom="${x.jumpDom}"`:"");
+    (x && x.jumpDom?` data-dom="${x.jumpDom}"`:"") +
+    (x && x.jumpChk?` data-chk="${esc(x.jumpChk)}"`:"") +
+    (x && x.jumpTpl?` data-tpl="${esc(x.jumpTpl)}"`:"");
   box.innerHTML = groups.map(g=>`
     <div class="gs-group">
       <div class="gs-head" ${attr(g)}>
@@ -1065,6 +1089,7 @@ function renderQuick(){
   let rows = t.rows.map(r=>({r, add:false})).concat(EXTRA.map(r=>({r, add:true})));
   if(q) rows = rows.filter(x=> x.r.join(" ").replace(/&[a-z]+;/g,"").toLowerCase().includes(q));
   const table = rows.length ? `
+    <div class="tbl-hint"><svg class=ic aria-hidden=true><use href=#i-target /></svg>窄屏可左右滑动看全部 ${t.cols.length} 列，首列会固定</div>
     <div class="table-card"><div class="tbl-scroll">
       <table class="mini">
         <thead><tr>${t.cols.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>
@@ -2328,7 +2353,8 @@ function renderTpl(){
 function renderFav(){
   const tabs = [
     {id:"fav",  n:"<svg class=ic aria-hidden=true><use href=#i-star /></svg>我的收藏", c:favCount()+" 条"},
-    {id:"note", n:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>我的笔记", c:noteCount()+" 条"}
+    {id:"note", n:"<svg class=ic aria-hidden=true><use href=#i-file-text /></svg>我的笔记", c:noteCount()+" 条"},
+    {id:"doubt", n:"<svg class=ic aria-hidden=true><use href=#i-alert /></svg>我的疑问", c:doubtCount()+" 条"}
   ];
   document.getElementById("favTabs").innerHTML = tabs.map(t=>
     `<button class="qv-tab${t.id===favTab?" active":""}" data-fv="${t.id}">${t.n} <span style="opacity:.6">${t.c}</span></button>`).join("");
@@ -2350,6 +2376,21 @@ function renderFav(){
         <button class="mini-btn" data-unfav="${esc(n)}" style="margin-left:12px">移出</button>
       </div>`;
     }).join("") : `<div class="card">${geHTML({ icon: "i-star", title: "还没有收藏", desc: "收藏是给「以后还要翻」的条目用的 —— 常用的材料参数、容易忘的公差表、天天要查的标准。", steps: ["打开任意知识点", "点右上「☆ 收藏」", "回这里随时翻"], acts: [["kb", "去知识库逛逛", "i-book"]] })}</div>`;
+  } else if(favTab === "doubt"){
+    const list = Object.keys(doubts).sort((a,b)=>doubts[b]-doubts[a]).filter(n=>KB_ITEMS.some(x=>x.name===n));
+    box.innerHTML = list.length ? list.map(nm=>{
+      const d = domOf(nm), it = KB_ITEMS.find(x=>x.name===nm);
+      const lead = deepLead(nm) || (it ? it.points : "");
+      return `<div class="fav-item" data-open="${esc(nm)}">
+        <span class="fi-ic">${d ? d.icon : "<svg class=ic aria-hidden=true><use href=#i-alert /></svg>"}</span>
+        <div style="min-width:0">
+          <div class="fi-n">${esc(nm)}</div>
+          <div class="fi-d">${esc(String(lead).slice(0, 62))}</div>
+        </div>
+        <span class="fi-t">${d ? esc(d.name) : ""}</span>
+        <button class="mini-btn" data-doubt="${esc(nm)}" style="margin-left:12px">搞懂了</button>
+      </div>`;
+    }).join("") : `<div class="card">${geHTML({ icon: "i-alert", title: "还没有标过疑问", desc: "遇到「看懂了但不敢下手」的条目，在它的详情里点「标为疑问」。攒起来回看，比糊过去强。", steps: ["打开任意知识点", "点「标为疑问」", "回这里集中回看"], acts: [["kb", "去知识库逛逛", "i-book"]] })}</div>`;
   } else {
     const list = Object.entries(notes).filter(([,v])=>v && v.trim()).sort((a,b)=>(b[1].length - a[1].length));
     box.innerHTML = list.length ? list.map(([n, v])=>{
@@ -2369,6 +2410,17 @@ function renderFav(){
 function renderDpActions(it){
   const btn = document.getElementById("dpFavBtn");
   if(btn){ btn.className = favOn(it.name) ? "on" : ""; btn.textContent = favOn(it.name) ? "★ 已收藏" : "☆ 收藏"; }
+  /* 「还没搞懂」标记：和「已掌握」是两回事 —— 那是学会了，这是还没学会 */
+  const db = document.getElementById("dpDoubt");
+  // ⚠️ 图标是 <svg>，只能进 innerHTML，不能进 textContent
+  if(db){
+    const on = doubtOn(it.name);
+    db.className = on ? "on" : "";
+    db.innerHTML = on
+      ? "<svg class=ic aria-hidden=true><use href=#i-alert /></svg>已标疑问"
+      : "<svg class=ic aria-hidden=true><use href=#i-alert /></svg>标为疑问";
+    db.title = on ? "点击取消这个疑问标记" : "标上之后可以在「我的收藏与笔记 · 我的疑问」里集中回看";
+  }
   const nj = document.getElementById("dpNoteJump");
   // ⚠️ 同上：图标是 <svg>，必须 innerHTML
   if(nj){ const n = notes[it.name]; nj.innerHTML = (n && n.trim()) ? `<svg class=ic aria-hidden=true><use href=#i-edit /></svg>笔记（${n.trim().length} 字）` : "<svg class=ic aria-hidden=true><use href=#i-edit /></svg>写笔记"; }
@@ -2968,7 +3020,7 @@ function timeCardHTML(){
 
 /* ══════════════ 学习数据备份与恢复 ══════════════ */
 const LS_ALL = ["kb-progress-v1","kb-check-v2","kb-quiz-v1","kb-fav-v1","kb-note-v1","kb-tpl-v1",
-                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1","kb-daily20-v1","kb-review-v1","kb-time-v1","kb-goal-v1",
+                "kb-theme-v1","kb-recent-v1","kb-search-v1","kb-streak-v1","kb-daily-v1","kb-daily20-v1","kb-review-v1","kb-time-v1","kb-goal-v1","kb-doubt-v1",
                 "kb-path-done-v1",
                 /* 工作台（kb-workspace.js）：单价库 / 报价方案 / 计算器记忆 / 项目台账 / 首页快捷 */
                 "kb-ws-price-v1","kb-ws-plan-v1","kb-ws-calc-v1","kb-ws-proj-v1","kb-ws-short-v1","kb-ws-auto-v1"];
@@ -3292,6 +3344,8 @@ document.getElementById("gsGroups").addEventListener("click", e=>{
   if(el.dataset.quiz) activeQuiz = el.dataset.quiz;
   if(el.dataset.sel){ activeSel = el.dataset.sel; selCur = null; selPath = []; }
   if(el.dataset.fm) activeFm = el.dataset.fm;
+  if(el.dataset.chk) activeChk = el.dataset.chk;
+  if(el.dataset.tpl) activeTpl = el.dataset.tpl;
   if(el.dataset.dom){ activeDomain = el.dataset.dom; browseAll = false; kw.value = ""; }
   if(activeModule === "gloss"){ glCat = "全部"; document.getElementById("glSearch").value = q; }
   else if(activeModule === "quick"){ document.getElementById("qvSearch").value = q; }
@@ -3825,7 +3879,111 @@ document.getElementById("statsBody").addEventListener("click", e=>{
   });
 })();
 
+/* ══════════════ 深链接：URL 直达单条内容 ══════════════
+   现在只能分享首页 —— 同事想看你说的「卡扣设计」，还是得自己再搜一次。
+   支持：?mod=kb&item=卡扣设计（自动切到所属领域并打开详情）
+        ?mod=kb&dom=material（某个领域）
+        ?mod=quick&id=thread / ?mod=case&id=xx / ?mod=tpl&id=xx
+        ?mod=field&id=std / ?mod=check&id=xx / ?mod=quiz&id=material
+   注意：只读自己的参数，不碰 ?donate= 的行为。 */
+
+function deepLinkOf(){
+  const p = new URLSearchParams();
+  p.set("mod", activeModule);
+  if(activeModule === "kb"){
+    const open = document.body.classList.contains("detail-open");
+    const el = document.getElementById("dpName");
+    const nm = open && el ? el.textContent.trim() : "";
+    if(nm) p.set("item", nm);
+    else if(!browseAll && activeDomain) p.set("dom", activeDomain);
+  }
+  if(activeModule === "quick" && activeQuick) p.set("id", activeQuick);
+  if(activeModule === "case"  && activeCase)  p.set("id", activeCase);
+  if(activeModule === "tpl"   && activeTpl)   p.set("id", activeTpl);
+  if(activeModule === "check" && activeChk)   p.set("id", activeChk);
+  if(activeModule === "field" && activeField) p.set("id", activeField);
+  if(activeModule === "quiz"  && activeQuiz)  p.set("id", activeQuiz);
+  return location.origin + location.pathname + "?" + p.toString();
+}
+
+function copyDeepLink(btn){
+  const url = deepLinkOf();
+  const done = () => {
+    if(!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = "已复制链接";
+    setTimeout(() => { if(btn.dataset.orig) btn.innerHTML = btn.dataset.orig; }, 1500);
+  };
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = url; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); }
+    catch(e){ alert("复制失败，链接是：\n" + url); }
+    ta.remove();
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fallback);
+  else fallback();
+}
+
+/* 打开带深链接的页面时直接定位过去 */
+function applyDeepLink(){
+  let sp;
+  try { sp = new URLSearchParams(location.search); } catch(e){ return false; }
+  const mod = sp.get("mod");
+  if(!mod) return false;
+  const id = sp.get("id"), item = sp.get("item"), dom = sp.get("dom");
+  if(mod === "kb" && dom){ activeDomain = dom; browseAll = false; }
+  if(mod === "quick" && id) activeQuick = id;
+  if(mod === "case"  && id) activeCase  = id;
+  if(mod === "tpl"   && id) activeTpl   = id;
+  if(mod === "check" && id) activeChk   = id;
+  if(mod === "field" && id) activeField = id;
+  if(mod === "quiz"  && id) activeQuiz  = id;
+  activeModule = mod;
+  /* 打开单个知识点时，先把它的所属领域切过来，这样背景是正确的列表 */
+  if(item){
+    const it = KB_ITEMS.find(x => x.name === item);
+    if(it){
+      const d = CAT_DOMAIN[it.cat];
+      if(d){ activeDomain = d.id; browseAll = false; activeSub = "all"; }
+    }
+  }
+  renderAll();
+  if(item) setTimeout(() => { try { openItemByName(item); } catch(e){ /* 名字对不上就不打开 */ } }, 90);
+  window.scrollTo(0, 0);
+  return true;
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-copy]"); if(!b) return;
+  copyDeepLink(b);
+});
+
+/* 「标为疑问 / 搞懂了」：两个入口共用一套切换 */
+function toggleDoubt(name){
+  if(doubts[name]) delete doubts[name]; else doubts[name] = Date.now();
+  lsSet(LS_DOUBT, doubts);
+  refreshBadges();
+  if(document.body.classList.contains("detail-open")) renderDpActions(KB_ITEMS.find(x=>x.name===name) || {name:name});
+  if(activeModule === "fav") renderFav();
+  if(activeModule === "kb") renderAll();
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-doubt]"); if(!b) return;
+  toggleDoubt(b.dataset.doubt);
+});
+document.getElementById("dpDoubt").addEventListener("click", ()=>{
+  const el = document.getElementById("dpName");
+  if(el && el.textContent.trim()) toggleDoubt(el.textContent.trim());
+});
+
+/* 「打印这张表」：走浏览器的打印（打印样式里已经把导航/工具栏隐藏掉） */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-print]"); if(!b) return;
+  window.print();
+});
 renderAll();
+applyDeepLink();
 refreshBadges();
 (function(){
   const box = document.getElementById("watermark");
