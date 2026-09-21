@@ -581,7 +581,8 @@ function renderHome(){
   const OVERVIEW = [
     {n:total, l:"知识点", mod:"kb"},
     {n:ovCount((a,b)=>a+b.length, Object.values(window.KB_IMG||{})), l:"参考图", mod:"gallery"},
-    {n:ovCount((a,p)=>a+quizTotal(p), KB_QUIZ), l:"自测题", mod:"quiz"},
+    /* 题库是懒加载的：没到位时先显示「—」，别显示一个偏小的错数字（曾显示 120） */
+    {n:dataReady("quiz") ? ovCount((a,p)=>a+quizTotal(p), KB_QUIZ) : "-", l:"自测题", mod:"quiz"},
     {n:D20_N, l:"每日练习题", mod:"daily"},
     {n:(typeof CALCS!=="undefined"?CALCS.length:0), l:"计算器", mod:"calc"},
     {n:ovCount((a,d)=>a+d.layers.reduce((x,l)=>x+l.items.length,0), KB_MAP), l:"地图条目", mod:"map"},
@@ -654,7 +655,7 @@ function renderHome(){
   else if(weak && weak.pct < 60) advice = `<b>「${weak.p.name}」</b>自测正确率只有 <b>${weak.pct}%</b>（已答 ${weak.dn} 题），建议回知识库重读这一块，再用「重做错题」巩固。`;
   else if(zeroDom) advice = `<b>「${zeroDom.d.name}」</b>（${zeroDom.n} 条）还没开始，建议点开 🧭 学习地图按层级过一遍。`;
   else if(mastered < total) advice = `已掌握 ${mastered}/${total} 条，还剩 <b>${total-mastered}</b> 条。保持每天 5-8 条的速度即可。`;
-  else advice = `🎉 198 条全部掌握！去「💼 实战宝典」用 35 道面试题检验一下，再去「🎯 自测题库」冲满分。`;
+  else advice = `🎉 ${total} 条全部掌握！去「💼 实战宝典」用 35 道面试题检验一下，再去「🎯 自测题库」冲满分。`;
   const barColor = p=> p>=80 ? "linear-gradient(90deg,#059669,#10b981)" : p>=40 ? "linear-gradient(90deg,#d97706,#f59e0b)" : "linear-gradient(90deg,#dc2626,#ef4444)";
   document.getElementById("panelProgress").innerHTML = `
     <h3><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>我的学习进度</h3>
@@ -1418,6 +1419,9 @@ function showLazyNote(on){
 function afterQuizData(){
   try{ mergeQuizWhy(); }catch(e){}
   try{ refreshBadges(); }catch(e){}
+  try{ initBadges(); }catch(e){}       // 题库总数角标（懒加载到位后校正）
+  try{ syncCounts(); }catch(e){}       // 文案里的总数
+  try{ renderHome(); }catch(e){}       // 首页「内容总览」里的自测题数
 }
 function quizExtra(p){ return (window.KB_QUIZ_ADD || {})[p.id] || []; }
 function quizTotal(p){ return p.questions.length + quizExtra(p).length; }
@@ -1743,6 +1747,8 @@ const MOD_LABEL = {
   gloss: "术语词典", gallery: "参考图库", field: "实战宝典", compare: "知识点对比",
   step: "STEP成本评估", fav: "我的收藏"
 };
+/* 模块描述。⚠️ 这里刻意不写「多少条」—— 数量会变，写死必然过期；
+   需要数字的地方用带 data-cnt 标记的元素（见 syncCounts）。 */
 const MOD_DESC = {
   step: "传 STEP，算体积 / 重量 / 模具费 / 单件成本",
   calc: "13 个常用工程计算，输入会记住",
@@ -1761,7 +1767,7 @@ const MOD_DESC = {
   quiz: "432 道题，按领域练",
   map: "12 个领域的知识地图",
   path: "6 周 29 天的学习计划",
-  kb: "198 条知识点全库",
+  kb: "知识点全库",
   stats: "掌握率与学习曲线",
   review: "按记忆曲线安排复习",
   fav: "收藏与笔记"
@@ -3387,7 +3393,29 @@ document.getElementById("imgModal").addEventListener("click", e=>{
 })();
 
 /* ══════════════ 模块导航与交互绑定 ══════════════ */
-(function initBadges(){
+
+/* 站内多处文案写着「多少条知识点 / 多少道题 / 多少张图」—— 内容一直在长，
+ * 光靠手改总会漏（2026-09-21 实测仍有 6 处写着 198、导航角标写着 120）。
+ * 这里给这些位置加 data-cnt 标记，启动时按实际数据校正一遍；
+ * HTML 里保留当前正确值作默认，所以题库（懒加载）还没到位时也不会显示错数字。
+ * ⚠️ 新增知识点 / 题目后，只需更新 index.html 的 title 与 meta 描述（SEO 要静态值），
+ *    页面内的这些数字会自动跟上。 */
+function syncCounts(){
+  const m = {
+    items: KB_ITEMS.length,
+    quiz:  (window.KB_QUIZ||[]).reduce(function(a,p){ return a + quizTotal(p); }, 0),
+    img:   Object.values(window.KB_IMG||{}).reduce(function(a,v){ return a + v.length; }, 0),
+    calc:  (typeof CALCS !== "undefined" ? CALCS.length : 0),
+  };
+  document.querySelectorAll("[data-cnt]").forEach(function(el){
+    const k = el.dataset.cnt;
+    if(m[k] === undefined) return;
+    if(k === "quiz" && !dataReady("quiz")) return;   // 题库未到位：保留 HTML 里的默认值
+    const tail = (el.textContent.match(/[条道张个]/) || [""])[0];
+    el.textContent = m[k] + (tail ? " " + tail : "");
+  });
+}
+function initBadges(){
   const set = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
   set("nbKb", KB_ITEMS.length);
   set("nbQuick", (window.KB_QUICK||[]).length + " 表");
@@ -3401,6 +3429,8 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbField", ((window.KB_MISTAKE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_TROUBLE||[]).reduce((a,x)=>a+x.items.length,0) + (window.KB_INTERVIEW||[]).reduce((a,x)=>a+x.items.length,0)) + " 条");
   set("nbGallery", Object.values(window.KB_IMG||{}).reduce((a,b)=>a+b.length,0) + " 张");
   set("nbSelect", (window.KB_SELECT||[]).length + " 棵树");
+  /* 题库是懒加载的：数据没到位时这里的数字会偏小（曾让角标一直显示 120 题），
+     所以 afterQuizData() 里会重新调用本函数校正一次。 */
   set("nbFormula", ((window.KB_FORMULA||[]).reduce((a,g)=>a+(g.items||[]).length,0) + (window.KB_UNIT||[]).reduce((a,g)=>a+(g.items||[]).length,0)) + " 条");
   set("nbTpl", (window.KB_TEMPLATE||[]).length + " 份");
   set("nbDaily", "20 题");
@@ -3409,7 +3439,9 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   set("nbWrong", wrongList().length ? wrongList().length + " 题" : "0 题");
   set("nbStats", "6 图");
   set("nbFav", favCount() + " 条");
-})();
+}
+initBadges();
+syncCounts();;
 
 // 参考图库筛选
 document.getElementById("gwCat").addEventListener("change", ()=>resetGallery());
