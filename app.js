@@ -3423,6 +3423,21 @@ document.getElementById("imgModal").addEventListener("click", e=>{
      · 自己看效果：链接后加 ?donate=1 强制弹；?donate=0 关掉本轮 */
   const DONATE_AUTO = { on: true, delay: 1600 };
 
+  /* 自动弹出时落在哪个页签（2026-09-21 定）
+     · 默认 **随机** —— 每次打开各 50% 概率落在「职业咨询 / 赞赏支持」。
+       只固定弹「咨询」的话，赞赏入口几乎拿不到曝光（点开永远是咨询）；
+       只固定弹「赞赏」又会埋没付费咨询。随机让两边都稳拿一半机会。
+     · 需要固定时用链接参数覆盖：?dm=advice 或 ?dm=donate。
+       （测试要可复现、定向分享要固定页签，都靠它；不影响 ?donate=0/1）
+     ⚠️ 只改「自动弹」的页签；**点入口进来的仍按入口归位**（见上面的入口绑定），
+        否则又会出现「点赞赏却看到咨询」。 */
+  const pickAutoTab = ()=>{
+    let forced = "";
+    try{ forced = new URLSearchParams(location.search).get("dm") || ""; }catch(e){}
+    if(forced === "advice" || forced === "donate") return forced;
+    return Math.random() < 0.5 ? "advice" : "donate";
+  };
+
   /* 本次打开是否已经弹过（或访客说过「本次不再提示」）
      ⚠️ 只存在内存里、不写 localStorage —— 所以：
         · 一次打开最多弹一次（访客关掉后不会再冒出来）
@@ -3448,7 +3463,7 @@ document.getElementById("imgModal").addEventListener("click", e=>{
         return;
       }
       donateShown = true;
-      showTab("advice");   // 自动弹时默认停在职业咨询页签
+      showTab(pickAutoTab());
       open();
     };
     setTimeout(tick, Math.max(0, DONATE_AUTO.delay));
