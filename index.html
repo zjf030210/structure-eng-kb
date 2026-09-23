@@ -1795,6 +1795,8 @@
     padding:11px 14px; font-size:var(--fs-sm);}
   .adv-list li b{display:block; color:var(--tx-strong); font-weight:700; margin-bottom:3px;}
   .adv-list li span{color:var(--sub); line-height:var(--lh-base);}
+  /* ⚠️ .adv-tags 目前没有 HTML 使用（2026-09-23 用户要求在咨询弹窗里下线「擅长领域」标签，
+     理由：标签把能力框在「灯具」上，而实际覆盖的行业与品类更宽）。样式保留，需要时可原样加回。 */
   .adv-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
   .adv-tags span{font-size:var(--fs-caption); padding:3px 10px; border-radius:var(--r-md);
     background:var(--primary-weak); color:var(--primary); border:1px solid var(--bd-row);}
@@ -2098,7 +2100,7 @@
       <div class="ac-ic"><svg class="ic-lg" aria-hidden="true"><use href="#i-compass"/></svg></div>
       <div class="ac-main">
         <h3>需要针对个人情况的建议？</h3>
-        <p>一对一职业规划咨询 · 简历与作品集诊断。塑料灯具结构设计方向尤其熟悉，也可以聊转行与入行。</p>
+        <p>一对一职业规划咨询 · 简历与作品集诊断。材料、结构、工艺、成本都能聊，不限行业与产品品类，也欢迎聊转行与入行。</p>
         <div class="ac-tags"><span>职业方向</span><span>能力盘点</span><span>简历诊断</span><span>¥66 / 次</span></div>
       </div>
       <div class="ac-act">
@@ -2422,14 +2424,15 @@
     </div>
 
     <div class="dm-pane" data-dmp="advice">
-      <p class="donate-sub">本站内容我会一直免费更新。如果你需要针对<tspan class="hl">个人情况</tspan>的建议，可以加我微信聊。</p>
+      <p class="donate-sub">本站内容我会一直免费更新。结构设计上的问题都能聊 —— 材料、结构、工艺、散热、安规、成本，
+        不限行业与产品品类。需要针对<span class="hl">个人情况</span>的建议，加我微信说。</p>
       <ul class="adv-list">
         <li><b>一对一职业规划咨询</b><span>职业方向选择、目标岗位拆解、能力盘点与学习路径</span></li>
         <li><b>简历 / 作品集诊断</b><span>看简历与项目经历，指出短板并给出具体修改方向</span></li>
       </ul>
-      <div class="adv-tags">
-        <span>塑料灯具结构设计</span><span>小夜灯 · 氛围灯 · 补光灯</span><span>树脂一体成型 / 搪胶 / 软硅胶</span><span>转行入行</span>
-      </div>
+      <!-- 此处原有 4 个「擅长领域」标签（塑料灯具结构设计 / 小夜灯·氛围灯·补光灯 / 树脂一体成型·搪胶·软硅胶 / 转行入行），
+           2026-09-23 按用户要求下线：标签把能力框死在「灯具」上，而实际能覆盖的行业与品类更宽。
+           .adv-tags 样式保留（见 CSS），需要时可原样加回。 -->
       <div class="wx-box">
         <div class="wx-h"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"/></svg>加微信，先说你的情况</div>
         <div class="wx-row">
