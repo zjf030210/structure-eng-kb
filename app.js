@@ -118,7 +118,7 @@ const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossV
                    map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView,
                    select:selectView, formula:formulaView, wrong:wrongView, stats:statsView,
                    tpl:tplView, fav:favView, daily:dailyView, review:reviewView, compare:compareView,
-                   step:stepView};
+                   step:stepView, files:filesView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -555,16 +555,23 @@ document.addEventListener("keydown", e => {
     const im = document.getElementById("imgModal");
     const dm = document.getElementById("donateModal");
     const am = document.getElementById("aiModal");
-    if(im && im.classList.contains("open")) im.classList.remove("open");
-    else if(dm && dm.classList.contains("open")) dm.classList.remove("open");
-    else if(am && am.classList.contains("open")) am.classList.remove("open");
-    else if(document.body.classList.contains("detail-open")) closeDetail();
+    let handled = false;
+    if(im && im.classList.contains("open")){ im.classList.remove("open"); handled = true; }
+    else if(dm && dm.classList.contains("open")){ dm.classList.remove("open"); handled = true; }
+    else if(am && am.classList.contains("open")){ am.classList.remove("open"); handled = true; }
+    else if(document.body.classList.contains("detail-open")){ closeDetail(); handled = true; }
     /* 搜索视图下按 Esc：先关搜索历史，再按一次清空关键词退回上一屏（通行习惯） */
     else if(searchView && searchView.style.display !== "none"){
       const hist = document.getElementById("searchHist");
-      if(hist && hist.classList.contains("on")) hideSearchHist();   // 下拉靠 .on 类控制，不看 offsetParent
-      else { kw.value = ""; browseAll = false; renderAll(); }
+      if(hist && hist.classList.contains("on")){ hideSearchHist(); handled = true; }   // 下拉靠 .on 类控制，不看 offsetParent
+      else { kw.value = ""; browseAll = false; renderAll(); handled = true; }
     }
+    /* ⚠️ 把「这次 Esc 已经消费掉」显式标记出去。
+       同一个 keydown 上还有第二个监听器（「Esc 从其他模块回知识库」），
+       它靠「现在有没有弹窗开着」来判断 —— 而此刻弹窗刚被上面关掉，
+       不标记的话它会误判成「没弹窗、可以切模块」→ 用户只是关个弹窗，却被弹回知识库。
+       （2026-10-06 在资料库模块上实测到，实际影响所有模块） */
+    if(handled) e.preventDefault();
   }
 });
 
@@ -3232,6 +3239,7 @@ function renderAll(){
     else if(activeModule==="wrong") renderWrong();
     else if(activeModule==="stats") renderStats();
     else if(activeModule==="tpl") renderTpl();
+    else if(activeModule==="files") renderFiles();
     else if(activeModule==="fav") renderFav();
     refreshBadges();          // 角标随当前状态刷新（复习/每日20题/错题/收藏）
     return;
@@ -3473,6 +3481,192 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   const neverBtn = document.getElementById("donateNeverBtn");
   if(neverBtn) neverBtn.addEventListener("click", ()=>{ donateShown = true; close(); });
 })();
+
+/* ══════════════ 资料库（第 22 模块，2026-10-06 加）══════════════
+   数据源 window.KB_FILES（见 kb-files.js）。这是静态站、没有后端，所以：
+     · src:"local"    → 文件放在 files/ 目录，点下载就是站内直下（带中文文件名）
+     · src:"external" → 网盘 / 在线文档 / 视频等外链，新标签打开
+     · gate:"wx"      → 不直接给下载，按钮变成「加微信领取」→ 打开咨询弹窗（引流）
+   ⚠️ 以后加资料只改 kb-files.js，不用动这里。 */
+let flCat = "all", flKw = "";
+
+const FL_CATS = [
+  { id: "all",   n: "全部" },
+  { id: "doc",   n: "文档 / 速查表" },
+  { id: "zip",   n: "压缩包" },
+  { id: "img",   n: "图片素材" },
+  { id: "video", n: "视频" },
+  { id: "link",  n: "链接 / 网盘" },
+];
+const FL_ICON = { doc: "i-file-text", zip: "i-archive", img: "i-image", video: "i-video", link: "i-link" };
+const FL_CATN = { doc: "文档", zip: "压缩包", img: "图片", video: "视频", link: "链接" };
+
+function flList(){
+  let a = (window.KB_FILES || []).slice();
+  if(flCat !== "all") a = a.filter(x => x.cat === flCat);
+  const q = flKw.trim().toLowerCase();
+  if(q) a = a.filter(x =>
+    (x.name + " " + (x.desc || "") + " " + (x.tags || []).join(" ") + " " + (x.type || ""))
+      .toLowerCase().indexOf(q) >= 0);
+  a.sort((x, y) => (y.hot ? 1 : 0) - (x.hot ? 1 : 0));   // 推荐的排前面
+  return a;
+}
+
+function flCard(x){
+  const ic = FL_ICON[x.cat] || "i-file-text";
+  const locked = x.gate === "wx";
+  const b = [];
+  if(x.type) b.push('<span class="fl-badge ty">' + esc(x.type) + '</span>');
+  b.push('<span class="fl-badge">' + esc(FL_CATN[x.cat] || "资料") + '</span>');
+  b.push('<span class="fl-badge">' + (x.src === "external" ? "外链" : "站内") + '</span>');
+  if(x.hot) b.push('<span class="fl-badge">推荐</span>');
+  if(locked) b.push('<span class="fl-badge lock"><svg class=ic aria-hidden=true><use href=#i-lock /></svg>加微信领取</span>');
+
+  const meta = [];
+  if(x.size) meta.push(x.size);
+  if(x.pages) meta.push(x.pages + " 页");
+  if(x.from) meta.push(x.from);
+  if(x.code) meta.push("提取码 " + x.code);
+  if(x.updated) meta.push("更新 " + x.updated);
+
+  let act;
+  if(locked){
+    act = '<button class="primary" data-flwx="1"><svg class=ic aria-hidden=true><use href=#i-lock /></svg>加微信领取</button>';
+  }else if(x.src === "external"){
+    act = '<button class="primary" data-flopen="' + esc(x.url) + '"><svg class=ic aria-hidden=true><use href=#i-external-link /></svg>打开链接</button>'
+        + '<button class="mini-btn" data-flcopy="' + esc(x.url) + '">复制链接</button>';
+  }else{
+    act = '<button class="primary" data-fldl="' + esc(x.url) + '" data-flname="' + esc(x.file || x.name) + '">'
+        + '<svg class=ic aria-hidden=true><use href=#i-download /></svg>下载 ' + esc(x.type || "文件") + '</button>'
+        + '<button class="mini-btn" data-flcopy="' + esc(x.url) + '">复制链接</button>';
+  }
+
+  return '<div class="fl-card' + (x.hot ? " hot" : "") + '" data-flid="' + esc(x.id) + '">'
+    + '<div class="fl-top">'
+    +   '<div class="fl-ic"><svg class="ic-lg" aria-hidden="true"><use href="#' + ic + '"/></svg></div>'
+    +   '<div class="fl-tit"><div class="fl-nm">' + esc(x.name) + '</div>'
+    +     '<div class="fl-badges">' + b.join("") + '</div></div>'
+    + '</div>'
+    + '<div class="fl-desc">' + esc(x.desc || "") + '</div>'
+    + '<div class="fl-meta">' + meta.map(m => '<span>' + esc(m) + '</span>').join("") + '</div>'
+    + '<div class="fl-act">' + act + '</div>'
+    + '</div>';
+}
+
+function renderFiles(){
+  initFilesEvents();
+  const all = window.KB_FILES || [];
+  const list = flList();
+
+  const cnt = document.getElementById("flCount");
+  if(cnt) cnt.textContent = all.length + " 份";
+
+  const st = document.getElementById("flStats");
+  if(st){
+    const free = all.filter(x => x.gate !== "wx").length;
+    const lock = all.length - free;
+    st.innerHTML = '<div class="fs-chip">共 <b>' + all.length + '</b> 份资料</div>'
+      + '<div class="fs-chip">直接下载 <b>' + free + '</b> 份</div>'
+      + (lock ? '<div class="fs-chip">加微信领取 <b>' + lock + '</b> 份</div>' : "")
+      + ((flCat !== "all" || flKw) ? '<div class="fs-chip">筛选出 <b>' + list.length + '</b> 份</div>' : "");
+  }
+
+  const host = document.getElementById("flBody");
+  if(!host) return;
+  if(!list.length){
+    host.classList.add("fl-empty");
+    host.innerHTML = geHTML({
+      icon: "i-download",
+      title: flKw ? "没有匹配的资料" : "这个分类下还没有资料",
+      desc: flKw ? "换个关键词试试，也可以搜标签（如「螺纹」「模板」「DFA」）。"
+                 : "资料在陆续补上。先把筛选切回「全部」看看。",
+    }) + '<div style="margin-top:14px; text-align:center">'
+       + '<button class="mini-btn" data-flreset="1">重置筛选，看全部</button></div>';
+    return;
+  }
+  host.classList.remove("fl-empty");
+  host.innerHTML = list.map(flCard).join("");
+}
+
+function initFilesEvents(){
+  const kwEl = document.getElementById("flSearch");
+  if(kwEl && !kwEl.dataset.bound){
+    kwEl.dataset.bound = "1";
+    let t = null;
+    kwEl.addEventListener("input", () => {
+      clearTimeout(t);
+      t = setTimeout(() => { flKw = kwEl.value; renderFiles(); }, 160);
+    });
+  }
+  const catEl = document.getElementById("flCat");
+  if(catEl){
+    if(!catEl.dataset.built){
+      catEl.innerHTML = FL_CATS.map(c => '<option value="' + c.id + '">' + esc(c.n) + '</option>').join("");
+      catEl.dataset.built = "1";
+      catEl.value = flCat;
+    }
+    if(!catEl.dataset.bound){
+      catEl.dataset.bound = "1";
+      catEl.addEventListener("change", () => { flCat = catEl.value; renderFiles(); });
+    }
+  }
+  const host = document.getElementById("flBody");
+  if(host && !host.dataset.bound){
+    host.dataset.bound = "1";
+    host.addEventListener("click", e => {
+      /* 「加微信领取」→ 复用导航栏那个咨询入口（它已经会切页签 + 打开弹窗） */
+      if(e.target.closest("[data-flwx]")){
+        const b = document.getElementById("adviceBtn");
+        if(b) b.click();
+        return;
+      }
+      if(e.target.closest("[data-flreset]")){
+        flCat = "all"; flKw = "";
+        const k = document.getElementById("flSearch"); if(k) k.value = "";
+        const c = document.getElementById("flCat"); if(c) c.value = "all";
+        renderFiles();
+        return;
+      }
+      const op = e.target.closest("[data-flopen]");
+      if(op){ window.open(op.dataset.flopen, "_blank", "noopener"); return; }
+      const dl = e.target.closest("[data-fldl]");
+      if(dl){
+        /* 站内文件：造一个带 download 的链节点一下 —— 同源，能带上中文文件名 */
+        const a = document.createElement("a");
+        a.href = dl.dataset.fldl;
+        a.download = dl.dataset.flname || "";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return;
+      }
+      const cp = e.target.closest("[data-flcopy]");
+      if(cp){
+        let url = cp.dataset.flcopy;
+        try { url = new URL(url, location.href).href; } catch(err){}
+        const done = () => {
+          const old = cp.textContent;
+          cp.textContent = "已复制";
+          setTimeout(() => { cp.textContent = old; }, 1400);
+        };
+        const fb = () => {
+          try {
+            const t = document.createElement("textarea");
+            t.value = url;
+            document.body.appendChild(t);
+            t.select();
+            document.execCommand("copy");
+            t.remove();
+            done();
+          } catch(err){}
+        };
+        if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(fb);
+        else fb();
+        return;
+      }
+    });
+  }
+}
 
 /* ══════════════ 模块导航与交互绑定 ══════════════ */
 
@@ -3783,6 +3977,10 @@ document.addEventListener("click", e=>{
 
 // Esc：详情未打开时，从其他模块回到知识库（有弹窗打开时先让弹窗处理）
 document.addEventListener("keydown", e=>{
+  /* ⚠️ 先看这个 Esc 有没有被上一个处理器消费掉（关弹窗 / 关详情 / 清搜索）。
+     只靠下面那句 modalOpen 是不够的：同一个事件里弹窗可能刚被关掉，
+     那时再查就查不到 → 会误判成「可以切模块」。（2026-10-06 修） */
+  if(e.defaultPrevented) return;
   const modalOpen = ["donateModal","imgModal","aiModal"].some(id=>{
     const el = document.getElementById(id); return el && el.classList.contains("open");
   });
@@ -4065,7 +4263,7 @@ document.getElementById("statsBody").addEventListener("click", e=>{
 
 /* ══════════ 键盘快捷键 ══════════ */
 (function(){
-  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily","review","compare","step"];
+  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily","review","compare","step","files"];
   document.addEventListener("keydown", e=>{
     const tag = (e.target.tagName || "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
