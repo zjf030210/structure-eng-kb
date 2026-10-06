@@ -18,6 +18,8 @@
  *   from     外链来源名（如「百度网盘」），仅 external 用
  *   code     提取码（可选），仅 external 用
  *   gate     none 直接下载 / wx 加微信领取（会引导打开咨询弹窗）
+ *            ⚠️ 2026-10-06 用户要求取消门槛：站内资料现在全是 none。
+ *            想恢复某一条的「加微信领取」，把它的 gate 改回 "wx" 即可（代码逻辑还在）。
  *   updated  更新日期 YYYY-MM-DD
  *   tags     标签数组（会影响搜索命中）
  *   hot      true 会在列表前部并标「推荐」
@@ -51,7 +53,7 @@ window.KB_FILES = [
     size: "372 KB", pages: 9,
     desc: "NPI 新品开发流程、DFM 检讨报告、供应商报价对比表、手板/打样需求单。表单式排版，打印出来就能填。",
     src: "local", url: "files/templates-all.pdf", file: "结构工程师实战模板-4份合集.pdf",
-    gate: "wx", updated: "2026-10-06",
+    gate: "none", updated: "2026-10-06",
     tags: ["模板", "NPI", "DFM", "报价", "打样"],
     hot: true,
   },
