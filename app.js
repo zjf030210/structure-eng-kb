@@ -4702,7 +4702,8 @@ refreshBadges();
     /* 降级：图片型计数（跨域图片不受 ORB 影响） */
     var img = document.createElement("img");
     img.alt = "本站访问次数";
-    img.src = "https://" + FOOT + ".svg";
+    /* 加时间戳：否则浏览器会用缓存的旧数字（实测截图里显示的是几分钟前的值） */
+    img.src = "https://" + FOOT + ".svg?cb=" + Date.now();
     img.onerror = function(){ st.err = (st.err ? st.err + "；" : "") + "降级用的图片计数也加载失败（你那边网络到不了该服务）"; paint(); };
     img.onload = function(){
       box.innerHTML = "";
