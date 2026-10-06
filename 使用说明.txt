@@ -262,6 +262,16 @@
           会出现「在线资料收录诊断」，把每条被忽略的 issue 连同原因（已关闭 / 没识别成资料 /
           正文没链接）都列出来，点「去处理」直达；另有「立即刷新在线资料」不用等缓存
 
+     ③ 访客乱发 issue 怎么办（2026-10-06 补）
+        · 站点侧已经过滤：只有「你本人发的 issue」「打了资料标签的」「标题含 [资料] 的」才会进资料库，
+          别人发的（如「厉害👍」）只会出现在 ?admin=1 的诊断面板里，不会显示给访客。
+        · ⚠️ 已加固：标题含 [资料] 也必须「你本人发的」才收录 —— 否则任何人都能把外链塞进公开资料库。
+        · 想彻底不让陌生人发 issue / 留言：仓库 Settings → Moderation options → Interaction limits
+          → 选「Limit to repository collaborators」→ Enable（时长最长 6 个月，到期需重开）。
+          开启后只有协作者能发 issue 与评论，你自己发资料不受影响；代价是没人能反馈问题。
+        · ⚠️ 不要用 Settings → Features 里关掉 Issues —— 那会把资料库的在线数据源一起关掉。
+        · 删掉某条 issue（不可恢复）：打开它 → 右侧「Notifications」下面点 Delete issue → 再点 Delete this issue。
+          （只有仓库管理员能删；你本人就是）不想删就关掉它，关掉等于从资料库下架。
      ② 站内文件（PDF / 图片 / 小压缩包）→ 文件放进仓库
         · 最简单：在 GitHub 仓库网页打开 files/ 目录 → Add file → Upload files → 拖进去（可多选）
         · 然后在 kb-files.js 里加一条（字段说明写在文件开头），提交即生效

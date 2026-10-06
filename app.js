@@ -3717,9 +3717,13 @@ function flWhyIgnored(it){
   if(it.state && it.state !== "open") return "已关闭 —— 关闭＝下架，不会显示；想恢复点 Reopen 就行";
   const title = (it.title || "").trim();
   const labels = (it.labels || []).map(l => (typeof l === "string" ? l : l.name));
-  if(labels.indexOf(FL_REMOTE.label) >= 0) return "";
-  if(/[\[【]\s*资料\s*[\]】]/.test(title)) return "";          // 标题里含 [资料] 即可，不要求开头
-  if(it.user && it.user.login === FL_OWNER && flLooksLikeFile(it.body || "")) return "";
+  if(labels.indexOf(FL_REMOTE.label) >= 0) return "";   // 标签只有协作者能打 → 视为人工确认
+  const byOwner = !!(it.user && it.user.login === FL_OWNER);
+  /* ⚠️ 标题/正文路径必须「站长本人」发的：
+     否则任何访客发一条标题带 [资料] 的 issue 就能把外链塞进公开资料库（钓鱼风险）。 */
+  if(byOwner && /[\[【]\s*资料\s*[\]】]/.test(title)) return "";
+  if(byOwner && flLooksLikeFile(it.body || "")) return "";
+  if(!byOwner) return "不是站长发的 —— 资料库只收录站长自己发的 issue（防止有人塞外链进来）";
   return "没识别成资料：标题里加「[资料]」，或正文写「链接：」+「分类：/说明：」";
 }
 /* 从一段文字里取出真正的网址。
@@ -4736,6 +4740,15 @@ document.addEventListener("click", e => {
       });
     })();
   }
-  if(document.readyState === "complete") setTimeout(kick, 600);
-  else window.addEventListener("load", function(){ setTimeout(kick, 600); });
+  /* ⚠️ 别只等 load：外部资源（统计脚本/字体）慢时 load 会被拖很久甚至不触发，
+     预取就永远不发生。改成「load 或 DOMContentLoaded+2.5s」先到先算。 */
+  let kicked = false;
+  function kickOnce(){ if(kicked) return; kicked = true; setTimeout(kick, 600); }
+  if(document.readyState === "complete") kickOnce();
+  else {
+    window.addEventListener("load", kickOnce);
+    const fallback = function(){ setTimeout(kickOnce, 2500); };
+    if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", fallback);
+    else fallback();
+  }
 })();
