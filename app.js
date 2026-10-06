@@ -4725,7 +4725,7 @@ refreshBadges();
       clearInterval(timer);
       if(!st.err) st.err = st.script === "loaded"
         ? "脚本加载了，但计数接口没回数据 —— 新版 Chrome 的 ORB 会拦掉这种跨域 JSONP（响应不是 JS 类型）"
-        : "统计脚本没有加载成功";
+        : (st.script === "pending" ? "统计脚本 20 秒内没加载完（网络慢，或被插件/策略拦了）" : "统计脚本加载失败（网络或广告拦截插件）");
       showFallback();
     }
   }, 500);
