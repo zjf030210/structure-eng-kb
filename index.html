@@ -2636,9 +2636,11 @@
 <script src="app.js" defer></script>
 
 <!-- 访问统计：不蒜子（加载失败会自动隐藏，不影响使用） -->
-<div id="site-stats" style="position:fixed; left:12px; bottom:8px; z-index:9997; font-size:var(--fs-caption); color:var(--tx-soft); background:var(--bg-soft); border:1px solid var(--bd-row); border-radius:var(--r-sm); padding:3px 10px; box-shadow:var(--shadow-xs); font-family:inherit; pointer-events:none; display:none;">
-  本站累计访客 <b id="busuanzi_value_site_uv" style="font-weight:600;">–</b> 人 · 浏览 <b id="busuanzi_value_site_pv" style="font-weight:600;">–</b> 次
-</div>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 访问统计角标：只统计「浏览量」（图片型计数，<img> 不受 Chrome ORB 限制，加载完立刻显示）。
+     ⚠️ 不蒜子已弃用（2026-10-06）：它的接口是跨域 JSONP，被新版 Chrome 的 ORB 拦掉
+     （net::ERR_BLOCKED_BY_ORB），数据永远拿不到 —— 脚本能加载，所以看代码发现不了。
+     内容由 app.js 填充。想要「访客人数 UV」与来源报表：接百度统计 / Cloudflare Web Analytics，
+     或看 GitHub 仓库 Insights → Traffic（详见「使用说明」的【📊 页脚与访问统计】）。 -->
+<div id="site-stats" style="position:fixed; left:12px; bottom:8px; z-index:9997; font-size:var(--fs-caption); color:var(--tx-soft); background:var(--bg-soft); border:1px solid var(--bd-row); border-radius:var(--r-sm); padding:3px 10px; box-shadow:var(--shadow-xs); font-family:inherit; pointer-events:none; display:none;"></div>
 </body>
 </html>
