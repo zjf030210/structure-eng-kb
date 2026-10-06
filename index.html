@@ -1850,6 +1850,22 @@
   #flStats .fs-sync.ok{color:var(--ok-strong); border-color:var(--ok-bd); background:var(--ok-bg);}
   #flStats .fs-sync.fail{color:var(--warn-tx); border-color:var(--warn-bd); background:var(--warn-bg);}
   #flAddBtn{display:inline-flex; align-items:center; gap:5px;}
+
+  /* ?admin=1 的「在线资料收录诊断」—— 让被忽略的 issue 显示原因，不再静默失败 */
+  .fl-diag{margin:14px 0 0; padding:12px 14px; border:1px solid var(--bd-row); border-radius:var(--r-sm);
+    background:var(--bg-soft); font-size:var(--fs-sm);}
+  .fl-diag h5{margin:0 0 8px; font-size:var(--fs-sm); font-weight:600; color:var(--tx-strong);
+    display:flex; align-items:center; gap:6px;}
+  .fl-diag .fd-row{display:flex; gap:10px; align-items:baseline; padding:7px 0;
+    border-top:1px dashed var(--bd-row); color:var(--tx-body); line-height:var(--lh-relaxed);}
+  .fl-diag .fd-row:first-of-type{border-top:0;}
+  .fl-diag .fd-n{color:var(--sub); font-variant-numeric:tabular-nums; flex:none;}
+  .fl-diag .fd-t{flex:1; min-width:0;}
+  .fl-diag .fd-why{color:var(--sub); font-size:var(--fs-xs);}
+  .fl-diag .fd-empty{color:var(--sub);}
+  .fl-diag .fd-ok{color:var(--ok-strong); font-weight:600;}
+  .fl-diag a{color:var(--primary); text-decoration:none; flex:none;}
+  .fl-diag a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>

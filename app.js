@@ -3486,25 +3486,34 @@ document.getElementById("imgModal").addEventListener("click", e=>{
    ── 数据有两份，自动合并 ──
    ① 本地 kb-files.js：基础资料（PDF 等站内文件），永远可用、离线也在
    ② 在线 GitHub Issues：站长随时加，不用碰代码 ——
-      发一条 issue（标题带 [资料] 前缀，或打「资料」标签）就是加一份资料；
-      编辑 issue = 改资料；关闭 issue = 下架。
+      识别规则（满足任一条）：① 标题里含 [资料]（不必在开头）② 打了「资料」标签
+      ③ 你自己（仓库 owner）发的 issue，正文有「链接：」+「分类：/说明：」键值行。
+      编辑 issue = 改资料；**关闭（Close）= 下架** —— 拉取用 state=all，被关掉的会在
+      ?admin=1 的诊断面板里说明原因，不会静默消失。
       正文格式（键值行，写不写都行，缺了就按链接自动推断）：
         链接：https://pan.baidu.com/s/xxxx        也可以写 网盘： / 地址： / 下载：
+        ⚠️ 粘贴网址别先选中文字再粘 —— GitHub 会写成 [选中的文字](真网址)，
+           解析时优先取括号里的真网址（flUrlFrom），但直接粘贴最稳。
         提取码：ab12                              也认 密码：
         分类：压缩包                              文档 / 压缩包 / 图片 / 视频 / 链接
-        体积：45 MB
+        体积：45 MB                               留空就留空，值不会串到下一行
         说明：任意多行文字
         图片：demo-01.jpg, demo-02.jpg            文件名自动指向 files/（也可直接写完整网址）
       图片建议拖到仓库的 files/ 目录（GitHub 网页支持拖拽上传）。
-   ⚠️ 拉取失败不影响本地资料 —— 界面会小字提示，本地照常可下载。 */
+   ⚠️ 拉取失败不影响本地资料 —— 界面会小字提示，本地照常可下载。
+   ⚠️ 站长自查：?admin=1 打开资料库 → 「收录诊断」列出被忽略的 issue 与原因，外加「立即刷新」。
+      诊断面板只在 admin=1 时渲染，普通访客看不到。 */
 const FL_REMOTE = {
   repo: "zjf030210/structure-eng-kb",
   label: "资料",              // 打了这个标签的 issue 也算资料
-  prefix: "[资料]",           // 标题以此开头的 issue 算资料
+  prefix: "[资料]",           // 标题里【含】它就算（不要求开头；此处仅作说明，实际判据见 flWhyIgnored）
   ttl: 10 * 60 * 1000,       // 缓存 10 分钟，避免频繁调 API（匿名限流 60 次/小时）
-  cacheKey: "kb-files-remote-v1",
+  cacheKey: "kb-files-remote-v2",
 };
+const FL_OWNER = FL_REMOTE.repo.split("/")[0];
+function flIsAdmin(){ return location.search.indexOf("admin=1") >= 0; }
 let flCat = "all", flKw = "", flRemote = [], flSync = "idle", flLoadedAt = 0;   // flSync: idle / loading / ok / fail
+let flIgnored = [];   // 被忽略的 issue（含原因）—— 只在 ?admin=1 的诊断面板显示，避免静默失败
 
 const FL_CATS = [
   { id: "all",   n: "全部" },
@@ -3520,12 +3529,13 @@ const FL_CATN = { doc: "文档", zip: "压缩包", img: "图片", video: "视频
 const FL_NEW_ISSUE = "https://github.com/" + FL_REMOTE.repo + "/issues/new"
   + "?title=" + encodeURIComponent("[资料] 写资料名")
   + "&body=" + encodeURIComponent(
-    "链接：https://（网盘或在线文档地址）\n"
+    "链接：\n"
   + "提取码：\n"
   + "分类：压缩包\n"
   + "体积：\n"
   + "说明：这份资料里有什么、什么时候用得上\n"
-  + "图片：demo-01.jpg（图片拖到仓库 files/ 目录后的文件名，可多张，逗号分隔）");
+  + "图片：demo-01.jpg（图片拖到仓库 files/ 目录后的文件名，可多张，逗号分隔）\n\n"
+  + "<!-- 提交后不要点 Close as completed —— 关闭等于从资料库下架，想下架时才关。 -->");
 
 /* ── 全部资料 = 本地 + 在线 ── */
 function flAll(){
@@ -3548,7 +3558,7 @@ function flCard(x){
   const isLocalFile = /^files\//.test(url);          // 站内文件 → 给「下载」；其余 → 「打开链接」
   const b = [];
   if(x.type) b.push('<span class="fl-badge ty">' + esc(x.type) + '</span>');
-  b.push('<span class="fl-badge">' + esc(FL_CATN[x.cat] || "资料") + '</span>');
+  if((x.type || "") !== (FL_CATN[x.cat] || "资料")) b.push('<span class="fl-badge">' + esc(FL_CATN[x.cat] || "资料") + '</span>');
   b.push('<span class="fl-badge">' + (x.src === "remote" ? "在线" : (x.src === "external" ? "外链" : "站内")) + '</span>');
   if(x.hot) b.push('<span class="fl-badge">推荐</span>');
 
@@ -3586,6 +3596,21 @@ function flCard(x){
     + '</div>';
 }
 
+/* 收录诊断（只在 ?admin=1 显示）—— 把「被忽略的 issue + 原因」摊开 */
+function flDiagHTML(){
+  const rows = flIgnored.map(g =>
+    '<div class="fd-row"><span class="fd-n">#' + esc(g.n) + '</span><span class="fd-t">'
+    + esc(g.title || "(无标题)") + ' <span class="fd-why">→ ' + esc(g.why) + '</span></span>'
+    + '<a href="' + esc(g.url) + '" target="_blank" rel="noopener">去处理</a></div>').join("");
+  const when = flLoadedAt ? new Date(flLoadedAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }) : "—";
+  return '<h5><svg class=ic aria-hidden=true><use href=#i-alert /></svg>在线资料收录诊断（只在 ?admin=1 显示）</h5>'
+    + '<div class="fd-row"><span class="fd-t">本次拉取：<span class="fd-ok">收录 ' + flRemote.length + ' 条</span>'
+    + '，忽略 ' + flIgnored.length + ' 条　·　最后同步 ' + esc(when) + '</span></div>'
+    + (rows || '<div class="fd-row"><span class="fd-empty">没有需要处理的 issue。</span></div>')
+    + '<div class="fd-row"><span class="fd-empty">规则：标题含「[资料]」或打「资料」标签即收录；你自己发的 issue 只要正文有「链接：」+「分类/说明：」也收录。'
+    + '<b>把 issue 关掉（Close）＝下架</b>，不会显示 —— 想恢复点开它按 Reopen。</span></div>';
+}
+
 function renderFiles(){
   initFilesEvents();
   /* 首次进来（或缓存过期）去拉一次在线资料；拉取完成会自己重渲染。
@@ -3610,9 +3635,11 @@ function renderFiles(){
       + sync
       + ((flCat !== "all" || flKw) ? '<div class="fs-chip">筛选出 <b>' + list.length + '</b> 份</div>' : "");
   }
-  if(location.search.indexOf("admin=1") >= 0 && !document.getElementById("flAddBtn")){
+  /* ?admin=1：站长工具（加资料 / 立即刷新）+ 收录诊断
+     —— 有 issue 没被收录时，这里会写明「是哪条、为什么」，不再静默失败。 */
+  if(flIsAdmin()){
     const bar = document.getElementById("flStats");
-    if(bar){
+    if(bar && !document.getElementById("flAddBtn")){
       const btn = document.createElement("button");
       btn.id = "flAddBtn";
       btn.className = "mini-btn";
@@ -3620,7 +3647,20 @@ function renderFiles(){
       btn.innerHTML = '<svg class=ic aria-hidden=true><use href=#i-plus /></svg>加一份资料（发 issue）';
       btn.onclick = () => window.open(FL_NEW_ISSUE, "_blank", "noopener");
       bar.appendChild(btn);
+      const rb = document.createElement("button");
+      rb.id = "flRefreshBtn";
+      rb.className = "mini-btn";
+      rb.type = "button";
+      rb.innerHTML = '<svg class=ic aria-hidden=true><use href=#i-refresh /></svg>立即刷新在线资料';
+      rb.onclick = () => { flLoadedAt = 0; flLoadRemote(true); };
+      bar.appendChild(rb);
+      const d = document.createElement("div");
+      d.id = "flDiag";
+      d.className = "fl-diag";
+      bar.insertAdjacentElement("afterend", d);
     }
+    const dg = document.getElementById("flDiag");
+    if(dg) dg.innerHTML = flDiagHTML();
   }
 
   const host = document.getElementById("flBody");
@@ -3661,29 +3701,61 @@ function flTypeOf(cat, url){
   if(cat === "doc") return "文档";
   return "链接";
 }
-/* 把一条 issue 解析成资料条目；不像资料就返回 null */
-function flParseIssue(it){
-  if(!it || it.pull_request) return null;
+/* 正文看起来像一份资料吗（站长自己发的 issue 用这条兜底识别）
+   —— 只要「有链接」且「有分类 / 说明这类键值行」就算，不强制标题前缀。 */
+function flLooksLikeFile(body){
+  if(!body) return false;
+  const hasLink = /(?:^|\n)\s*(?:链接|地址|下载|网盘|download|url)\s*[：:]/i.test(body) || /https?:\/\//.test(body);
+  const hasMeta = /(?:^|\n)\s*(?:分类|类型|说明|描述|体积|大小|提取码|密码)\s*[：:]/i.test(body);
+  return hasLink && hasMeta;
+}
+/* 一条 issue 是不是资料？不是就返回「为什么不算」的文字（空串＝算）
+   ⚠️ 这条规则同时也是「下架」的开关：issue 被 Close 就等于从资料库移除。 */
+function flWhyIgnored(it){
+  if(!it) return "数据异常";
+  if(it.pull_request) return "这是 Pull Request，不是 issue";
+  if(it.state && it.state !== "open") return "已关闭 —— 关闭＝下架，不会显示；想恢复点 Reopen 就行";
   const title = (it.title || "").trim();
   const labels = (it.labels || []).map(l => (typeof l === "string" ? l : l.name));
-  const hasLabel = labels.indexOf(FL_REMOTE.label) >= 0;
-  const hasPrefix = title.indexOf(FL_REMOTE.prefix) === 0 || title.indexOf("【资料】") === 0;
-  if(!hasLabel && !hasPrefix) return null;
+  if(labels.indexOf(FL_REMOTE.label) >= 0) return "";
+  if(/[\[【]\s*资料\s*[\]】]/.test(title)) return "";          // 标题里含 [资料] 即可，不要求开头
+  if(it.user && it.user.login === FL_OWNER && flLooksLikeFile(it.body || "")) return "";
+  return "没识别成资料：标题里加「[资料]」，或正文写「链接：」+「分类：/说明：」";
+}
+/* 从一段文字里取出真正的网址。
+   ⚠️ 必须能处理 Markdown 链接：GitHub 输入框在「选中一段文字后粘贴网址」时会自动写成
+      [选中的文字](真实网址) —— 站长照模板填时极易踩到（占位符会被一起包进去，
+      于是解析出来是「https://（网盘或在线文档地址）](真实网址」这种坏串）。 */
+function flCleanUrl(u){
+  return String(u || "").replace(/[）)】\]>，,。;；、“”]+$/g, "").trim();
+}
+function flUrlFrom(text){
+  if(!text) return "";
+  const md = String(text).match(/\]\(\s*(https?:\/\/[^\s)]+)\s*\)/);
+  if(md) return flCleanUrl(md[1]);
+  const cands = [...String(text).matchAll(/https?:\/\/[^\s)\]<>"]+/g)].map(m => flCleanUrl(m[0]));
+  /* 丢掉模板占位（含全角括号的假网址，如 https://（网盘或在线文档地址）） */
+  return cands.find(u => !/[（）【】]/.test(u) && u.replace(/^https?:\/\//i, "").length > 3) || "";
+}
+/* 把一条 issue 解析成资料条目；不算资料就返回 null */
+function flParseIssue(it){
+  if(flWhyIgnored(it) !== "") return null;
+  const title = (it.title || "").trim();
+  const labels = (it.labels || []).map(l => (typeof l === "string" ? l : l.name));
 
-  const name = title.replace(/^\[资料\]\s*/, "").replace(/^【资料】\s*/, "").trim() || ("资料 #" + it.number);
+  const name = title.replace(/[\[【]\s*资料\s*[\]】]\s*/g, "").trim() || ("资料 #" + it.number);
   const body = it.body || "";
   /* 键值行：链接 / 提取码 / 分类 / 体积 / 说明 / 图片 */
   const pick = (keys) => {
-    const re = new RegExp("(?:^|\\n)\\s*(?:" + keys + ")\\s*[：:]\\s*([^\\n]+)", "i");
+    /* ⚠️ 冒号后只能用 [ \\t]*，不能用 \\s* —— \\s 含换行，
+       「体积：」留空时会把下一行的「说明：xxx」当成体积值（实测踩过）。 */
+    const re = new RegExp("(?:^|\\n)[ \\t]*(?:" + keys + ")[ \\t]*[：:][ \\t]*([^\\n]+)", "i");
     const m = body.match(re);
     return m ? m[1].trim() : "";
   };
-  let url = pick("链接|地址|下载|网盘|download|url");
-  if(url) url = (url.match(/https?:\/\/\S+/) || [""])[0].replace(/[)；;，,]+$/, "");
-  if(!url){                                   // 没写「链接：」就取正文里第一个链接
-    const m = body.match(/https?:\/\/[^\s)>"']+/);
-    url = m ? m[0].replace(/[)；;，,]+$/, "") : "";
-  }
+  let url = flUrlFrom(pick("链接|地址|下载|网盘|download|url"));
+  if(!url) url = flUrlFrom(body);              // 没写「链接：」就取正文里第一个真链接
+  if(!url) return null;                        // 没有可用链接就没意义：交给上层标出原因
   const code = pick("提取码|密码|code");
   const size = pick("体积|大小|size");
   const catRaw = pick("分类|类型");
@@ -3740,6 +3812,7 @@ function flLoadRemote(force){
   try { cached = JSON.parse(localStorage.getItem(FL_REMOTE.cacheKey) || "null"); } catch(e){}
   if(!force && cached && cached.t && (now - cached.t) < FL_REMOTE.ttl){
     flRemote = cached.list || [];
+    flIgnored = cached.ignored || [];
     flSync = "ok";
     flLoadedAt = cached.t;
     renderFiles();
@@ -3747,22 +3820,33 @@ function flLoadRemote(force){
   }
   flSync = "loading";
   renderFiles();
-  fetch("https://api.github.com/repos/" + FL_REMOTE.repo + "/issues?state=open&per_page=100&sort=created&direction=desc", {
+  /* ⚠️ 取 state=all（而不是 open）—— 关闭的 issue 也要拿回来，才能告诉你「这条被关闭所以没显示」 */
+  fetch("https://api.github.com/repos/" + FL_REMOTE.repo + "/issues?state=all&per_page=100&sort=created&direction=desc", {
     headers: { "Accept": "application/vnd.github+json" },
   })
     .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(arr => {
       if(!Array.isArray(arr)) throw new Error("返回值不是数组");
-      flRemote = arr.map(flParseIssue).filter(Boolean);
+      const keep = [], skip = [];
+      arr.forEach(it => {
+        const link = it.html_url || ("https://github.com/" + FL_REMOTE.repo + "/issues/" + it.number);
+        const why = flWhyIgnored(it);
+        if(why){ skip.push({ n: it.number, title: it.title, why: why, url: link }); return; }
+        const o = flParseIssue(it);
+        if(o) keep.push(o);
+        else skip.push({ n: it.number, title: it.title, url: link, why: "正文里没找到可用链接（写「链接：」后面接网址）" });
+      });
+      flRemote = keep;
+      flIgnored = skip;
       flSync = "ok";
       flLoadedAt = Date.now();
-      try { lsSet(FL_REMOTE.cacheKey, { t: flLoadedAt, list: flRemote }); } catch(e){}
+      try { lsSet(FL_REMOTE.cacheKey, { t: flLoadedAt, list: flRemote, ignored: flIgnored }); } catch(e){}
       renderFiles();
     })
     .catch(err => {
       /* 在线取不到就用缓存，再不行就只显示本地 —— 绝不因此让资料库变空 */
-      if(cached && cached.list) { flRemote = cached.list; flSync = "ok"; }
-      else { flRemote = []; flSync = "fail"; }
+      if(cached && cached.list) { flRemote = cached.list; flIgnored = cached.ignored || []; flSync = "ok"; }
+      else { flRemote = []; flIgnored = []; flSync = "fail"; }
       flLoadedAt = Date.now();     // 记下时间，别每次渲染都重试
       renderFiles();
     });
