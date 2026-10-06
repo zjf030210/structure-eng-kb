@@ -4677,22 +4677,74 @@ refreshBadges();
   window.addEventListener("resize", ()=>{ clearTimeout(t); t = setTimeout(fill, 200); });
 })();
 
-/* ========== 访问统计角标（不蒜子）：加载成功才显示 ========== */
-// 不蒜子加载成功后再显示统计角标（加载失败则自动隐藏，不影响使用）
+/* ========== 访问统计角标：有数据显示 → 拿不到降级 → ?admin=1 说明原因 ==========
+   ⚠️ 原来的坑（2026-10-06 查明）：不蒜子的接口是「跨域 JSONP」，
+      而新版 Chrome 的 ORB（Opaque Response Blocking）会拦掉「响应类型不是 JS」的跨域脚本加载 →
+      请求直接 ERR_BLOCKED_BY_ORB，数据永远拿不到。脚本本身能加载成功，所以单看代码完全正常，
+      只有观察网络才知道被拦 —— 这也是「人数显示突然不见了」的真实原因。
+   现在的策略：① 给足时间（20s，脚本下载本身可能就要几秒）
+              ② 拿不到就降级用图片型计数（<img> 不受 ORB 限制）
+              ③ 降级也失败就彻底隐藏（不留半截 UI）
+              ④ ?admin=1 时把「脚本状态 / 拿到的值 / 失败原因 / 自查建议」摊开 */
 (function(){
   var box = document.getElementById("site-stats");
-  var tries = 0;
+  if(!box) return;
+  var IS_ADMIN = location.search.indexOf("admin=1") >= 0;
+  var script = document.querySelector('script[src*="busuanzi"]');
+  var FOOT = "hits.dwyl.com/zjf030210/structure-eng-kb";
+  var st = { script: "pending", err: "", t0: Date.now(), shown: false, fallback: false };
+  if(script){
+    script.addEventListener("load", function(){ st.script = "loaded"; });
+    script.addEventListener("error", function(){ st.script = "failed"; st.err = "统计脚本本身没加载成功（网络或广告拦截插件）"; });
+  } else { st.script = "missing"; st.err = "页面里找不到统计脚本标签"; }
+
+  function showFallback(){
+    /* 降级：图片型计数（跨域图片不受 ORB 影响） */
+    var img = document.createElement("img");
+    img.alt = "本站访问次数";
+    img.src = "https://" + FOOT + ".svg";
+    img.onerror = function(){ st.err = (st.err ? st.err + "；" : "") + "降级用的图片计数也加载失败（你那边网络到不了该服务）"; paint(); };
+    img.onload = function(){
+      box.innerHTML = "";
+      var lab = document.createElement("span");
+      lab.className = "ss-label"; lab.textContent = "本站访问";
+      box.appendChild(lab); box.appendChild(img);
+      box.style.display = "flex";
+      st.shown = true; st.fallback = true; paint();
+    };
+  }
+
   var timer = setInterval(function(){
-    tries++;
     var uv = document.getElementById("busuanzi_value_site_uv");
     var pv = document.getElementById("busuanzi_value_site_pv");
-    if(uv && pv && uv.textContent && uv.textContent !== "–"){
-      box.style.display = "block";
+    if(uv && uv.textContent && uv.textContent !== "–"){
+      box.style.display = "flex"; st.shown = true;
+      clearInterval(timer); paint(); return;
+    }
+    if(Date.now() - st.t0 > 20000){
       clearInterval(timer);
-    } else if(tries > 30){ // 约15秒仍失败则放弃
-      clearInterval(timer);
+      if(!st.err) st.err = st.script === "loaded"
+        ? "脚本加载了，但计数接口没回数据 —— 新版 Chrome 的 ORB 会拦掉这种跨域 JSONP（响应不是 JS 类型）"
+        : "统计脚本没有加载成功";
+      showFallback();
     }
   }, 500);
+
+  function paint(){
+    if(!IS_ADMIN) return;
+    var d = document.getElementById("statDiag");
+    if(!d){ d = document.createElement("div"); d.id = "statDiag"; d.className = "stat-diag"; document.body.appendChild(d); }
+    var uv = (document.getElementById("busuanzi_value_site_uv") || {}).textContent || "–";
+    var pv = (document.getElementById("busuanzi_value_site_pv") || {}).textContent || "–";
+    var sc = { pending: "加载中", loaded: "已加载", failed: "加载失败", missing: "页面里没有" }[st.script] || st.script;
+    var badge = st.shown ? (st.fallback ? "已降级显示（图片计数）" : "已显示（不蒜子）") : "未显示";
+    d.innerHTML = '<div class="sd-t"><svg class=ic aria-hidden=true><use href=#i-trending-up /></svg>访问统计自检（只在 ?admin=1 显示）</div>'
+      + '<div class="sd-r">脚本：' + esc(sc) + '　·　接口取到的值：访客 ' + esc(uv) + ' / 浏览 ' + esc(pv) + '　·　角标：' + esc(badge) + '</div>'
+      + (st.err ? '<div class="sd-r sd-err">原因：' + esc(st.err) + '</div>' : "")
+      + '<div class="sd-r sd-tip">自查三步：① 无痕窗口打开（排除插件/缓存）② 手机流量打开对比（排除公司网络）③ F12 → Console 与 Network 看有没有红色报错。<br>要「真实访客数（UV，而不只是浏览量）」目前只能接统计服务：百度统计 / Cloudflare Web Analytics（都免费，需你注册拿 ID）。</div>';
+  }
+  paint();
+  if(IS_ADMIN) setInterval(paint, 2000);   // admin 下持续刷新，能看到状态变化
 })();
 
 /* ========== 搜索无结果时的建议词：点一下直接搜 ========== */
