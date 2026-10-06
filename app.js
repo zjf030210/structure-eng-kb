@@ -3482,13 +3482,29 @@ document.getElementById("imgModal").addEventListener("click", e=>{
   if(neverBtn) neverBtn.addEventListener("click", ()=>{ donateShown = true; close(); });
 })();
 
-/* ══════════════ 资料库（第 22 模块，2026-10-06 加）══════════════
-   数据源 window.KB_FILES（见 kb-files.js）。这是静态站、没有后端，所以：
-     · src:"local"    → 文件放在 files/ 目录，点下载就是站内直下（带中文文件名）
-     · src:"external" → 网盘 / 在线文档 / 视频等外链，新标签打开
-     · gate:"wx"      → 不直接给下载，按钮变成「加微信领取」→ 打开咨询弹窗（引流）
-   ⚠️ 以后加资料只改 kb-files.js，不用动这里。 */
-let flCat = "all", flKw = "";
+/* ══════════════ 资料库（第 22 模块）
+   ── 数据有两份，自动合并 ──
+   ① 本地 kb-files.js：基础资料（PDF 等站内文件），永远可用、离线也在
+   ② 在线 GitHub Issues：站长随时加，不用碰代码 ——
+      发一条 issue（标题带 [资料] 前缀，或打「资料」标签）就是加一份资料；
+      编辑 issue = 改资料；关闭 issue = 下架。
+      正文格式（键值行，写不写都行，缺了就按链接自动推断）：
+        链接：https://pan.baidu.com/s/xxxx        也可以写 网盘： / 地址： / 下载：
+        提取码：ab12                              也认 密码：
+        分类：压缩包                              文档 / 压缩包 / 图片 / 视频 / 链接
+        体积：45 MB
+        说明：任意多行文字
+        图片：demo-01.jpg, demo-02.jpg            文件名自动指向 files/（也可直接写完整网址）
+      图片建议拖到仓库的 files/ 目录（GitHub 网页支持拖拽上传）。
+   ⚠️ 拉取失败不影响本地资料 —— 界面会小字提示，本地照常可下载。 */
+const FL_REMOTE = {
+  repo: "zjf030210/structure-eng-kb",
+  label: "资料",              // 打了这个标签的 issue 也算资料
+  prefix: "[资料]",           // 标题以此开头的 issue 算资料
+  ttl: 10 * 60 * 1000,       // 缓存 10 分钟，避免频繁调 API（匿名限流 60 次/小时）
+  cacheKey: "kb-files-remote-v1",
+};
+let flCat = "all", flKw = "", flRemote = [], flSync = "idle", flLoadedAt = 0;   // flSync: idle / loading / ok / fail
 
 const FL_CATS = [
   { id: "all",   n: "全部" },
@@ -3500,27 +3516,41 @@ const FL_CATS = [
 ];
 const FL_ICON = { doc: "i-file-text", zip: "i-archive", img: "i-image", video: "i-video", link: "i-link" };
 const FL_CATN = { doc: "文档", zip: "压缩包", img: "图片", video: "视频", link: "链接" };
+/* 站长自己用的「发一条 issue」入口（?admin=1 时才会出现按钮） */
+const FL_NEW_ISSUE = "https://github.com/" + FL_REMOTE.repo + "/issues/new"
+  + "?title=" + encodeURIComponent("[资料] 写资料名")
+  + "&body=" + encodeURIComponent(
+    "链接：https://（网盘或在线文档地址）\n"
+  + "提取码：\n"
+  + "分类：压缩包\n"
+  + "体积：\n"
+  + "说明：这份资料里有什么、什么时候用得上\n"
+  + "图片：demo-01.jpg（图片拖到仓库 files/ 目录后的文件名，可多张，逗号分隔）");
 
+/* ── 全部资料 = 本地 + 在线 ── */
+function flAll(){
+  return (window.KB_FILES || []).concat(flRemote);
+}
 function flList(){
-  let a = (window.KB_FILES || []).slice();
+  let a = flAll();
   if(flCat !== "all") a = a.filter(x => x.cat === flCat);
   const q = flKw.trim().toLowerCase();
   if(q) a = a.filter(x =>
     (x.name + " " + (x.desc || "") + " " + (x.tags || []).join(" ") + " " + (x.type || ""))
       .toLowerCase().indexOf(q) >= 0);
-  a.sort((x, y) => (y.hot ? 1 : 0) - (x.hot ? 1 : 0));   // 推荐的排前面
+  a.sort((x, y) => (y.hot ? 1 : 0) - (x.hot ? 1 : 0));
   return a;
 }
 
 function flCard(x){
   const ic = FL_ICON[x.cat] || "i-file-text";
-  const locked = x.gate === "wx";
+  const url = x.url || "";
+  const isLocalFile = /^files\//.test(url);          // 站内文件 → 给「下载」；其余 → 「打开链接」
   const b = [];
   if(x.type) b.push('<span class="fl-badge ty">' + esc(x.type) + '</span>');
   b.push('<span class="fl-badge">' + esc(FL_CATN[x.cat] || "资料") + '</span>');
-  b.push('<span class="fl-badge">' + (x.src === "external" ? "外链" : "站内") + '</span>');
+  b.push('<span class="fl-badge">' + (x.src === "remote" ? "在线" : (x.src === "external" ? "外链" : "站内")) + '</span>');
   if(x.hot) b.push('<span class="fl-badge">推荐</span>');
-  if(locked) b.push('<span class="fl-badge lock"><svg class=ic aria-hidden=true><use href=#i-lock /></svg>加微信领取</span>');
 
   const meta = [];
   if(x.size) meta.push(x.size);
@@ -3530,18 +3560,21 @@ function flCard(x){
   if(x.updated) meta.push("更新 " + x.updated);
 
   let act;
-  if(locked){
-    act = '<button class="primary" data-flwx="1"><svg class=ic aria-hidden=true><use href=#i-lock /></svg>加微信领取</button>';
-  }else if(x.src === "external"){
-    act = '<button class="primary" data-flopen="' + esc(x.url) + '"><svg class=ic aria-hidden=true><use href=#i-external-link /></svg>打开链接</button>'
-        + '<button class="mini-btn" data-flcopy="' + esc(x.url) + '">复制链接</button>';
+  if(isLocalFile){
+    act = '<button class="primary" data-fldl="' + esc(url) + '" data-flname="' + esc(x.file || x.name) + '">'
+        + '<svg class=ic aria-hidden=true><use href=#i-download /></svg>下载 ' + esc(x.type || "文件") + '</button>';
   }else{
-    act = '<button class="primary" data-fldl="' + esc(x.url) + '" data-flname="' + esc(x.file || x.name) + '">'
-        + '<svg class=ic aria-hidden=true><use href=#i-download /></svg>下载 ' + esc(x.type || "文件") + '</button>'
-        + '<button class="mini-btn" data-flcopy="' + esc(x.url) + '">复制链接</button>';
+    act = '<button class="primary" data-flopen="' + esc(url) + '">'
+        + '<svg class=ic aria-hidden=true><use href=#i-external-link /></svg>打开链接</button>';
   }
+  act += '<button class="mini-btn" data-flcopy="' + esc(url) + '">复制链接</button>';
+
+  const thumb = x.img
+    ? '<div class="fl-thumb"><img src="' + esc(x.img) + '" alt="' + esc(x.name) + ' 示意图" loading="lazy"></div>'
+    : '';
 
   return '<div class="fl-card' + (x.hot ? " hot" : "") + '" data-flid="' + esc(x.id) + '">'
+    + thumb
     + '<div class="fl-top">'
     +   '<div class="fl-ic"><svg class="ic-lg" aria-hidden="true"><use href="#' + ic + '"/></svg></div>'
     +   '<div class="fl-tit"><div class="fl-nm">' + esc(x.name) + '</div>'
@@ -3555,7 +3588,10 @@ function flCard(x){
 
 function renderFiles(){
   initFilesEvents();
-  const all = window.KB_FILES || [];
+  /* 首次进来（或缓存过期）去拉一次在线资料；拉取完成会自己重渲染。
+     守卫 `flSync !== "loading"` 同时防住了递归（加载中不会再触发）。 */
+  if(flSync !== "loading" && (Date.now() - flLoadedAt) > FL_REMOTE.ttl) flLoadRemote();
+  const all = flAll();
   const list = flList();
 
   const cnt = document.getElementById("flCount");
@@ -3563,12 +3599,28 @@ function renderFiles(){
 
   const st = document.getElementById("flStats");
   if(st){
-    const free = all.filter(x => x.gate !== "wx").length;
-    const lock = all.length - free;
+    const localN = (window.KB_FILES || []).length;
+    let sync = "";
+    if(flSync === "loading") sync = '<div class="fs-chip fs-sync">正在同步在线资料…</div>';
+    else if(flSync === "ok" && flRemote.length) sync = '<div class="fs-chip fs-sync ok">在线资料 <b>' + flRemote.length + '</b> 份</div>';
+    else if(flSync === "ok") sync = '<div class="fs-chip fs-sync">在线资料暂无</div>';
+    else if(flSync === "fail") sync = '<div class="fs-chip fs-sync fail">在线资料暂时取不到（不影响下面下载）</div>';
     st.innerHTML = '<div class="fs-chip">共 <b>' + all.length + '</b> 份资料</div>'
-      + '<div class="fs-chip">直接下载 <b>' + free + '</b> 份</div>'
-      + (lock ? '<div class="fs-chip">加微信领取 <b>' + lock + '</b> 份</div>' : "")
+      + '<div class="fs-chip">站内文件 <b>' + localN + '</b> 份</div>'
+      + sync
       + ((flCat !== "all" || flKw) ? '<div class="fs-chip">筛选出 <b>' + list.length + '</b> 份</div>' : "");
+  }
+  if(location.search.indexOf("admin=1") >= 0 && !document.getElementById("flAddBtn")){
+    const bar = document.getElementById("flStats");
+    if(bar){
+      const btn = document.createElement("button");
+      btn.id = "flAddBtn";
+      btn.className = "mini-btn";
+      btn.type = "button";
+      btn.innerHTML = '<svg class=ic aria-hidden=true><use href=#i-plus /></svg>加一份资料（发 issue）';
+      btn.onclick = () => window.open(FL_NEW_ISSUE, "_blank", "noopener");
+      bar.appendChild(btn);
+    }
   }
 
   const host = document.getElementById("flBody");
@@ -3586,6 +3638,134 @@ function renderFiles(){
   }
   host.classList.remove("fl-empty");
   host.innerHTML = list.map(flCard).join("");
+}
+
+/* ══════ 在线资料：从 GitHub Issues 读 ══════ */
+function flClassify(text, url){
+  const t = (text || "") + " " + (url || "");
+  if(/压缩包|zip|rar|7z|网盘|pan\.|lanzou|夸克|quark|aliyundrive|123pan|weiyun/i.test(t)) {
+    if(/zip|rar|7z|压缩包|pan\.|lanzou|夸克|quark|aliyundrive|123pan|weiyun/i.test(t)) return "zip";
+  }
+  if(/视频|mp4|mov|bilibili|youtube|b23\.tv/i.test(t)) return "video";
+  if(/图片|素材|jpg|jpeg|png|webp|图集/i.test(t)) return "img";
+  if(/文档|pdf|表格|excel|word|ppt|速查|清单|模板/i.test(t)) return "doc";
+  return "link";
+}
+function flTypeOf(cat, url){
+  const u = (url || "").toLowerCase();
+  if(/\.pdf($|\?)/.test(u)) return "PDF";
+  if(/\.(zip|rar|7z)($|\?)/.test(u)) return "压缩包";
+  if(/\.(jpg|jpeg|png|webp)($|\?)/.test(u)) return "图片";
+  if(cat === "video") return "视频";
+  if(/pan\.baidu|lanzou|aliyundrive|123pan|quark|weiyun/.test(u)) return "网盘";
+  if(cat === "doc") return "文档";
+  return "链接";
+}
+/* 把一条 issue 解析成资料条目；不像资料就返回 null */
+function flParseIssue(it){
+  if(!it || it.pull_request) return null;
+  const title = (it.title || "").trim();
+  const labels = (it.labels || []).map(l => (typeof l === "string" ? l : l.name));
+  const hasLabel = labels.indexOf(FL_REMOTE.label) >= 0;
+  const hasPrefix = title.indexOf(FL_REMOTE.prefix) === 0 || title.indexOf("【资料】") === 0;
+  if(!hasLabel && !hasPrefix) return null;
+
+  const name = title.replace(/^\[资料\]\s*/, "").replace(/^【资料】\s*/, "").trim() || ("资料 #" + it.number);
+  const body = it.body || "";
+  /* 键值行：链接 / 提取码 / 分类 / 体积 / 说明 / 图片 */
+  const pick = (keys) => {
+    const re = new RegExp("(?:^|\\n)\\s*(?:" + keys + ")\\s*[：:]\\s*([^\\n]+)", "i");
+    const m = body.match(re);
+    return m ? m[1].trim() : "";
+  };
+  let url = pick("链接|地址|下载|网盘|download|url");
+  if(url) url = (url.match(/https?:\/\/\S+/) || [""])[0].replace(/[)；;，,]+$/, "");
+  if(!url){                                   // 没写「链接：」就取正文里第一个链接
+    const m = body.match(/https?:\/\/[^\s)>"']+/);
+    url = m ? m[0].replace(/[)；;，,]+$/, "") : "";
+  }
+  const code = pick("提取码|密码|code");
+  const size = pick("体积|大小|size");
+  const catRaw = pick("分类|类型");
+  const cat = (() => {
+    if(/文档|doc/i.test(catRaw)) return "doc";
+    if(/压缩|zip|rar/i.test(catRaw)) return "zip";
+    if(/图片|img|素材/i.test(catRaw)) return "img";
+    if(/视频|video/i.test(catRaw)) return "video";
+    if(/链接|网盘|link/i.test(catRaw)) return "link";
+    return flClassify(body, url);
+  })();
+  /* 说明：优先「说明：」键；否则把正文里的链接、图片和键值行去掉后剩下的文字 */
+  let desc = pick("说明|描述|简介|desc");
+  if(!desc){
+    desc = body.replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/(?:^|\n)\s*(?:链接|地址|下载|网盘|提取码|密码|分类|类型|体积|大小|说明|描述|简介|图片|download|url|code|size|desc)\s*[：:][^\n]*/gi, "")
+      .replace(/\n{2,}/g, "\n").trim().slice(0, 300);
+  }
+  /* 图片：文件名→files/ 路径；也接受完整网址 */
+  const imgRaw = pick("图片|配图|图");
+  const imgs = imgRaw.split(/[,，、\s]+/).filter(Boolean).map(s =>
+    /^https?:\/\//i.test(s) ? s : ("files/" + s.replace(/^\.?\//, "")));
+  /* 正文里直接贴的图片（issue 附件）也收集起来 */
+  const inlineImgs = [...body.matchAll(/!\[[^\]]*\]\((https?:[^)]+)\)/g)].map(m => m[1]);
+  const allImgs = imgs.concat(inlineImgs);
+
+  const d = new Date(it.created_at || Date.now());
+  const ymd = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+
+  return {
+    id: "gh-" + it.number,
+    name: name,
+    cat: cat,
+    type: flTypeOf(cat, url),
+    size: size,
+    desc: desc,
+    src: "remote",
+    url: url,
+    file: name,
+    code: code,
+    from: /pan\.baidu|lanzou|aliyundrive|123pan|quark|weiyun/i.test(url) ? "网盘" : "",
+    img: allImgs[0] || "",
+    updated: ymd,
+    tags: ["在线"].concat(labels.filter(l => l !== FL_REMOTE.label)),
+    hot: false,
+    issue: it.html_url || ("https://github.com/" + FL_REMOTE.repo + "/issues/" + it.number),
+  };
+}
+
+function flLoadRemote(force){
+  const now = Date.now();
+  let cached = null;
+  try { cached = JSON.parse(localStorage.getItem(FL_REMOTE.cacheKey) || "null"); } catch(e){}
+  if(!force && cached && cached.t && (now - cached.t) < FL_REMOTE.ttl){
+    flRemote = cached.list || [];
+    flSync = "ok";
+    flLoadedAt = cached.t;
+    renderFiles();
+    return;
+  }
+  flSync = "loading";
+  renderFiles();
+  fetch("https://api.github.com/repos/" + FL_REMOTE.repo + "/issues?state=open&per_page=100&sort=created&direction=desc", {
+    headers: { "Accept": "application/vnd.github+json" },
+  })
+    .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(arr => {
+      if(!Array.isArray(arr)) throw new Error("返回值不是数组");
+      flRemote = arr.map(flParseIssue).filter(Boolean);
+      flSync = "ok";
+      flLoadedAt = Date.now();
+      try { lsSet(FL_REMOTE.cacheKey, { t: flLoadedAt, list: flRemote }); } catch(e){}
+      renderFiles();
+    })
+    .catch(err => {
+      /* 在线取不到就用缓存，再不行就只显示本地 —— 绝不因此让资料库变空 */
+      if(cached && cached.list) { flRemote = cached.list; flSync = "ok"; }
+      else { flRemote = []; flSync = "fail"; }
+      flLoadedAt = Date.now();     // 记下时间，别每次渲染都重试
+      renderFiles();
+    });
 }
 
 function initFilesEvents(){
@@ -3614,12 +3794,6 @@ function initFilesEvents(){
   if(host && !host.dataset.bound){
     host.dataset.bound = "1";
     host.addEventListener("click", e => {
-      /* 「加微信领取」→ 复用导航栏那个咨询入口（它已经会切页签 + 打开弹窗） */
-      if(e.target.closest("[data-flwx]")){
-        const b = document.getElementById("adviceBtn");
-        if(b) b.click();
-        return;
-      }
       if(e.target.closest("[data-flreset]")){
         flCat = "all"; flKw = "";
         const k = document.getElementById("flSearch"); if(k) k.value = "";
