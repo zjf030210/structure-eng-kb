@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>结构工程师知识库 · 产品结构设计（214 条知识点 / 432 道自测题）</title>
-<meta name="description" content="面向产品结构设计的完整知识库，不限行业与产品品类：214 条知识点覆盖材料、成型、模具、结构、公差、表面处理、光学、散热、安规、测试、包装与成本，每条含深度解析、经验数值、参考图与视频；另有 432 道自测题、13 个工程计算器、速查手册、检查清单与实战模板。">
-<meta name="keywords" content="结构工程师,产品结构设计,结构设计,塑料件,注塑,DFM,脱模斜度,卡扣,公差,光学设计,散热,安规认证,知识库">
+<meta name="description" content="面向产品结构设计的完整知识库，不限行业与产品品类：214 条知识点覆盖材料、成型、模具、结构、公差、表面处理、光学、散热、安规、测试、包装与成本，每条含深度解析、经验数值、参考图与视频；另有 432 道自测题、13 个工程计算器、速查手册、检查清单与实战模板，以及滑块抽芯 / 斜顶 / 电火花加工的模具动画演示。">
+<meta name="keywords" content="结构工程师,产品结构设计,结构设计,塑料件,注塑,DFM,脱模斜度,卡扣,公差,光学设计,散热,安规认证,知识库,模具动画,滑块抽芯,斜顶,电火花,EDM">
 <meta name="author" content="光光light">
 <meta name="theme-color" content="#2563eb">
 <link rel="canonical" href="https://zjf030210.github.io/structure-eng-kb/">
@@ -1867,6 +1867,87 @@
   .fl-diag a{color:var(--primary); text-decoration:none; flex:none;}
   .fl-diag a:hover{text-decoration:underline;}
 
+  /* ══════════ 模具动画（第 23 模块，2026-11-16 加）══════════ */
+  .md-hint{display:flex; align-items:center; gap:7px; margin:0 0 16px; padding:9px 13px;
+    font-size:var(--fs-sm); color:var(--sub); background:var(--bg-soft);
+    border:1px solid var(--border); border-radius:var(--r-md);}
+  .md-hint .ic{color:var(--primary); flex:none;}
+  #mdBody{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(336px, 100%), 1fr));
+    gap:16px;}
+  .md-card{background:var(--card); border:1px solid var(--border); border-radius:var(--r-lg);
+    overflow:hidden; display:flex; flex-direction:column; min-width:0;
+    transition:border-color .18s, box-shadow .18s, transform .18s;}
+  .md-card:hover{border-color:var(--primary); box-shadow:var(--shadow-lg); transform:translateY(-2px);}
+  .md-thumb{position:relative; display:block; width:100%; aspect-ratio:3/2; padding:0; border:0;
+    border-bottom:1px solid var(--border); background:var(--bg-muted); cursor:pointer; overflow:hidden;}
+  .md-thumb img{width:100%; height:100%; object-fit:cover; object-position:top center; display:block;
+    transition:transform .5s cubic-bezier(.4,0,.2,1);}
+  .md-card:hover .md-thumb img{transform:scale(1.035);}
+  .md-thumb::after{content:""; position:absolute; inset:0; background:rgba(15,23,42,.14);
+    transition:background .18s;}
+  .md-card:hover .md-thumb::after{background:rgba(15,23,42,.04);}
+  .md-play{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none;}
+  .md-play i{width:54px; height:54px; border-radius:50%; background:rgba(255,255,255,.94);
+    color:#0f172a; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 22px rgba(15,23,42,.32); font-style:normal;
+    transition:transform .18s, background .18s;}
+  .md-card:hover .md-play i{transform:scale(1.08); background:#fff;}
+  .md-play svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2;
+    stroke-linecap:round; stroke-linejoin:round;}
+  .md-tag{position:absolute; top:10px; left:10px; font-size:var(--fs-caption); font-weight:600;
+    padding:3px 9px; border-radius:var(--r-sm); background:rgba(15,23,42,.68); color:#fff;
+    letter-spacing:.2px;}
+  .md-in{padding:14px 16px 16px; display:flex; flex-direction:column; gap:9px; flex:1; min-width:0;}
+  .md-in h3{font-size:var(--fs-md); color:var(--tx-strong); display:flex; align-items:baseline;
+    gap:7px; flex-wrap:wrap; line-height:1.3;}
+  .md-in h3 span{font-size:var(--fs-caption); font-weight:500; color:var(--faint); letter-spacing:.3px;}
+  .md-in p{font-size:var(--fs-sm); color:var(--sub); line-height:var(--lh-relaxed); min-width:0;}
+  .md-key{font-size:var(--fs-sm); color:var(--tx-body); line-height:var(--lh-relaxed);
+    padding:7px 11px; border-radius:var(--r-sm); background:var(--primary-weak);
+    border-left:3px solid var(--primary);}
+  .md-key b{color:var(--primary);}
+  .md-spec{display:flex; flex-wrap:wrap; gap:5px;}
+  .md-spec span{font-size:var(--fs-caption); color:var(--sub); background:var(--bg-soft);
+    border:1px solid var(--bd-row); border-radius:var(--r-sm); padding:2px 8px;
+    font-variant-numeric:tabular-nums;}
+  .md-act{display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:auto; padding-top:4px;}
+  .md-btn{display:inline-flex; align-items:center; gap:5px; padding:7px 13px; border-radius:var(--r-md);
+    border:1px solid var(--border); background:var(--card); color:var(--sub); font-size:var(--fs-sm);
+    font-family:inherit; cursor:pointer; text-decoration:none; transition:all .16s;}
+  .md-btn:hover{color:var(--primary); border-color:var(--primary); background:var(--primary-weak);}
+  .md-btn.pri{background:var(--primary); border-color:var(--primary); color:var(--tx-inv); font-weight:600;}
+  .md-btn.pri:hover{background:var(--primary-d); border-color:var(--primary-d); color:var(--tx-inv);}
+  .md-pt{margin-top:2px; align-self:flex-start; padding:0; border:0; background:none;
+    font-size:var(--fs-caption); color:var(--faint); font-family:inherit; cursor:pointer; text-align:left;}
+  .md-pt:hover{color:var(--primary); text-decoration:underline;}
+
+  /* 站内浮层播放器（比 #imgModal 高一层，且不依赖 .modal 类） */
+  .mold-modal{position:fixed; inset:0; z-index:210; display:none; background:rgba(9,14,22,.82);
+    padding:20px; align-items:stretch; justify-content:center;}
+  .mold-modal.open{display:flex;}
+  .mm-box{width:min(1440px, 100%); display:flex; flex-direction:column; min-height:0;
+    background:var(--card); border-radius:var(--r-lg); overflow:hidden; box-shadow:0 24px 60px rgba(2,8,20,.45);}
+  .mm-bar{display:flex; align-items:center; gap:12px; padding:10px 14px; border-bottom:1px solid var(--border);
+    background:var(--bg-soft); flex-wrap:wrap;}
+  .mm-bar b{font-size:var(--fs-md); color:var(--tx-strong);}
+  .mm-note{font-size:var(--fs-caption); color:var(--faint); flex:1; min-width:120px;}
+  .mm-note-m{display:none;}
+  .mm-btn{padding:6px 12px; border-radius:var(--r-md); border:1px solid var(--border);
+    background:var(--card); color:var(--sub); font-size:var(--fs-sm); font-family:inherit;
+    cursor:pointer; text-decoration:none; line-height:1.4;}
+  .mm-btn:hover{color:var(--primary); border-color:var(--primary);}
+  .mm-close{padding:4px 10px; font-size:var(--fs-lg); line-height:1.2;}
+  .mm-frame{flex:1; min-height:0; background:#eef1f5;}
+  .mm-frame iframe{width:100%; height:100%; border:0; display:block;}
+  @media (max-width:640px){
+    .mold-modal{padding:0;}
+    .mm-box{border-radius:0; width:100%;}
+    .mm-note{display:none;}
+    .mm-note-m{display:block; flex:1; text-align:right; padding-right:2px;}
+    .mm-bar{padding:8px 10px; gap:8px;}
+    .mm-btn{padding:5px 9px; font-size:var(--fs-caption);}
+  }
+
   /* 页脚「开发者说明」（文件清单 / app.js 说明）：默认隐藏 —— 访客不需要看这些。
      2026-10-06 用户要求。想恢复：把下面的 display:none 去掉即可（内容仍在 HTML 里）。 */
   .foot-dev{display:none;}
@@ -1944,6 +2025,7 @@
       <button class="nav-tab" data-mod="case"><svg class="ic" aria-hidden="true"><use href="#i-box"/></svg>整机案例<span class="nb" id="nbCase"></span></button>
       <button class="nav-tab" data-mod="gloss"><svg class="ic" aria-hidden="true"><use href="#i-book-open"/></svg>术语词典<span class="nb" id="nbGloss"></span></button>
       <button class="nav-tab" data-mod="gallery"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg>参考图库<span class="nb" id="nbGallery"></span></button>
+      <button class="nav-tab" data-mod="mold"><svg class="ic" aria-hidden="true"><use href="#i-mold"/></svg>模具动画<span class="nb" id="nbMold"></span></button>
       <button class="nav-tab" data-mod="files"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>资料库<span class="nb" id="nbFiles"></span></button>
       <button class="nav-tab" data-mod="field"><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg>实战宝典<span class="nb" id="nbField"></span></button>
       <button class="nav-tab" data-mod="compare"><svg class="ic" aria-hidden="true"><use href="#i-columns"/></svg>知识点对比<span class="nb" id="nbCompare"></span></button>
@@ -2037,6 +2119,21 @@
     </div>
     <div id="flStats"></div>
     <div id="flBody"></div>
+  </div>
+  <!-- 模具动画（第 23 模块，2026-11-16 加）：索引 3 个独立交互演示 -->
+  <div id="moldView" style="display:none">
+    <div class="mod-head">
+      <div class="mic"><svg class="ic-lg" aria-hidden="true"><use href="#i-mold"/></svg></div>
+      <div>
+        <h2>模具动画<span class="mcnt" id="mdCount"></span></h2>
+        <div class="mtg">开合模、抽芯、顶出、放电——把模具里<strong>看不见的动作</strong>按真机顺序放给你看。每个演示都能暂停、拖进度、0.5×/2× 变速，卡在哪一帧就停在哪一帧。</div>
+      </div>
+    </div>
+    <div class="md-hint">
+      <svg class="ic" aria-hidden="true"><use href="#i-play"/></svg>
+      <span>点卡片就在站内打开（不会跳走）；想全屏或收藏，用「新标签页」。</span>
+    </div>
+    <div id="mdBody"></div>
   </div>
   <div id="galleryView" style="display:none">
     <div class="mod-head">
@@ -2556,6 +2653,19 @@
 </div>
 
 <!-- 图片放大 Modal -->
+<div class="mold-modal" id="moldModal" role="dialog" aria-modal="true" aria-label="模具动画演示">
+  <div class="mm-box">
+    <div class="mm-bar">
+      <b id="mmTitle">模具动画</b>
+      <span class="mm-note">演示自带播放 / 速度 / 进度控制</span>
+      <span class="mm-note mm-note-m">手机上横屏看更清楚</span>
+      <a class="mm-btn" id="mmNewTab" href="#" target="_blank" rel="noopener">新标签页打开</a>
+      <button class="mm-btn mm-close" id="mmClose" type="button" aria-label="关闭演示">✕</button>
+    </div>
+    <div class="mm-frame"><iframe id="mmFrame" title="模具动画演示" allowfullscreen></iframe></div>
+  </div>
+</div>
+
 <div class="modal" id="imgModal">
   <div class="box" style="padding:6px; background:transparent; box-shadow:none;">
     <img id="imgModalSrc" alt="参考图大图预览" style="max-width:90vw; max-height:85vh; border-radius:var(--r-md); display:block;">

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>斜顶开合演示 · Lifter Ejection Animation</title>
+<style>
+  :root{
+    --bg:#eef1f5;
+    --panel:#ffffff;
+    --line:#dde3ea;
+    --ink:#1c2430;
+    --ink2:#5c6b7d;
+    --ink3:#93a1b1;
+    --accent:#1f6feb;
+    --green:#5f9e42;
+    --olive:#c9a227;
+    --blue:#3878c0;
+    --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:16px;padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;color:var(--ink2);background:#f3f6fa;
+    border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+  /* ---------- body ---------- */
+  .body{display:grid;grid-template-columns:1fr 286px;min-height:0;flex:1}
+
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%}
+  #mold text.lb{font-size:12.5px;fill:#5c6b7d;font-family:inherit}
+  #mold text.lb2{font-size:12.5px;fill:#2a6099;font-weight:600;font-family:inherit}
+  #mold text.lb3{font-size:12px;fill:#9aa7b6;font-family:inherit;letter-spacing:.3px}
+  .stage .grid-bg{position:absolute;inset:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.55;pointer-events:none}
+
+  /* phase ribbon */
+  .phases{
+    position:absolute;top:14px;left:16px;display:flex;gap:5px;z-index:3;
+  }
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);
+    color:var(--ink3);backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+  .ph em{display:none}
+
+  /* ---------- side panel ---------- */
+  aside{
+    border-left:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:18px;
+    background:#fff;overflow:auto;
+  }
+  .k{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);font-weight:600}
+  .rows{display:flex;flex-direction:column;gap:0;margin-top:9px;border-top:1px solid #eef2f7}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid #eef2f7;font-size:12.5px}
+  .row span{color:var(--ink2)}
+  .row b{font-variant-numeric:tabular-nums;font-weight:650;font-size:13px}
+  .row b i{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:400;margin-left:2px}
+
+  .live{
+    background:#f6f9fd;border:1px solid #e2ebf6;border-radius:12px;padding:13px 14px;
+  }
+  .live .big{font-size:24px;font-weight:660;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+  .live .big i{font-style:normal;font-size:12px;color:var(--ink3);font-weight:500;margin-left:3px}
+  .live .cap{font-size:11.5px;color:var(--ink2);margin-top:3px}
+  .live .split{display:flex;gap:10px;margin-top:12px;padding-top:11px;border-top:1px dashed #d8e4f2}
+  .live .split div{flex:1}
+  .live .split b{display:block;font-size:14px;font-variant-numeric:tabular-nums}
+  .live .split span{font-size:10.5px;color:var(--ink3)}
+
+  .note{font-size:12px;line-height:1.65;color:var(--ink2)}
+  .note b{color:var(--ink);font-weight:600}
+  .note .hl{color:var(--accent);font-weight:600}
+
+  .legend{display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--ink2)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+
+  /* ---------- controls ---------- */
+  .controls{
+    border-top:1px solid var(--line);padding:14px 22px 16px;display:flex;align-items:center;gap:16px;
+    background:linear-gradient(180deg,#fff,#fbfcfe);
+  }
+  button{
+    font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:9px;padding:9px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px;
+    transition:.16s;white-space:nowrap;
+  }
+  button:hover{background:#f5f8fc;border-color:#c9d5e3}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink);min-width:96px;justify-content:center}
+  button.primary:hover{background:#2b3648}
+  .play-ico{width:0;height:0;border-left:9px solid currentColor;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent}
+  button.primary.playing .play-ico{border:0;width:9px;height:11px;border-left:3px solid currentColor;border-right:3px solid currentColor}
+
+  .track{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:#e3eaf3;outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+    border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .tcode{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums;width:92px;text-align:right}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:9px 11px;background:#fff;font-size:12px;color:var(--ink2)}
+  .seg button.on{background:#eef4fd;color:var(--accent);font-weight:600}
+  .seg button+button{border-left:1px solid var(--line)}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+  .toggle input{accent-color:var(--ink);width:15px;height:15px;cursor:pointer}
+
+  @media (min-width:1081px){
+    .app{height:calc(100vh - 36px)}
+  }
+  @media (max-width:1080px){
+    body{height:auto;align-items:flex-start;padding:12px}
+    .app{height:auto;width:100%}
+    .body{grid-template-columns:1fr}
+    .stage{height:auto;aspect-ratio:1000/830}
+    aside{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .controls{flex-wrap:wrap}
+    .track{order:9;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>斜顶开合演示 <span>· Lifter Ejection Animation</span></h1>
+      <div class="sub">斜顶头部做成 <b>钩形</b>，在倒扣的上沿、外侧、下沿三面留出成型面把它包住；顶出时沿 <b>12°</b> 轴线滑动，垂直分量脱模、水平分量脱扣。</div>
+    </div>
+    <div class="badge"><span class="dot"></span>参数可调 · 循环演示</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases">
+        <div class="ph" data-ph="closed">合模<em>Closed</em></div>
+        <div class="ph" data-ph="open">开模<em>Open</em></div>
+        <div class="ph" data-ph="eject">顶出<em>Eject</em></div>
+        <div class="ph" data-ph="free">取件<em>Free</em></div>
+      </div>
+
+      <svg id="mold" viewBox="0 -70 1000 830" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gCav" x1="0" y1="0" x2="0.35" y2="1">
+            <stop offset="0" stop-color="#8dbf6c"/>
+            <stop offset=".45" stop-color="#6aa64a"/>
+            <stop offset="1" stop-color="#4a7f33"/>
+          </linearGradient>
+          <linearGradient id="gCore" x1="0" y1="0" x2="0.3" y2="1">
+            <stop offset="0" stop-color="#e8cb63"/>
+            <stop offset=".5" stop-color="#cba72f"/>
+            <stop offset="1" stop-color="#a9871f"/>
+          </linearGradient>
+          <linearGradient id="gLift" x1="0" y1="0" x2="1" y2="0.6">
+            <stop offset="0" stop-color="#5b9bd8"/>
+            <stop offset=".5" stop-color="#3c7ec4"/>
+            <stop offset="1" stop-color="#2a6099"/>
+          </linearGradient>
+          <linearGradient id="gPart" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0" stop-color="#d3dae2"/>
+            <stop offset=".55" stop-color="#b3bdc8"/>
+            <stop offset="1" stop-color="#8e99a5"/>
+          </linearGradient>
+          <linearGradient id="gSteel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9aa3ad"/>
+            <stop offset=".35" stop-color="#87919c"/>
+            <stop offset="1" stop-color="#6d7681"/>
+          </linearGradient>
+          <linearGradient id="gSteel2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#b2bac3"/>
+            <stop offset="1" stop-color="#8b949e"/>
+          </linearGradient>
+          <radialGradient id="gBall" cx=".35" cy=".3" r=".8">
+            <stop offset="0" stop-color="#ef7b6c"/>
+            <stop offset=".6" stop-color="#c0392b"/>
+            <stop offset="1" stop-color="#8e2417"/>
+          </radialGradient>
+          <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#2a3a52" flood-opacity=".18"/>
+          </filter>
+          <filter id="soft2" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#2a3a52" flood-opacity=".22"/>
+          </filter>
+
+          <!-- marks -->
+          <marker id="arw" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1.4 L9,5 L0,8.6 z" fill="#5c6b7d"/>
+          </marker>
+          <marker id="arwB" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1.4 L9,5 L0,8.6 z" fill="#2a6099"/>
+          </marker>
+          <clipPath id="zclip"><rect x="804" y="122" width="174" height="182" rx="8"/></clipPath>
+        </defs>
+
+        <!-- ============ 固定部分：底板 / 支撑 / 固定板 ============ -->
+        <g id="statics">
+          <!-- 底座 -->
+          <rect x="196" y="690" width="608" height="34" rx="6" fill="url(#gSteel)" filter="url(#soft)"/>
+          <rect x="196" y="690" width="608" height="5" rx="2.5" fill="#c2cad3" opacity=".55"/>
+          <!-- 两侧支撑（模架） -->
+          <rect x="196" y="500" width="66" height="192" rx="5" fill="url(#gSteel2)"/>
+          <rect x="738" y="500" width="66" height="192" rx="5" fill="url(#gSteel2)"/>
+          <!-- 后模固定板上的斜顶过孔 -->
+          <path d="M368,438 L414,438 L377,502 L353,502 Z" fill="#6b5310" opacity=".38"/>
+          <!-- 后模固定板（挖出斜顶过孔） -->
+          <path d="M235,440 L765,440 L765,502 L235,502 Z M368,440 L414,440 L377,502 L355,502 Z"
+                fill="url(#gCore)" fill-rule="evenodd" filter="url(#soft)"/>
+          <!-- 与后模仁的分界 -->
+          <path d="M235,443 L765,443" stroke="#7d6212" stroke-width="1.4" opacity=".65"/>
+        </g>
+
+        <!-- ============ 顶针板（上行） ============ -->
+        <g id="ejector">
+          <rect x="262" y="620" width="476" height="34" rx="5" fill="url(#gSteel2)" filter="url(#soft)"/>
+          <rect x="262" y="654" width="476" height="36" rx="5" fill="url(#gSteel)" filter="url(#soft)"/>
+          <!-- 斜顶座（导向块，带着斜顶沿 12° 轴向滑动） -->
+          <rect x="300" y="596" width="84" height="26" rx="5" fill="url(#gLift)" filter="url(#soft2)"/>
+          <rect x="300" y="596" width="84" height="9" rx="4" fill="#7fb2e0" opacity=".65"/>
+          <!-- 顶针 -->
+          <rect x="492" y="310" width="16" height="312" rx="2" fill="url(#gSteel2)" stroke="#5f6873" stroke-width="1"/>
+          <rect x="493" y="310" width="14" height="3" fill="#c9d0d8"/>
+        </g>
+
+        <!-- ============ 后模仁 + 斜顶 + 制件（同一组，供放大窗引用） ============ -->
+        <g id="detailSrc">
+          <!-- 斜顶安装槽：后模仁上按 12° 挖出的矩形避空腔 -->
+          <path d="M355,310 L440,310 L412,442 L355,442 Z" fill="#6b5310" opacity=".5"/>
+          <!-- 后模仁（挖去斜顶槽） -->
+          <path d="M355,310 L645,310 L645,442 L355,442 Z M355,310 L440,310 L412,442 L355,442 Z"
+                fill="url(#gCore)" fill-rule="evenodd"/>
+          <path d="M440,310 L645,310 L645,442 L412,442" fill="none" stroke="#a9871f" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M412,442 L645,442" stroke="#7d6212" stroke-width="1.4" opacity=".65"/>
+
+          <!-- 斜顶：斜杆 + 钩形头（头部三面咬住倒扣） -->
+          <g id="lifter">
+            <path d="M355,310 L440,310 L412,442 L386,442 L348,622 L332,622 L370,442 L355,428 L355,405 L373,405 L373,354 L355,350 Z"
+                  fill="url(#gLift)" stroke="#123c66" stroke-width="1.5" stroke-linejoin="round"/>
+            <!-- 背面导向面 / 顶面高光 -->
+            <path d="M437.6,313 L409.9,439" stroke="#8fc0e8" stroke-width="1.5" opacity=".5"/>
+            <path d="M357,313.5 L436,313.5" stroke="#8fc0e8" stroke-width="1.6" opacity=".45"/>
+            <!-- 斜顶底销 -->
+            <circle cx="340" cy="622" r="9" fill="url(#gBall)" stroke="#7b1f13" stroke-width="1"/>
+            <circle cx="337" cy="619" r="2.6" fill="#fff" opacity=".45"/>
+          </g>
+
+          <!-- 制件（压在斜顶之上，倒扣轮廓才清楚） -->
+          <g id="part">
+            <path d="M330,280 L670,280 L670,440 L645,440 L645,310 L355,310 L355,350 L373,354 L373,405 L355,405 L355,440 L330,440 Z"
+                  fill="url(#gPart)" stroke="#6f7a86" stroke-width="1.6" stroke-linejoin="round" filter="url(#soft2)"/>
+            <!-- 倒扣本体：斜顶头咬住的就是这一块 -->
+            <path d="M355,350 L373,354 L373,405 L355,405 Z" fill="#7f8b98" opacity=".7"/>
+            <path id="ucLine" d="M355,350 L373,354 L373,405 L355,405"
+                  fill="none" stroke="#c0392b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          </g>
+        </g>
+
+        <!-- ============ 前模 ============ -->
+        <g id="cavity">
+          <path d="M225,240 L775,240 L775,440 L670,440 L670,280 L330,280 L330,440 L225,440 Z"
+                fill="url(#gCav)" stroke="#3d6b2a" stroke-width="1.6" stroke-linejoin="round" filter="url(#soft)"/>
+          <path d="M232,248 L768,248 L768,262 L232,262 Z" fill="#a8d18d" opacity=".5"/>
+        </g>
+
+        <!-- ============ 标注 ============ -->
+        <g id="anno" style="opacity:1">
+          <!-- 前模 -->
+          <path id="leadCav" d="M178,206 L250,206 L262,232" fill="none" stroke="#8794a3" stroke-width="1" marker-end="url(#arw)"/>
+          <text x="172" y="200" text-anchor="end" class="lb">前模 Cavity</text>
+          <!-- 后模 -->
+          <path d="M822,470 L792,470 L762,466" fill="none" stroke="#8794a3" stroke-width="1" marker-end="url(#arw)"/>
+          <text x="828" y="474" class="lb">后模 Core</text>
+          <!-- 制件 -->
+          <path id="leadPart" d="M822,348 L700,348 L682,356" fill="none" stroke="#8794a3" stroke-width="1" marker-end="url(#arw)"/>
+          <text x="828" y="352" class="lb" id="partLb">制件 Part</text>
+          <!-- 顶针 -->
+          <path id="leadPin" d="M822,392 L520,392 L512,380" fill="none" stroke="#8794a3" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arw)"/>
+          <text x="828" y="396" class="lb">顶针 Ejector Pin</text>
+          <!-- 顶针板 -->
+          <path id="leadPlate" d="M180,660 L246,660 L262,646" fill="none" stroke="#8794a3" stroke-width="1" marker-end="url(#arw)"/>
+          <text x="174" y="664" text-anchor="end" class="lb">顶针板 Ejector Plate</text>
+          <!-- 斜顶 -->
+          <path id="leadLifter" d="M180,470 L326,470" fill="none" stroke="#2a6099" stroke-width="1.1" stroke-dasharray="5 4" marker-end="url(#arwB)"/>
+          <text x="174" y="474" text-anchor="end" class="lb2">斜顶 Lifter</text>
+          <!-- 角度示意（右下空区） -->
+          <g id="angleMark">
+            <rect x="806" y="566" width="166" height="140" rx="11" fill="#ffffff" opacity=".75" stroke="#e3e9f1"/>
+            <text x="822" y="590" class="lb3">顶出角 θ</text>
+            <path d="M838,684 L838,606" stroke="#2a6099" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>
+            <path d="M838,684 L854.6,606" stroke="#2a6099" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M838,628 A56,56 0 0 1 849.6,629.2" fill="none" stroke="#2a6099" stroke-width="1.3"/>
+            <text x="858" y="646" fill="#2a6099" font-size="13.5" font-weight="650">12°</text>
+          </g>
+          <!-- 档位说明 -->
+          <text x="500" y="748" text-anchor="middle" class="lb3">斜顶在顶出过程中沿自身轴线滑动 —— 垂直分量脱模，水平分量脱扣</text>
+        </g>
+
+        <!-- ============ 局部放大：斜顶头部与倒扣的咬合 ============ -->
+        <g id="zoomWin">
+          <rect x="792" y="84" width="198" height="238" rx="12" fill="#ffffff" stroke="#e1e8f0"/>
+          <text x="808" y="108" class="lb3" style="letter-spacing:.6px">咬合细节 · UNDERCUT</text>
+          <path d="M808,114 L974,114" stroke="#eef2f7" stroke-width="1"/>
+          <g clip-path="url(#zclip)">
+            <rect x="804" y="122" width="174" height="182" fill="#fdfdff"/>
+            <use id="zoomUse" href="#detailSrc" transform="translate(144,-547) scale(2)"/>
+          </g>
+          <rect x="804" y="122" width="174" height="182" rx="8" fill="none" stroke="#e8eef5"/>
+          <text x="808" y="313" class="lb3" id="zoomCap" style="font-size:10.5px;paint-order:stroke;stroke:#fff;stroke-width:3.2;stroke-linejoin:round">斜顶头三面抱住倒扣</text>
+        </g>
+      </svg>
+    </div>
+
+    <aside>
+      <div>
+        <div class="k">关键参数 / Spec</div>
+        <div class="rows">
+          <div class="row"><span>斜顶角 θ</span><b>12<i>°</i></b></div>
+          <div class="row"><span>顶出行程</span><b>30<i>mm</i></b></div>
+          <div class="row"><span>侧向位移</span><b>6.4<i>mm</i></b></div>
+          <div class="row"><span>倒扣深度</span><b>4.5<i>mm</i></b></div>
+          <div class="row"><span>顶针行程</span><b>30<i>mm</i></b></div>
+        </div>
+      </div>
+
+      <div class="live">
+        <div class="big" id="liveE">0.0<i>mm</i></div>
+        <div class="cap">当前顶出行程</div>
+        <div class="split">
+          <div><b id="liveX">0.0</b><span>侧移 mm</span></div>
+          <div><b id="liveS">合模</b><span>当前动作</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">配色</div>
+        <div class="legend" style="margin-top:10px">
+          <div><i style="background:#6aa64a"></i>前模 Cavity</div>
+          <div><i style="background:#cba72f"></i>后模 Core</div>
+          <div><i style="background:#3c7ec4"></i>斜顶 Lifter</div>
+          <div><i style="background:#b3bdc8"></i>制件 Part</div>
+        </div>
+      </div>
+
+      <div class="note">
+        <b>斜顶头必须"包住"倒扣：</b>头部在倒扣的 <span class="hl">上沿、外侧、下沿</span> 三面都要有成型面，倒扣才长得出来 —— 少一面就是缺胶。顶出时斜顶沿 12° 轴线上滑，头部横向让开 <span class="hl">6.4mm</span>，越过 4.5mm 的倒扣深度后完全脱扣，余量 1.9mm。
+      </div>
+    </aside>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="play"><span class="play-ico"></span><span id="playTxt">播放</span></button>
+    <div class="track">
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <div class="tcode" id="tcode">0%</div>
+    </div>
+    <label class="toggle"><input type="checkbox" id="annoChk" checked>标注</label>
+    <div class="seg" id="speed">
+      <button data-s="0.5">0.5×</button>
+      <button data-s="1" class="on">1×</button>
+      <button data-s="2">2×</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const OPEN  = 300;   // 前模开模行程 px（须 > 制品高度，否则顶出时撞前模）
+  const EJECT = 120;   // 顶出行程 px
+  const TAN   = Math.tan(12*Math.PI/180);
+  const DX    = EJECT * TAN;  // 侧向位移 px  (30mm × tan12° = 6.4mm)
+  const MM    = 4;     // 1mm = 4px
+  const PIVX  = 340, PIVY = 620;   // 斜顶轴线支点
+  const UC    = 18;    // 倒扣深度 px (4.5mm)
+  const ZS    = 2;     // 放大窗倍率
+  const ZTX   = 144, ZTY = -547; // 放大窗基准位移
+
+  const $ = (id)=>document.getElementById(id);
+  const gCav=$('cavity'), gPart=$('part'), gEj=$('ejector'), gLift=$('lifter');
+  const leadLifter=$('leadLifter'), ucLine=$('ucLine');
+  const leadCav=$('leadCav'), leadPart=$('leadPart'), leadPin=$('leadPin'), leadPlate=$('leadPlate');
+  const partLb=$('partLb');
+  const zoomUse=$('zoomUse'), zoomWin=$('zoomWin'), zoomCap=$('zoomCap');
+
+  const ease = t => t*t*(3-2*t);
+  const seg  = (t,a,b) => Math.min(1, Math.max(0, (t-a)/(b-a)));
+
+  // 时间轴
+  const T = { openA:0.14, openB:0.44, ejA:0.52, ejB:0.84, freeA:0.88, freeB:1.0 };
+
+  function state(t){
+    const eo = ease(seg(t, T.openA, T.openB));
+    const ee = ease(seg(t, T.ejA,  T.ejB));
+    const pf = ease(seg(t, T.freeA, T.freeB));
+    return {eo, ee, pf};
+  }
+
+  function phase(t){
+    if(t < T.openA) return ['closed','合模'];
+    if(t < T.ejA)   return ['open','开模'];
+    if(t < T.ejB)   return ['eject','顶出'];
+    return ['free','取件'];
+  }
+
+  function render(t){
+    const {eo,ee,pf} = state(t);
+
+    gCav.setAttribute('transform', `translate(0,${-OPEN*eo})`);
+    gPart.setAttribute('transform',
+      `translate(${(72*pf).toFixed(1)},${(-EJECT*ee-10*pf).toFixed(1)}) rotate(${(-4*pf).toFixed(2)} 500 400)`);
+    gPart.style.opacity = (1 - pf*0.92).toFixed(3);
+    gEj.setAttribute('transform', `translate(0,${-EJECT*ee})`);
+    gLift.setAttribute('transform', `translate(${(DX*ee).toFixed(2)},${(-EJECT*ee).toFixed(2)})`);
+
+    // 标签跟随
+    const dyL = EJECT*ee;
+    const lx = (PIVX + (PIVY-473.3)*TAN) + DX*ee, ly = 473.3 - dyL;
+    leadLifter.setAttribute('d', `M180,474 L${lx.toFixed(1)},${ly.toFixed(1)}`);
+    leadCav.setAttribute('d', `M178,200 L204,200 L222,${(340-OPEN*eo).toFixed(1)}`);
+    leadPart.setAttribute('d', `M822,348 L706,348 L674,${(356-EJECT*ee-150*pf).toFixed(1)}`);
+    leadPart.style.opacity = (1 - pf).toFixed(3);
+    partLb.style.opacity = (1 - pf).toFixed(3);
+    leadPin.setAttribute('d', `M822,392 L546,392 L512,${(404-EJECT*ee).toFixed(1)}`);
+    leadPlate.setAttribute('d', `M180,660 L246,660 L262,${(646-EJECT*ee).toFixed(1)}`);
+
+    // 放大窗：抵消制件顶出位移，突出斜顶相对制件的侧移
+    zoomUse.setAttribute('transform',
+      `translate(${ZTX.toFixed(1)},${(ZTY + ZS*EJECT*ee).toFixed(1)}) scale(${ZS})`);
+    zoomWin.style.opacity = Math.max(0, 1 - pf*2.4).toFixed(3);
+
+    const gap = (ee*DX - UC)/MM;
+    zoomCap.textContent = ee <= 0.001
+      ? '斜顶头三面抱住倒扣'
+      : (gap > 0 ? `已脱开 ${gap.toFixed(1)} mm` : `咬合中 · 还差 ${(-gap).toFixed(1)} mm`);
+    zoomCap.setAttribute('fill', gap > 0 ? '#1f7a3f' : '#9aa7b6');
+
+    // 倒扣轮廓：脱开后淡出，避免抢镜
+    ucLine.setAttribute('stroke-opacity', (1 - ee*0.5).toFixed(2));
+
+    // 读数
+    $('liveE').innerHTML = (ee*EJECT/MM).toFixed(1) + '<i>mm</i>';
+    $('liveX').textContent = (ee*DX/MM).toFixed(1);
+    const [ph,label] = phase(t);
+    $('liveS').textContent = label;
+    document.querySelectorAll('.ph').forEach(el=>{
+      el.classList.toggle('on', el.dataset.ph===ph);
+    });
+    $('tcode').textContent = Math.round(t*100)+'%';
+  }
+
+  // ---- 播放 ----
+  let t=0, playing=false, speed=1, dir=1, last=0, timer=null;
+
+  function step(){
+    const now = performance.now();
+    const dt = Math.min(80, now-last)/1000; last = now;
+
+    t += dir * dt/6.4 * speed;   // 6.4s 单程
+    if(t>=1){ t=1; dir=-1; }
+    if(t<=0){ t=0; dir=1; }
+    render(t);
+    $('scrub').value = Math.round(t*1000);
+  }
+
+  function setPlaying(p){
+    playing = p;
+    $('play').classList.toggle('playing', p);
+    $('playTxt').textContent = p ? '暂停' : '播放';
+    if(timer){ clearInterval(timer); timer=null; }
+    if(p){ last = performance.now(); timer = setInterval(step, 16); }
+  }
+
+  $('play').onclick = ()=> setPlaying(!playing);
+
+  $('scrub').oninput = e=>{
+    setPlaying(false);
+    t = +e.target.value/1000;
+    render(t);
+  };
+
+  document.querySelectorAll('#speed button').forEach(b=>{
+    b.onclick = ()=>{
+      speed = +b.dataset.s;
+      document.querySelectorAll('#speed button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+    };
+  });
+
+  $('annoChk').onchange = e=>{
+    $('anno').style.opacity = e.target.checked ? 1 : 0;
+  };
+
+  document.querySelectorAll('.ph').forEach(el=>{
+    el.onclick = ()=>{
+      const map = {closed:0, open:0.47, eject:0.7, free:0.98};
+      setPlaying(false);
+      t = map[el.dataset.ph];
+      render(t);
+      $('scrub').value = Math.round(t*1000);
+    };
+  });
+
+  // 静态定格（供裁图核对用）
+  const qs = new URLSearchParams(location.search);
+  if(qs.has('t')){
+    t = Math.min(1, Math.max(0, +qs.get('t')));
+    render(t);
+    if(qs.get('s')==='1'){
+      document.querySelector('.app').style.cssText += ';box-shadow:none;border-radius:0';
+      document.body.style.padding='0';
+    }
+  } else {
+    render(0);
+    setTimeout(()=>setPlaying(true), 500);
+  }
+})();
+</script>
+</body>
+</html>

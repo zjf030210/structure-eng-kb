@@ -107,6 +107,7 @@ const compareView = document.getElementById("compareView");
 const calcView = document.getElementById("calcView");
 const fieldView = document.getElementById("fieldView");
 const galleryView = document.getElementById("galleryView");
+const moldView = document.getElementById("moldView");
 const selectView = document.getElementById("selectView");
 const formulaView = document.getElementById("formulaView");
 const wrongView = document.getElementById("wrongView");
@@ -118,7 +119,7 @@ const MOD_VIEWS = {quick:quickView, check:checkView, case:caseView, gloss:glossV
                    map:mapView, quiz:quizView, calc:calcView, field:fieldView, gallery:galleryView,
                    select:selectView, formula:formulaView, wrong:wrongView, stats:statsView,
                    tpl:tplView, fav:favView, daily:dailyView, review:reviewView, compare:compareView,
-                   step:stepView, files:filesView};
+                   step:stepView, files:filesView, mold:moldView};
 
 let activeModule = "kb";
 let activeQuick = (window.KB_QUICK && KB_QUICK[0] ? KB_QUICK[0].id : "");
@@ -1765,7 +1766,7 @@ const MOD_LABEL = {
   review: "复习计划", stats: "学习数据", calc: "计算器", path: "30天路径", select: "选型决策",
   formula: "公式速查", quick: "速查手册", check: "检查清单", tpl: "实战模板", case: "整机案例",
   gloss: "术语词典", gallery: "参考图库", field: "实战宝典", compare: "知识点对比",
-  step: "STEP成本评估", fav: "我的收藏"
+  step: "STEP成本评估", fav: "我的收藏", files: "资料库", mold: "模具动画"
 };
 /* 模块描述。⚠️ 这里刻意不写「多少条」—— 数量会变，写死必然过期；
    需要数字的地方用带 data-cnt 标记的元素（见 syncCounts）。 */
@@ -1790,7 +1791,9 @@ const MOD_DESC = {
   kb: "知识点全库",
   stats: "掌握率与学习曲线",
   review: "按记忆曲线安排复习",
-  fav: "收藏与笔记"
+  fav: "收藏与笔记",
+  files: "速查表 / 清单 / 模板，直接下载",
+  mold: "滑块抽芯 / 斜顶 / 电火花，能拖进度看"
 };
 const HQ_DEFAULT = ["step", "calc", "quick", "check"];
 let hqEdit = false;
@@ -3240,6 +3243,7 @@ function renderAll(){
     else if(activeModule==="stats") renderStats();
     else if(activeModule==="tpl") renderTpl();
     else if(activeModule==="files") renderFiles();
+    else if(activeModule==="mold") renderMold();
     else if(activeModule==="fav") renderFav();
     refreshBadges();          // 角标随当前状态刷新（复习/每日20题/错题/收藏）
     return;
@@ -3609,6 +3613,123 @@ function flDiagHTML(){
     + (rows || '<div class="fd-row"><span class="fd-empty">没有需要处理的 issue。</span></div>')
     + '<div class="fd-row"><span class="fd-empty">规则：标题含「[资料]」或打「资料」标签即收录；你自己发的 issue 只要正文有「链接：」+「分类/说明：」也收录。'
     + '<b>把 issue 关掉（Close）＝下架</b>，不会显示 —— 想恢复点开它按 Reopen。</span></div>';
+}
+
+/* ══════════ 模具动画（第 23 模块，2026-11-16 加）══════════
+   三个演示是独立的交互 HTML（mold/ 目录），这里只做索引卡 + 站内浮层预览。
+   ⚠️ 演示内部自带播放 / 速度 / 进度 / 标注开关，别去改它内部；
+   ⚠️ iframe 的 src 只在打开时挂上、关掉时清空 —— 否则动画定时器会在后台一直跑。 */
+const MOLD_DEMOS = [
+  { id:"slider", file:"mold/slider.html", img:"images/mold-slider.jpg",
+    t:"滑块抽芯", en:"Slide Core", tag:"侧向倒扣",
+    d:"斜导柱固定在前模上，开模时拨着滑块横着退出去，先把侧向倒扣抽开；抽芯完成后斜导柱才脱开，滑块停住，制件才顶得出来。",
+    key:"顺序错了就拉伤——<b>先抽芯，后顶出</b>。滑块没退干净，顶针一动制件侧面就撕。",
+    spec:["斜导柱 18°", "合模 → 开模抽芯 → 顶出 → 取件", "斜导柱在前模"],
+    pt:"滑块与斜顶" },
+  { id:"lifter", file:"mold/lifter.html", img:"images/mold-lifter.jpg",
+    t:"斜顶开合", en:"Lifter", tag:"内侧倒扣",
+    d:"斜顶头部做成钩形，在倒扣的上沿、外侧、下沿三面留出成型面把它包住；顶出时沿 12° 轴线滑动，垂直分量脱模、水平分量脱扣。",
+    key:"钩形头部是<b>三面成型面</b>，少一面就脱不了扣；斜顶角越大脱扣越快，顶出阻力也越大。",
+    spec:["斜顶角 12°", "顶出行程 30 mm", "侧向位移 6.4 mm", "倒扣深度 4.5 mm"],
+    pt:"滑块与斜顶" },
+  { id:"edm", file:"mold/edm.html", img:"images/mold-edm.jpg",
+    t:"电火花加工", en:"EDM / 打火花", tag:"淬硬钢加工",
+    d:"淬到 HRC52 的型腔铣刀啃不动，只能让电极隔着 0.05–0.15 mm 的间隙一次次击穿放电，把钢一点点蚀掉。按真机顺序：对刀 → 粗加工 → 换电极 → 精加工 → 退刀。",
+    key:"间隙就是<b>刀</b>——没有间隙就没有火花；间隙一旦被电蚀渣堵死，就变成拉弧，工件上会烧出一个坑。",
+    spec:["单边火花位 0.15 mm", "表面 Ra 3.2 μm", "脉冲 200 / 100 μs", "粗公 + 精公"],
+    pt:"模具钢热处理与表面强化" },
+];
+
+let mdWired = false;
+
+function mdCard(m){
+  return '<article class="md-card">'
+    + '<button class="md-thumb" type="button" data-mold="' + m.id + '" aria-label="播放「' + m.t + '」演示">'
+    +   '<img src="' + m.img + '" alt="' + m.t + '演示界面" loading="lazy" width="1000" height="662">'
+    +   '<span class="md-tag">' + m.tag + '</span>'
+    +   '<span class="md-play"><i><svg aria-hidden="true"><use href="#i-play"/></svg></i></span>'
+    + '</button>'
+    + '<div class="md-in">'
+    +   '<h3>' + m.t + '<span>' + m.en + '</span></h3>'
+    +   '<p>' + m.d + '</p>'
+    +   '<div class="md-key">记住这一点：' + m.key + '</div>'
+    +   '<div class="md-spec">' + m.spec.map(x => '<span>' + x + '</span>').join("") + '</div>'
+    +   '<div class="md-act">'
+    +     '<button class="md-btn pri" type="button" data-mold="' + m.id + '">播放动画</button>'
+    +     '<a class="md-btn" href="' + m.file + '" target="_blank" rel="noopener">新标签页</a>'
+    +   '</div>'
+    +   '<button class="md-pt" type="button" data-kbitem="' + m.pt + '">配套知识点：' + m.pt + ' →</button>'
+    + '</div></article>';
+}
+
+function renderMold(){
+  const body = document.getElementById("mdBody");
+  if(!body) return;
+  const cnt = document.getElementById("mdCount");
+  if(cnt) cnt.textContent = MOLD_DEMOS.length + " 个演示";
+  if(!body.dataset.built){
+    body.innerHTML = MOLD_DEMOS.map(mdCard).join("");
+    body.dataset.built = "1";
+  }
+  if(mdWired) return;
+  mdWired = true;
+
+  body.addEventListener("click", e => {
+    const b = e.target.closest("[data-mold]");
+    if(b){ e.preventDefault(); openMold(b.dataset.mold); return; }
+    const k = e.target.closest("[data-kbitem]");
+    if(k){ mdGoItem(k.dataset.kbitem); }
+  });
+
+  const modal = document.getElementById("moldModal");
+  const frame = document.getElementById("mmFrame");
+  document.getElementById("mmClose").addEventListener("click", closeMold);
+  modal.addEventListener("click", e => { if(e.target === modal) closeMold(); });
+  /* Esc：先关浮层，并把事件消费掉（否则外层监听会顺势把人送回知识库） */
+  document.addEventListener("keydown", e => {
+    if(e.key === "Escape" && modal.classList.contains("open")){ closeMold(); e.preventDefault(); }
+  });
+  frame.addEventListener("load", () => { frame.style.opacity = "1"; });
+  window.addEventListener("popstate", () => { if(modal.classList.contains("open")) closeMold(); });
+}
+
+function openMold(id){
+  const m = MOLD_DEMOS.find(x => x.id === id);
+  if(!m) return;
+  const modal = document.getElementById("moldModal");
+  const frame = document.getElementById("mmFrame");
+  document.getElementById("mmTitle").textContent = m.t + " · " + m.en;
+  const a = document.getElementById("mmNewTab");
+  a.href = m.file;
+  frame.style.opacity = "0";
+  frame.src = m.file;
+  modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+  try{ history.replaceState(null, "", "?mod=mold&id=" + id); }catch(e){}
+  const btn = document.getElementById("mmClose");
+  if(btn) btn.focus({ preventScroll: true });
+}
+
+function closeMold(){
+  const modal = document.getElementById("moldModal");
+  if(!modal || !modal.classList.contains("open")) return;
+  modal.classList.remove("open");
+  const frame = document.getElementById("mmFrame");
+  if(frame) frame.src = "about:blank";     // 卸载掉，动画定时器随之停止
+  document.body.style.overflow = "";
+  try{ history.replaceState(null, "", location.pathname + location.hash); }catch(e){}
+}
+
+/* 卡片 → 跳进知识库对应条目（要先切模块，不然详情面板挂在隐藏的视图上） */
+function mdGoItem(name){
+  const it = KB_ITEMS.find(x => x.name === name);
+  if(!it) return;
+  const d = CAT_DOMAIN[it.cat];
+  if(d){ activeDomain = d.id; browseAll = false; activeSub = "all"; }
+  activeModule = "kb";
+  renderAll();
+  window.scrollTo(0, 0);
+  setTimeout(() => { try{ openItemByName(name); }catch(e){} }, 60);
 }
 
 function renderFiles(){
@@ -4243,7 +4364,7 @@ document.addEventListener("keydown", e=>{
      只靠下面那句 modalOpen 是不够的：同一个事件里弹窗可能刚被关掉，
      那时再查就查不到 → 会误判成「可以切模块」。（2026-10-06 修） */
   if(e.defaultPrevented) return;
-  const modalOpen = ["donateModal","imgModal","aiModal"].some(id=>{
+  const modalOpen = ["donateModal","imgModal","aiModal","moldModal"].some(id=>{
     const el = document.getElementById(id); return el && el.classList.contains("open");
   });
   if(modalOpen) return;
@@ -4525,7 +4646,7 @@ document.getElementById("statsBody").addEventListener("click", e=>{
 
 /* ══════════ 键盘快捷键 ══════════ */
 (function(){
-  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily","review","compare","step","files"];
+  const MODS = ["kb","map","quiz","wrong","stats","calc","path","select","formula","quick","check","tpl","case","gloss","gallery","field","fav","daily","review","compare","step","files","mold"];
   document.addEventListener("keydown", e=>{
     const tag = (e.target.tagName || "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || e.target.isContentEditable;
@@ -4623,6 +4744,7 @@ function applyDeepLink(){
   }
   renderAll();
   if(item) setTimeout(() => { try { openItemByName(item); } catch(e){ /* 名字对不上就不打开 */ } }, 90);
+  if(mod === "mold" && id) setTimeout(() => { try { openMold(id); } catch(e){} }, 120);
   window.scrollTo(0, 0);
   return true;
 }
