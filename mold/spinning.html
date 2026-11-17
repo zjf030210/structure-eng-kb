@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旋压成型演示 · Metal Spinning</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --line:#dde3ea;
+    --ink:#1c2430; --ink2:#5c6b7d; --ink3:#93a1b1;
+    --accent:#1f6feb; --green:#5f9e42; --copper:#c47240; --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);background:var(--panel);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5;max-width:880px}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+    background:#f3f6fa;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--copper)}
+
+  .body{display:grid;grid-template-columns:1fr 296px;min-height:0;flex:1}
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+  .stage .grid-bg{
+    position:absolute;inset:0;z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.45;pointer-events:none;
+  }
+
+  .phases{position:absolute;top:14px;left:16px;display:flex;flex-wrap:wrap;gap:5px;z-index:3;max-width:calc(100% - 32px)}
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--ink3);
+    backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph:hover{border-color:#c3d0de}
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+
+  aside{
+    border-left:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:13px;
+    overflow-y:auto;
+  }
+  .card{border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fcfdfe}
+  .card h2{font-size:11px;letter-spacing:1.2px;color:var(--ink3);font-weight:600;margin-bottom:9px;text-transform:uppercase}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:11.8px;color:var(--ink2)}
+  .row+.row{border-top:1px dashed #e8edf3}
+  .row b{font-size:13px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+  .row b small{font-size:10px;color:var(--ink3);font-weight:400;margin-left:2px}
+
+  .desc{font-size:12.2px;line-height:1.75;color:#43536a}
+  .desc b{color:var(--ink);font-weight:600}
+  .desc .hl{color:var(--copper);font-weight:600}
+  .desc .warn{color:var(--red);font-weight:600}
+
+  .bar{
+    display:flex;align-items:center;gap:12px;padding:11px 20px 13px;
+    border-top:1px solid var(--line);background:linear-gradient(180deg,#fff,#fafcfe);
+    font-size:11.5px;color:var(--ink2);flex-wrap:wrap;
+  }
+  .btn{
+    font:inherit;font-size:12px;padding:6px 14px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;color:var(--ink);transition:.2s;
+  }
+  .btn:hover{border-color:#c3d0de;background:#f7fafd}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+  .btn.primary:hover{background:#2b3644;border-color:#2b3644}
+  #seek{flex:1;min-width:140px;height:4px;appearance:none;background:#e2e9f1;border-radius:2px;outline:none;cursor:pointer}
+  #seek::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2.5px solid #fff;box-shadow:0 1px 4px rgba(31,111,235,.5);cursor:pointer}
+  .tc{font-variant-numeric:tabular-nums;color:var(--ink2);min-width:82px;text-align:center}
+  .rates{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .rates button{
+    font:inherit;font-size:11px;padding:6px 10px;border:0;background:#fff;color:var(--ink3);
+    cursor:pointer;transition:.2s;border-left:1px solid var(--line);
+  }
+  .rates button:first-child{border-left:0}
+  .rates button.on{background:var(--accent);color:#fff;font-weight:600}
+  .sw{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .sw input{accent-color:var(--accent);cursor:pointer}
+
+  body.no-anno .anno,body.no-anno .lead{display:none}
+
+  svg .anno{font-size:10px;fill:#54637a;letter-spacing:.1px;paint-order:stroke;stroke:#f7f9fc;stroke-width:3.2px;stroke-linejoin:round;transition:opacity .35s}
+  svg .anno.b{fill:#1c2430;font-weight:600;font-size:10.6px}
+  svg .anno.amber{fill:#a0632c;font-weight:600}
+  svg .anno.red{fill:#b8452f;font-weight:600}
+  .lead{stroke:#aebbc9;stroke-width:.85;fill:none;transition:opacity .35s}
+  .axis{stroke:#c6d3e2;stroke-width:1;stroke-dasharray:9 5 2 5;fill:none}
+  .spindle{fill:url(#gSteel);stroke:#5b6a78;stroke-width:1.1}
+  .mandrel{fill:url(#gSteel);stroke:#54636f;stroke-width:1.2}
+  .tail{fill:url(#gSteel);stroke:#5b6a78;stroke-width:1.05}
+  .blank{fill:none;stroke:#6d8db6;stroke-linecap:butt;stroke-linejoin:round}
+  .mline{stroke:#8fa4bb;stroke-width:.7;fill:none;opacity:.42;stroke-dasharray:4 4}
+  .topBg{fill:#fbfcfe;stroke:#dde3ea;stroke-width:1}
+  .topBlank{fill:#e3ecf7;stroke:#9fb4cb;stroke-width:1}
+  .topRay{stroke:#94abc4;stroke-width:1.5;fill:none}
+  .topMold{fill:#cfdbe9;stroke:#7d90a4;stroke-width:1}
+  .topRing{fill:none;stroke:#c6d3e2;stroke-width:1.2}
+  .topTxt{font-size:9.4px;fill:#93a1b1;text-anchor:middle;letter-spacing:.2px}
+  .spinArrow{stroke:#9fb0c2;stroke-width:1.1;fill:none}
+
+  @media (max-width:1080px){
+    body{padding:10px;display:block;height:auto}
+    .app{width:100%}
+    .body{grid-template-columns:1fr}
+    aside{border-left:0;border-top:1px solid var(--line);padding:14px}
+    .stage{aspect-ratio:530/348}
+    .phases{position:static;padding:12px 14px 0;max-width:100%}
+    header{padding:16px 18px 12px;flex-direction:column;align-items:flex-start;gap:10px}
+  }
+  @media (min-width:1081px){ .app{height:calc(100vh - 36px)} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>旋压成型<span>Metal Spinning · 铝灯罩 / 反光杯</span></h1>
+      <p class="sub">把一片铝圆片压在<b>芯模</b>端面，主轴带着它转，<b>旋轮</b>一道一道从外向内压，平板就被"卷"成回转体。
+      料片直径按<b>展开面积</b>算，通常要放到成品的 1.45 倍以上。</p>
+    </div>
+    <div class="badge"><span class="dot"></span>凸模旋压 · 3 道次</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases" id="phases">
+        <div class="ph" data-ph="ld">装料</div>
+        <div class="ph" data-ph="st">起旋</div>
+        <div class="ph" data-ph="p1">一道</div>
+        <div class="ph" data-ph="p2">二道</div>
+        <div class="ph" data-ph="p3">三道</div>
+        <div class="ph" data-ph="fm">贴模</div>
+        <div class="ph" data-ph="tr">修边</div>
+        <div class="ph" data-ph="ej">脱模</div>
+      </div>
+
+      <svg id="scene" viewBox="50 168 530 348" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gSteel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#eaf0f8"/>
+            <stop offset=".34" stop-color="#d0dcea"/>
+            <stop offset=".7" stop-color="#aebfd2"/>
+            <stop offset="1" stop-color="#8fa3b9"/>
+          </linearGradient>
+          <linearGradient id="gRoller" x1="0" y1="0" x2="0.3" y2="1">
+            <stop offset="0" stop-color="#f4f8fd"/>
+            <stop offset=".55" stop-color="#c4d2e2"/>
+            <stop offset="1" stop-color="#94a7bd"/>
+          </linearGradient>
+          <radialGradient id="gGlow" cx=".42" cy=".28" r=".6">
+            <stop offset="0" stop-color="#ffffff" stop-opacity=".72"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+          <marker id="arrEnd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="#7b8b9d"/>
+          </marker>
+          <marker id="arrTurn" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="#9fb0c2"/>
+          </marker>
+        </defs>
+
+        <!-- 轴线 -->
+        <line class="axis" x1="60" y1="340" x2="472" y2="340"/>
+
+        <!-- 主轴夹头 -->
+        <g id="gSpindle">
+          <rect class="spindle" x="58" y="294" width="60" height="92" rx="3"/>
+          <line x1="80" y1="294" x2="80" y2="386" stroke="#7d8fa4" stroke-width=".9" opacity=".55"/>
+          <line x1="97" y1="294" x2="97" y2="386" stroke="#7d8fa4" stroke-width=".9" opacity=".55"/>
+          <rect x="112" y="302" width="10" height="76" fill="#b8c6d6" stroke="#7d8fa4" stroke-width=".8" rx="1"/>
+        </g>
+
+        <!-- 芯模：柄 + 半球 -->
+        <g id="gMold">
+          <rect class="mandrel" x="116" y="310" width="62" height="60" rx="2"/>
+          <circle class="mandrel" cx="260" cy="340" r="100"/>
+          <circle cx="260" cy="340" r="100" fill="url(#gGlow)"/>
+          <g class="mline">
+            <ellipse cx="260" cy="340" rx="74" ry="74"/>
+            <ellipse cx="260" cy="340" rx="46" ry="46"/>
+          </g>
+        </g>
+
+        <!-- 料片 -->
+        <g id="gBlank">
+          <path id="blankPath" class="blank" stroke-width="5" d="M362,190 L362,490"/>
+        </g>
+
+        <!-- 尾座顶针 -->
+        <g id="gTail">
+          <rect class="tail" x="378" y="324" width="46" height="32" rx="2"/>
+          <path class="tail" d="M362,332 L378,340 L362,348 Z"/>
+        </g>
+
+        <!-- 旋轮（上下对称） -->
+        <g id="rollU" opacity="0">
+          <circle r="17" fill="url(#gRoller)" stroke="#58687a" stroke-width="1.2"/>
+          <circle r="6.2" fill="#8496aa" stroke="#58687a" stroke-width=".9"/>
+          <path d="M-17,0 L17,0 M0,-17 L0,17" stroke="#8fa0b3" stroke-width=".65" opacity=".6"/>
+        </g>
+        <g id="rollD" opacity="0">
+          <circle r="17" fill="url(#gRoller)" stroke="#58687a" stroke-width="1.2"/>
+          <circle r="6.2" fill="#8496aa" stroke="#58687a" stroke-width=".9"/>
+          <path d="M-17,0 L17,0 M0,-17 L0,17" stroke="#8fa0b3" stroke-width=".65" opacity=".6"/>
+        </g>
+
+        <!-- 修边：红色块就是"要车掉的法兰"，高度随 rb 收小 -->
+        <g id="gKnife" opacity="0">
+          <rect id="scrapU" x="257" y="210" width="9" height="30" fill="#f6dcd5" stroke="#c0392b" stroke-width="1" stroke-dasharray="3.5 2.5" opacity=".92"/>
+          <rect id="scrapD" x="257" y="440" width="9" height="30" fill="#f6dcd5" stroke="#c0392b" stroke-width="1" stroke-dasharray="3.5 2.5" opacity=".92"/>
+          <path d="M304,184 L304,198 L276,204 L276,190 Z" fill="#b9c7d7" stroke="#6b7d91" stroke-width="1"/>
+          <path d="M276,190 L270,193 L270,203 L276,206 Z" fill="#cfdae7" stroke="#6b7d91" stroke-width=".9"/>
+          <path d="M270,193 L270,203" stroke="#c0392b" stroke-width="1.9"/>
+        </g>
+
+        <!-- 俯视小窗 -->
+        <g id="gTop">
+          <circle class="topBg" cx="512" cy="420" r="46"/>
+          <g id="topSpin">
+            <circle class="topBlank" cx="512" cy="420" r="37"/>
+            <path class="topRay" d="M512,383 L512,457 M475,420 L549,420"/>
+            <path class="topRay" d="M492,400 L532,440 M532,400 L492,440" opacity=".5"/>
+          </g>
+          <circle class="topMold" cx="512" cy="420" r="25"/>
+          <circle class="topRing" cx="512" cy="420" r="46"/>
+          <path class="spinArrow" d="M512,368 A52,52 0 0 1 564,420" marker-end="url(#arrTurn)"/>
+          <text class="topTxt" x="512" y="488">俯视 · 主轴 600 rpm</text>
+        </g>
+
+        <!-- ===== 标注 ===== -->
+        <g id="anno">
+          <g data-on="ld st p1 p2 p3 fm">
+            <path class="lead" d="M196,468 L220,450"/>
+            <text class="anno" x="196" y="480" text-anchor="middle">芯模（凸模）</text>
+          </g>
+          <g data-on="ld st p1 p2 p3 fm">
+            <path class="lead" d="M78,388 L78,436"/>
+            <text class="anno" x="78" y="450" text-anchor="middle">主轴夹头</text>
+          </g>
+          <g id="gAnnoTail" data-on="ld st p1 p2 p3 fm">
+            <path class="lead" d="M410,300 L400,318"/>
+            <text class="anno" x="414" y="298" text-anchor="start">尾座顶针</text>
+          </g>
+          <g id="gAnnoBlank" data-on="ld">
+            <text class="anno b" x="362" y="176" text-anchor="middle" fill="#a0632c">料片 φ300×1.2</text>
+          </g>
+          <g data-on="p1 p2">
+            <path class="lead" d="M256,196 L298,216"/>
+            <text class="anno amber" x="250" y="192" text-anchor="end">喇叭口</text>
+          </g>
+          <g id="gAnnoRoll" data-on="p1 p2 p3">
+            <path class="lead" d="M13,-23 L5,-15"/>
+            <text class="anno" x="14" y="-26" text-anchor="start">旋轮</text>
+          </g>
+          <g data-on="tr">
+            <path class="lead" d="M306,174 L294,192"/>
+            <text class="anno red" x="312" y="170" text-anchor="start">车掉修边余量</text>
+          </g>
+          <g data-on="ej">
+            <path class="lead" d="M302,498 L346,474"/>
+            <text class="anno b" x="300" y="504" text-anchor="start" fill="#43536a">成品 φ200 · 壁厚 0.95</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <aside>
+      <div class="card">
+        <h2>实时状态</h2>
+        <div class="row"><span>成形进度</span><b id="vProg">0<small>%</small></b></div>
+        <div class="row"><span>壁厚</span><b id="vThick">1.20<small>mm</small></b></div>
+        <div class="row"><span>当前道次</span><b id="vPass">—</b></div>
+        <div class="row"><span>工序</span><b id="vState" style="font-size:12px">待装料</b></div>
+      </div>
+
+      <div class="card">
+        <h2>工艺参数</h2>
+        <div class="row"><span>材料</span><b style="font-size:12px">铝 1060-O</b></div>
+        <div class="row"><span>料片</span><b style="font-size:12px">φ300 × 1.2</b></div>
+        <div class="row"><span>成品</span><b style="font-size:12px">φ200 × H100</b></div>
+        <div class="row"><span>主轴转速</span><b style="font-size:12px">600 rpm</b></div>
+        <div class="row"><span>旋轮进给</span><b style="font-size:12px">0.5 mm/r</b></div>
+        <div class="row"><span>道次数</span><b style="font-size:12px">3 道</b></div>
+        <div class="row"><span>减薄率</span><b style="font-size:12px">21 %</b></div>
+      </div>
+
+      <div class="card">
+        <h2>此刻在做什么</h2>
+        <p class="desc" id="desc">按「播放」开始。也可以点上方阶段直接跳过去。</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="bar">
+    <button class="btn primary" id="play">▶ 播放</button>
+    <input type="range" id="seek" min="0" max="1000" value="0">
+    <span class="tc" id="tc">0:00 / 0:30</span>
+    <div class="rates">
+      <button data-rate="0.5">0.5×</button>
+      <button data-rate="1" class="on">1×</button>
+      <button data-rate="2">2×</button>
+    </div>
+    <label class="sw"><input type="checkbox" id="annoToggle" checked><span>标注</span></label>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const $ = s => document.querySelector(s);
+  const clamp = (v,a,b) => v<a?a:(v>b?b:v);
+  const ease = x => x*x*(3-2*x);
+  const seg = (t,a,b) => { if(b<=a) return t>=b?1:0; return clamp((t-a)/(b-a),0,1); };
+  const lerp = (a,b,k) => a + (b-a)*k;
+
+  /* ===== 几何常量（世界坐标） =====
+     轴线 y=340；球心 (260,340) R=100；料片平面 x=362；料片半径 150 */
+  const CY = 340, R = 100, RB = 150, XP = 362, CX = 260;
+  const SKIN = 2.4;  // 料片自身半厚：让人看出它贴在球面外侧，而不是重合
+  const R0 = 132;   // 料片上"刚好走到赤道"的那一圈半径（其余是修边余量）
+  const D_LOAD = 84, D_TAIL = 104;   // 装料时料片 / 尾座各自的起始退距
+
+  /* 料片半径 r 处的材料，成形后落在哪里。
+     用的是【面积守恒】：料片上半径 r 的圆内面积 πr²，
+     等于球面上球冠面积 2πR²·(1-cosφ)/2 的对应份额 —— 化简得 cosφ = 1 - (r/R0)²。
+     r > R0 时料片已经绕过赤道，不再贴球，而是在球根处堆成一段竖直的【法兰】，
+     这段就是修边要车掉的东西。 */
+  function moldAt(r){
+    const ar = Math.abs(r);
+    const c = Math.max(-1, Math.min(1, 1 - (ar*ar)/(R0*R0)));
+    const phi = Math.acos(c);
+    if(phi <= Math.PI/2){
+      return { x: CX + SKIN + R*Math.cos(phi), y: R*Math.sin(phi) };
+    }
+    return { x: CX + SKIN, y: R + R*(phi - Math.PI/2) };
+  }
+
+  /* ===== 时间轴：单位秒 ===== */
+  const DUR = 30;
+  const T = {
+    ld: [0.6,  3.2],
+    st: [4.2,  6.6],
+    p1: [7.6,  11.4],
+    p2: [12.4, 16.2],
+    p3: [17.2, 20.6],
+    fm: [21.6, 23.0],
+    tr: [24.0, 26.4],
+    ej: [27.4, 29.4]
+  };
+
+  // 成形前沿 s（料片原始半径，从 150 收到 12）
+  const SK = [
+    [0,          150], [T.st[0], 150], [T.st[1], 142],
+    [T.p1[0],    142], [T.p1[1],  96],
+    [T.p2[0],     96], [T.p2[1],  56],
+    [T.p3[0],     56], [T.p3[1],  16],
+    [T.fm[0],     16], [T.fm[1], -30]
+  ];
+
+  const TXT = {
+    ld: '把 <b>φ300×1.2</b> 的铝圆片贴到芯模端面，尾座顶针压紧。料片直径不能凭感觉：半球表面积 2πR²，料片面积 πRb²，推出 <span class="hl">Rb = R√2 ≈ 1.41R</span>，再加 8~12% 修边余量，正好 φ300。',
+    st: '主轴升到 <b>600 rpm</b>，旋轮从料片外缘接触，浇润滑液（肥皂水或机油）。<span class="warn">转速低了起皱，高了打滑烧伤</span>，这个窗口很窄。',
+    p1: '旋轮沿轴向进给，把料片外圈往芯模方向"卷"。第一道只走总变形量的 <b>40%</b>——一次压到底必起皱，褶皱一旦产生就压不平了。',
+    p2: '第二道继续向内。<span class="hl">喇叭口</span>就是还没压到的过渡区，它越小说明成形越接近完成。实际生产在这一步之后常做一次中间退火。',
+    p3: '第三道压到球顶附近，喇叭口收拢。累计变形量已超 60%，铝 1060 要 <b>340℃ 保温 2h</b> 退火，否则继续压会开裂。',
+    fm: '完全贴合。壁厚从 1.20 减到 <b>0.95</b>（减薄 21%）。<span class="hl">越靠球顶减薄越严重</span>——那里的材料被拉得最长，是强度最弱的位置。',
+    tr: '车掉根部多出来的法兰边，顺便车平尾座压痕。到这一步才是成品尺寸 <b>φ200</b>，之前都只能算半成品。',
+    ej: '尾座退回，成品从芯模上轴向拉出。凸模旋压的成品<b>内表面</b>贴合芯模、尺寸准；<b>外表面</b>是旋轮压出来的，带轻微螺旋纹。'
+  };
+
+  function piecewise(t, k){
+    for(let i=0;i<k.length-1;i++){
+      if(t <= k[i+1][0]){
+        const [t0,v0] = k[i], [t1,v1] = k[i+1];
+        if(t1 <= t0) return v1;
+        return lerp(v0, v1, ease(clamp((t-t0)/(t1-t0), 0, 1)));
+      }
+    }
+    return k[k.length-1][1];
+  }
+
+  function state(t){
+    const s = piecewise(t, SK);
+    const ldP = ease(seg(t, T.ld[0], T.ld[1]));
+    const ldMid = T.ld[0] + (T.ld[1]-T.ld[0]) * 0.58;
+    const ldBlank = ease(seg(t, T.ld[0], ldMid));           // 料片先送入
+    const ldTail  = ease(seg(t, ldMid, T.ld[1]));           // 尾座后顶紧
+    const inFeed = ease(seg(t, T.st[0], T.st[0]+0.7));
+    const trimP = ease(seg(t, T.tr[0]+0.15, T.tr[1]-0.15));
+    const ejP = ease(seg(t, T.ej[0], T.ej[1]));
+    const rb = lerp(RB, R0, trimP);
+    const prog = clamp((RB - s) / (RB + 30), 0, 1);
+    const thick = lerp(1.20, 0.95, prog);
+    return { s, ldP, ldBlank, ldTail, inFeed, trimP, ejP, rb, prog, thick };
+  }
+
+  /* ===== 料片路径 ===== */
+  const NSEG = 80;
+  /* 料片上原始半径 ar 的材料，此刻画在哪儿。
+     s = 成形前沿；dw = 过渡带宽度；过渡带里给一点"外鼓"，
+     形状才对得上旋压现场看到的那个喇叭口。 */
+  function profileAt(ar, s){
+    const dw = Math.max(4, 9 + 19 * (s / RB));
+    const bumpK = clamp((dw - 10) / 16, 0, 1);
+    const e = ease(clamp((ar - s) / dw, 0, 1));
+    const mp = moldAt(ar);
+    const bump = 18 * bumpK * Math.pow(Math.sin(Math.PI * e), 2);
+    return {
+      x: XP + (mp.x - XP) * e,
+      y: ar + (mp.y - ar) * e + bump,
+      dw
+    };
+  }
+
+  function blankD(s, rb){
+    let d = '';
+    for(let i=-NSEG;i<=NSEG;i++){
+      const r = rb * i / NSEG;
+      const p = profileAt(Math.abs(r), s);
+      d += (i===-NSEG ? 'M' : 'L') + p.x.toFixed(2) + ',' + (CY + (r < 0 ? -p.y : p.y)).toFixed(2);
+    }
+    return d;
+  }
+
+  function rollerAt(s, rb){
+    const dw = Math.max(4, 9 + 19 * (s / RB));
+    const rr = Math.min(s + dw * 0.72, rb);
+    const p = profileAt(rr, s);
+    return { x: p.x + 15, y: p.y };
+  }
+
+  function phaseOf(t){
+    if(t < T.st[0]) return 'ld';
+    if(t < T.p1[0]) return 'st';
+    if(t < T.p2[0]) return 'p1';
+    if(t < T.p3[0]) return 'p2';
+    if(t < T.fm[0]) return 'p3';
+    if(t < T.tr[0]) return 'fm';
+    if(t < T.ej[0]) return 'tr';
+    return 'ej';
+  }
+
+  /* ===== DOM ===== */
+  const blankPath = $('#blankPath');
+  const gBlank    = $('#gBlank');
+  const gTail     = $('#gTail');
+  const rollU     = $('#rollU');
+  const rollD     = $('#rollD');
+  const gKnife    = $('#gKnife');
+  const gAnnoRoll = $('#gAnnoRoll');
+  const gAnnoTail = $('#gAnnoTail');
+  const gAnnoBlank= $('#gAnnoBlank');
+  const scrapU = $('#scrapU'), scrapD = $('#scrapD');
+  const topSpin   = $('#topSpin');
+  const vProg     = $('#vProg');
+  const vThick    = $('#vThick');
+  const vPass     = $('#vPass');
+  const vState    = $('#vState');
+  const desc      = $('#desc');
+  const tc        = $('#tc');
+  const seek      = $('#seek');
+  const playBtn   = $('#play');
+
+  let time = 0, playing = false, rate = 1, lastTs = 0;
+
+  function render(t){
+    const st = state(t);
+    const cur = phaseOf(t);
+
+    /* 料片 */
+    const d = blankD(st.s, st.rb);
+    blankPath.setAttribute('d', d);
+    blankPath.setAttribute('stroke-width', (3.9 + 1.0 * (1 - st.prog)).toFixed(2));
+
+    let dx = D_LOAD * (1 - st.ldBlank) + 92 * ease(seg(t, T.ej[0]+0.22, T.ej[0]+1.15));
+    let dy = -6 * st.ejP;
+    gBlank.setAttribute('transform', `translate(${dx.toFixed(2)},${dy.toFixed(2)})`);
+    gBlank.style.opacity = (1 - ease(seg(t, T.ej[1]-0.55, T.ej[1]-0.02))).toFixed(3);
+
+    /* 尾座 */
+    const tailX = D_TAIL * (1 - st.ldTail) + 110 * ease(seg(t, T.ej[0], T.ej[0]+0.55));
+    gTail.setAttribute('transform', `translate(${tailX.toFixed(2)},0)`);
+
+    /* 跟随运动的标注 */
+    gAnnoTail.setAttribute('transform', `translate(${(D_TAIL * (1 - st.ldTail)).toFixed(2)},0)`);
+    gAnnoBlank.setAttribute('transform', `translate(${dx.toFixed(2)},0)`);
+
+
+    /* 旋轮 */
+    const rp = rollerAt(st.s, st.rb);
+    const rx = rp.x + 96 * (1 - st.inFeed);
+    rollU.setAttribute('transform', `translate(${rx.toFixed(2)},${(CY - rp.y).toFixed(2)})`);
+    rollD.setAttribute('transform', `translate(${rx.toFixed(2)},${(CY + rp.y).toFixed(2)})`);
+    const rollFade = 1 - ease(seg(t, T.fm[0]-0.55, T.fm[0]+0.15));
+    const ro = (t >= T.st[0]-0.05) ? (0.22 + 0.78 * st.inFeed) * rollFade : 0;
+    rollU.style.opacity = ro.toFixed(3);
+    rollD.style.opacity = ro.toFixed(3);
+
+    /* 修边：切割线随边缘收进 */
+    const knifeOn = (t >= T.tr[0]) && (t < T.tr[1]+0.6);
+    gKnife.style.opacity = knifeOn ? 1 : 0;
+    /* 法兰尖端 = 料片在 rb 处落到芯模上的高度；红块正好是"还剩下的法兰" */
+    const tipU = CY - moldAt(st.rb).y;
+    const flH  = Math.max(0.1, (CY - R) - tipU);
+    scrapU.setAttribute('y', tipU.toFixed(2));
+    scrapU.setAttribute('height', flH.toFixed(2));
+    scrapD.setAttribute('y', (CY + R).toFixed(2));
+    scrapD.setAttribute('height', flH.toFixed(2));
+    gKnife.setAttribute('transform', `translate(0,${(tipU - 203).toFixed(2)})`);
+
+    /* 旋轮标注跟随上方旋轮 */
+    gAnnoRoll.setAttribute('transform', `translate(${rx.toFixed(2)},${(CY - rp.y).toFixed(2)})`);
+
+    /* 俯视窗旋转 */
+    const ang = (t * 150) % 360;
+    topSpin.setAttribute('transform', `rotate(${ang.toFixed(1)} 512 420)`);
+
+    /* 分阶段标注 */
+    document.querySelectorAll('#anno [data-on]').forEach(el=>{
+      el.style.opacity = el.dataset.on.split(' ').includes(cur) ? 1 : 0;
+    });
+
+    /* 面板 */
+    vProg.innerHTML = Math.round(st.prog*100) + '<small>%</small>';
+    vThick.innerHTML = st.thick.toFixed(2) + '<small>mm</small>';
+
+    let passTxt = '—';
+    if(cur === 'p1') passTxt = '第 1 道';
+    else if(cur === 'p2') passTxt = '第 2 道';
+    else if(cur === 'p3') passTxt = '第 3 道';
+    else if(cur === 'fm' || cur === 'tr' || cur === 'ej') passTxt = '3 道完成';
+    else if(cur === 'st') passTxt = '准备';
+    vPass.textContent = passTxt;
+
+    const ST = { ld:'装料夹紧', st:'起旋', p1:'旋压中', p2:'旋压中', p3:'旋压中',
+                 fm:'贴模', tr:'修边', ej:'脱模' };
+    vState.textContent = ST[cur];
+    vState.style.color = (cur==='tr') ? '#c0392b' : (cur==='ej' ? '#5f9e42' : '#1c2430');
+
+    desc.innerHTML = TXT[cur] || '';
+
+    document.querySelectorAll('#phases .ph').forEach(el=>{
+      el.classList.toggle('on', el.dataset.ph === cur);
+    });
+
+    tc.textContent = fmt(t) + ' / ' + fmt(DUR);
+    seek.value = Math.round(t / DUR * 1000);
+  }
+
+  function fmt(t){
+    const m = Math.floor(t/60), s = Math.floor(t%60);
+    return m + ':' + String(s).padStart(2,'0');
+  }
+
+  function tick(ts){
+    if(!lastTs) lastTs = ts;
+    const dt = Math.min((ts - lastTs)/1000, 0.08);
+    lastTs = ts;
+    if(playing){
+      time += dt * rate;
+      if(time > DUR) time = 0;
+      render(time);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.onclick = ()=>{
+    playing = !playing;
+    lastTs = 0;
+    playBtn.textContent = playing ? '❚❚ 暂停' : '▶ 播放';
+    if(!playing) render(time);
+  };
+
+  seek.oninput = e=>{
+    time = (+e.target.value) / 1000 * DUR;
+    playing = false;
+    lastTs = 0;
+    playBtn.textContent = '▶ 播放';
+    render(time);
+  };
+
+  document.querySelectorAll('.rates button').forEach(b=>{
+    b.onclick = ()=>{
+      rate = +b.dataset.rate;
+      document.querySelectorAll('.rates button').forEach(x=>x.classList.toggle('on', x===b));
+    };
+  });
+
+  document.querySelectorAll('#phases .ph').forEach(el=>{
+    el.onclick = ()=>{
+      const k = el.dataset.ph;
+      time = (T[k][0] + T[k][1]) / 2;
+      playing = false;
+      lastTs = 0;
+      playBtn.textContent = '▶ 播放';
+      render(time);
+    };
+  });
+
+  $('#annoToggle').onchange = e=>{
+    document.body.classList.toggle('no-anno', !e.target.checked);
+  };
+
+  document.addEventListener('keydown', e=>{
+    if(e.code === 'Space'){ e.preventDefault(); playBtn.click(); }
+  });
+
+  const q = new URLSearchParams(location.search).get('t');
+  if(q !== null && !isNaN(+q)){
+    const v = +q;
+    time = clamp(v <= 1 ? v*DUR : v, 0, DUR);
+  }
+  render(time);
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

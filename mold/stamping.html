@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>冲压模 · 落料工序演示 · Blanking Die</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --line:#dde3ea;
+    --ink:#1c2430; --ink2:#5c6b7d; --ink3:#93a1b1;
+    --accent:#1f6feb; --green:#5f9e42; --copper:#c47240; --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);background:var(--panel);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5;max-width:900px}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+    background:#f3f6fa;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--copper)}
+
+  .body{display:grid;grid-template-columns:1fr 296px;min-height:0;flex:1}
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+  .stage .grid-bg{
+    position:absolute;inset:0;z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.45;pointer-events:none;
+  }
+
+  .phases{position:absolute;top:14px;left:16px;display:flex;flex-wrap:wrap;gap:5px;z-index:3;max-width:calc(100% - 32px)}
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--ink3);
+    backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph:hover{border-color:#c3d0de}
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+
+  aside{
+    border-left:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:13px;
+    overflow-y:auto;
+  }
+  .card{border:1px solid var(--line);border-radius:11px;padding:12px 13px;background:#fcfdfe}
+  .card h2{font-size:11px;letter-spacing:1.2px;color:var(--ink3);font-weight:600;margin-bottom:9px;text-transform:uppercase}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;font-size:11.8px;color:var(--ink2)}
+  .row+.row{border-top:1px dashed #e8edf3}
+  .row b{font-size:13px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+  .row b small{font-size:10px;color:var(--ink3);font-weight:400;margin-left:2px}
+
+  .desc{font-size:12.2px;line-height:1.75;color:#43536a}
+  .desc b{color:var(--ink);font-weight:600}
+  .desc .hl{color:var(--copper);font-weight:600}
+  .desc .warn{color:var(--red);font-weight:600}
+
+  .bar{
+    display:flex;align-items:center;gap:12px;padding:11px 20px 13px;
+    border-top:1px solid var(--line);background:linear-gradient(180deg,#fff,#fafcfe);
+    font-size:11.5px;color:var(--ink2);flex-wrap:wrap;
+  }
+  .btn{
+    font:inherit;font-size:12px;padding:6px 14px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--line);background:#fff;color:var(--ink);transition:.2s;
+  }
+  .btn:hover{border-color:#c3d0de;background:#f7fafd}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
+  .btn.primary:hover{background:#2b3644;border-color:#2b3644}
+  #seek{flex:1;min-width:140px;height:4px;appearance:none;background:#e2e9f1;border-radius:2px;outline:none;cursor:pointer}
+  #seek::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2.5px solid #fff;box-shadow:0 1px 4px rgba(31,111,235,.5);cursor:pointer}
+  .tc{font-variant-numeric:tabular-nums;color:var(--ink2);min-width:82px;text-align:center}
+  .rates{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .rates button{
+    font:inherit;font-size:11px;padding:6px 10px;border:0;background:#fff;color:var(--ink3);
+    cursor:pointer;transition:.2s;border-left:1px solid var(--line);
+  }
+  .rates button:first-child{border-left:0}
+  .rates button.on{background:var(--accent);color:#fff;font-weight:600}
+  .sw{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .sw input{accent-color:var(--accent);cursor:pointer}
+
+  body.no-anno .anno,body.no-anno .lead{display:none}
+
+  svg .anno{font-size:10px;fill:#54637a;letter-spacing:.1px;paint-order:stroke;stroke:#f7f9fc;stroke-width:3.2px;stroke-linejoin:round;transition:opacity .35s}
+  svg .anno.b{fill:#1c2430;font-weight:600;font-size:10.6px}
+  svg .anno.amber{fill:#a0632c;font-weight:600}
+  svg .anno.red{fill:#b8452f;font-weight:600}
+  .lead{stroke:#aebbc9;stroke-width:.85;fill:none;transition:opacity .35s}
+
+  .holder{fill:url(#gSteel);stroke:#6b7f94;stroke-width:1.1}
+  .backing{fill:#c8d5e4;stroke:#7c8fa4;stroke-width:.9}
+  .fixplate{fill:url(#gSteel);stroke:#6b7f94;stroke-width:1}
+  .punch{fill:url(#gPunch);stroke:#5f7389;stroke-width:1}
+  .die{fill:url(#gDie);stroke:#61758b;stroke-width:1.1}
+  .base{fill:url(#gBase);stroke:#5e7187;stroke-width:1.1}
+  .stripper{fill:url(#gSteel);stroke:#6b7f94;stroke-width:1}
+  .ejector{fill:#c6d4e3;stroke:#7d90a6;stroke-width:1}
+  .table{fill:#a7b8ca;stroke:#6b7f94;stroke-width:1.1}
+  .strip{fill:url(#gStrip);stroke:#a8813f;stroke-width:.8}
+  .stop{fill:#a9bacd;stroke:#687d93;stroke-width:.9}
+  .spring{stroke:#8698ae;stroke-width:1;fill:none;stroke-linejoin:round}
+  .edge{stroke:#e9f1fa;stroke-width:1.1;opacity:.55}
+  .seat{stroke:#5e7187;stroke-width:.8;opacity:.45}
+
+  @media (max-width:1080px){
+    body{padding:10px;display:block;height:auto}
+    .app{width:100%}
+    .body{grid-template-columns:1fr}
+    aside{border-left:0;border-top:1px solid var(--line);padding:14px}
+    .stage{aspect-ratio:448/302}
+    .phases{position:static;padding:12px 14px 0;max-width:100%}
+    header{padding:16px 18px 12px;flex-direction:column;align-items:flex-start;gap:10px}
+  }
+  @media (min-width:1081px){ .app{height:calc(100vh - 36px)} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>冲压模 · 落料<span>Blanking Die · 单工序模</span></h1>
+      <p class="sub">条料送进顶住<b>挡料销</b> → 滑块下行 → <b>卸料板先压料</b> → <b>凸模</b>切入，材料在刃口处剪切分离 → 回程脱料 → <b>顶件板</b>把工件顶回凹模面。
+      冲裁间隙取料厚的 5%~8%，它决定断面的光亮带、毛刺和模具寿命。</p>
+    </div>
+    <div class="badge"><span class="dot"></span>弹性卸料 · 下顶出</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases" id="phases">
+        <div class="ph" data-ph="fd">送料</div>
+        <div class="ph" data-ph="dn">下行</div>
+        <div class="ph" data-ph="cl">压料</div>
+        <div class="ph" data-ph="pc">冲裁</div>
+        <div class="ph" data-ph="bd">死点</div>
+        <div class="ph" data-ph="up">回程</div>
+        <div class="ph" data-ph="ej">顶件</div>
+        <div class="ph" data-ph="ou">出件</div>
+      </div>
+
+      <svg id="scene" viewBox="36 78 448 302" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="gSteel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#eef3f9"/>
+            <stop offset=".3" stop-color="#d4e0ed"/>
+            <stop offset=".72" stop-color="#b3c4d6"/>
+            <stop offset="1" stop-color="#94a8bd"/>
+          </linearGradient>
+          <linearGradient id="gPunch" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#8b9fb6"/>
+            <stop offset=".26" stop-color="#c1d0e0"/>
+            <stop offset=".52" stop-color="#dee8f3"/>
+            <stop offset=".78" stop-color="#b5c5d6"/>
+            <stop offset="1" stop-color="#8195ac"/>
+          </linearGradient>
+          <linearGradient id="gDie" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#cbd8e5"/>
+            <stop offset=".42" stop-color="#a6b9cd"/>
+            <stop offset="1" stop-color="#7f94aa"/>
+          </linearGradient>
+          <linearGradient id="gBase" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#b9c8d8"/>
+            <stop offset=".45" stop-color="#9baec3"/>
+            <stop offset="1" stop-color="#7c8fa5"/>
+          </linearGradient>
+          <linearGradient id="gStrip" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#f1d9ab"/>
+            <stop offset=".45" stop-color="#e0bd7e"/>
+            <stop offset="1" stop-color="#c8a05a"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 下模：凹模 -->
+        <g id="gDie">
+          <rect class="die" x="100" y="246" width="102" height="44"/>
+          <rect class="die" x="298" y="246" width="102" height="44"/>
+          <line class="seat" x1="100" y1="256" x2="202" y2="256"/>
+          <line class="seat" x1="298" y1="256" x2="400" y2="256"/>
+          <line class="edge" x1="202" y1="246" x2="202" y2="288"/>
+          <line class="edge" x1="298" y1="246" x2="298" y2="288"/>
+        </g>
+
+        <!-- 下模座 + 垫脚 + 工作台 -->
+        <g id="gBase">
+          <rect class="base" x="100" y="290" width="102" height="26"/>
+          <rect class="base" x="298" y="290" width="102" height="26"/>
+          <rect class="base" x="132" y="316" width="58" height="28"/>
+          <rect class="base" x="310" y="316" width="58" height="28"/>
+          <rect class="table" x="62" y="344" width="336" height="14" rx="1.5"/>
+          <line x1="62" y1="347" x2="398" y2="347" stroke="#c3d2e2" stroke-width="1" opacity=".55"/>
+        </g>
+
+        <!-- 顶件板 -->
+        <path id="ejSpr1" class="spring" d="" opacity=".8"/>
+        <path id="ejSpr2" class="spring" d="" opacity=".8"/>
+        <g id="gEject">
+          <rect class="ejector" x="202" y="246" width="96" height="14"/>
+          <line x1="202" y1="246.6" x2="298" y2="246.6" stroke="#6f8399" stroke-width="1.3"/>
+        </g>
+
+        <!-- 条料 -->
+        <g id="gStrip">
+          <rect class="strip" x="30" y="240" width="172" height="6"/>
+          <rect class="strip" x="298" y="240" width="122" height="6"/>
+        </g>
+
+        <!-- 工件 -->
+        <g id="gWork">
+          <rect class="strip" x="202" y="240" width="96" height="6"/>
+          <rect id="wpHi" x="202" y="240" width="96" height="6"
+                fill="#f6e3ba" fill-opacity=".62" stroke="#5b7fa6" stroke-width="1" opacity="0"/>
+        </g>
+
+        <!-- 挡料销 -->
+        <rect id="gStop" class="stop" x="420" y="240" width="10" height="12"/>
+
+        <!-- 上模 -->
+        <g id="gUpper">
+          <rect class="holder" x="100" y="112" width="300" height="24" rx="1.5"/>
+          <line x1="100" y1="130" x2="400" y2="130" stroke="#7d90a5" stroke-width=".8" opacity=".5"/>
+          <rect class="backing" x="128" y="136" width="244" height="12"/>
+          <rect class="fixplate" x="128" y="148" width="244" height="24"/>
+          <rect class="punch" x="205" y="172" width="90" height="45"/>
+          <line x1="205" y1="176" x2="205" y2="215" stroke="#6d8199" stroke-width=".7" opacity=".55"/>
+          <line x1="295" y1="176" x2="295" y2="215" stroke="#6d8199" stroke-width=".7" opacity=".55"/>
+        </g>
+
+        <!-- 卸料弹簧 -->
+        <path id="sprL" class="spring" d=""/>
+        <path id="sprR" class="spring" d=""/>
+
+        <!-- 卸料板 -->
+        <g id="gStripper">
+          <rect class="stripper" x="128" y="210" width="77" height="14"/>
+          <rect class="stripper" x="295" y="210" width="77" height="14"/>
+          <line x1="128" y1="217" x2="205" y2="217" stroke="#7d90a5" stroke-width=".7" opacity=".45"/>
+          <line x1="295" y1="217" x2="372" y2="217" stroke="#7d90a5" stroke-width=".7" opacity=".45"/>
+        </g>
+
+        <!-- 标注 -->
+        <g id="anno">
+          <g data-on="fd dn">
+            <path class="lead" d="M56,231 L62,239"/>
+            <text class="anno b" x="48" y="228" text-anchor="start" fill="#a0632c">条料 1.5</text>
+          </g>
+
+          <g data-on="dn cl pc bd up">
+            <path class="lead" d="M400,124 L404,124"/>
+            <text class="anno" x="408" y="127" text-anchor="start">上模座</text>
+          </g>
+
+          <g data-on="dn cl pc bd up">
+            <path class="lead" d="M374,160 L404,160"/>
+            <text class="anno" x="408" y="163" text-anchor="start">垫板/固定板</text>
+          </g>
+
+          <g data-on="dn cl pc bd up">
+            <path class="lead" d="M297,196 L404,196"/>
+            <text class="anno b" x="408" y="199" text-anchor="start">凸模</text>
+          </g>
+
+          <g id="gAnnoStr" data-on="dn cl pc up">
+            <path class="lead" d="M96,207 L126,211"/>
+            <text class="anno" x="92" y="204" text-anchor="end">卸料板</text>
+          </g>
+
+          <g data-on="cl pc">
+            <path class="lead" d="M118,192 L161,192"/>
+            <text class="anno amber" x="114" y="189" text-anchor="end">卸料弹簧</text>
+          </g>
+
+          <g data-on="fd">
+            <path class="lead" d="M442,236 L426,241"/>
+            <text class="anno" x="446" y="232" text-anchor="end">挡料销</text>
+          </g>
+
+          <g data-on="fd dn cl pc bd up ej ou">
+            <path class="lead" d="M400,268 L404,268"/>
+            <text class="anno b" x="408" y="271" text-anchor="start">凹模</text>
+          </g>
+
+          <g data-on="fd dn cl pc bd up ej ou">
+            <path class="lead" d="M400,306 L404,306"/>
+            <text class="anno" x="408" y="309" text-anchor="start">下模座</text>
+          </g>
+
+          <g id="gAnnoGap" data-on="pc bd">
+            <path class="lead" d="M376,237 L330,242"/>
+            <text class="anno red" x="378" y="234" text-anchor="start">间隙 δ</text>
+          </g>
+
+          <g data-on="up ej">
+            <path class="lead" d="M198,264 L208,257"/>
+            <text class="anno" x="194" y="267" text-anchor="end">顶件板</text>
+          </g>
+
+          <g id="gAnnoWp" data-on="ou">
+            <path class="lead" d="M214,225 L214,232"/>
+            <text class="anno b" x="208" y="221" text-anchor="start" fill="#a0632c">工件 φ90 ×1.5</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <aside>
+      <div class="card">
+        <h2>模具参数</h2>
+        <div class="row"><span>材料</span><b>08F 冷轧板</b></div>
+        <div class="row"><span>料厚 t</span><b>1.5<small>mm</small></b></div>
+        <div class="row"><span>工件</span><b>φ90<small>圆片</small></b></div>
+        <div class="row"><span>单边间隙 δ</span><b>0.09<small>mm</small></b></div>
+        <div class="row"><span>凸模 / 凹模</span><b>φ89.82 / φ90</b></div>
+        <div class="row"><span>冲裁力</span><b>127<small>kN</small></b></div>
+        <div class="row"><span>步距</span><b>124<small>mm</small></b></div>
+      </div>
+
+      <div class="card">
+        <h2>实时状态</h2>
+        <div class="row"><span>滑块下压</span><b id="vStroke">0<small>%</small></b></div>
+        <div class="row"><span>凸模入模</span><b id="vDepth">0.0<small>mm</small></b></div>
+        <div class="row"><span>当前工序</span><b id="vState" style="font-size:12px">送料</b></div>
+      </div>
+
+      <div class="card">
+        <h2>这一步在干什么</h2>
+        <p class="desc" id="desc"></p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="bar">
+    <button class="btn primary" id="play">▶ 播放</button>
+    <input type="range" id="seek" min="0" max="1000" value="0">
+    <span class="tc" id="tc">0:00 / 0:30</span>
+    <div class="rates">
+      <button data-rate="0.5">0.5×</button>
+      <button data-rate="1" class="on">1×</button>
+      <button data-rate="2">2×</button>
+    </div>
+    <label class="sw"><input type="checkbox" id="annoToggle" checked> 标注</label>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const clamp = (v,a,b) => v<a?a:(v>b?b:v);
+  const ease = x => x*x*(3-2*x);
+  const seg = (t,a,b) => clamp((t-a)/(b-a), 0, 1);
+
+  /* ===== 时间轴（单位：秒） ===== */
+  const DUR = 30;
+  const T = {
+    fd: [0.5, 3.6],   // 送料
+    dn: [4.2, 6.8],   // 空行程 0→16
+    cl: [6.8, 9.0],   // 压料 16→24（弹簧压缩 8）
+    pc: [9.0, 13.2],  // 冲裁 24→38（凸模刃口入凹模 14）
+    bd: [13.2, 14.6], // 死点
+    up: [15.4, 19.0], // 回程 38→0
+    ej: [19.8, 22.2], // 顶件
+    ou: [23.0, 27.6]  // 出件
+  };
+
+  /* ===== 几何常量（侧视剖面，中线 X=250） ===== */
+  const PUN_W = 90;      // 凸模宽 205..295
+  const DIE_W = 96;      // 凹模孔宽 202..298
+  const STK_TOP = 240;   // 条料上表面
+  const STK_T = 6;       // 料厚（视觉放大 4×，实际 1.5）
+  const DIE_FACE = 246;  // 凹模上表面
+  const STR_TOP = 210;   // 卸料板初始顶面
+  const STR_T = 14;      // 卸料板厚
+  const PRESS = 16;      // 卸料板接触前滑块空行程
+  const CUT = 14;        // 冲裁行程
+  const TOTAL = 38;      // 总行程 = 16 + 8 + 14
+
+  function phaseOf(t){
+    if(t < T.dn[0]) return 'fd';
+    if(t < T.cl[0]) return 'dn';
+    if(t < T.pc[0]) return 'cl';
+    if(t < T.bd[0]) return 'pc';
+    if(t < T.up[0]) return 'bd';
+    if(t < T.ej[0]) return 'up';
+    if(t < T.ou[0]) return 'ej';
+    return 'ou';
+  }
+
+  function state(t){
+    /* 滑块位置：三段累加，回程一段减回 */
+    let down = PRESS * ease(seg(t, T.dn[0], T.dn[1]));
+    down += 8 * ease(seg(t, T.cl[0], T.cl[1]));
+    down += CUT * Math.pow(seg(t, T.pc[0], T.pc[1]), 1.5);
+    down -= TOTAL * ease(seg(t, T.up[0], T.up[1]));
+
+    const stripD = Math.min(down, PRESS);   // 卸料板被条料挡住后不再动
+
+    /* 工件：随凸模下移，顶件时回弹 */
+    let py = CUT * Math.pow(seg(t, T.pc[0], T.pc[1]), 1.5);
+    py -= CUT * ease(seg(t, T.ej[0], T.ej[1]));
+
+    /* 送料：先送到挡料销，出件时再送一步 */
+    const sxFeed = -30 * (1 - ease(seg(t, T.fd[0], T.fd[1])));
+    const sxNext = 62 * ease(seg(t, T.ou[0] + 0.6, T.ou[1] - 0.5));
+
+    /* 出件：先抬起离开凹模面，再向右移出 */
+    const wy = -14 * ease(seg(t, T.ou[0], T.ou[0] + 1.5));
+    const wx = 100 * ease(seg(t, T.ou[0] + 1.9, T.ou[1] - 0.2));
+
+    const depth = clamp((down - 24) / CUT, 0, 1) * 3.0;
+
+    return { down, stripD, py, sxFeed, sxNext, wx, wy, depth };
+  }
+
+  /* ===== 弹簧 ===== */
+  function springD(x, y1, y2, amp, n){
+    const len = y2 - y1;
+    if(len < 6) return `M${x},${y1} L${x},${y2}`;
+    let d = `M${x},${y1}`;
+    const step = len / n;
+    for(let i = 0; i < n; i++){
+      const y = y1 + step * (i + 0.5);
+      d += `L${(x + (i % 2 === 0 ? amp : -amp)).toFixed(1)},${y.toFixed(1)}`;
+    }
+    d += `L${x},${y2}`;
+    return d;
+  }
+
+  /* ===== DOM ===== */
+  const gUpper    = $('#gUpper');
+  const gStripper = $('#gStripper');
+  const gStrip    = $('#gStrip');
+  const gWork     = $('#gWork');
+  const gEject    = $('#gEject');
+  const wpHi      = $('#wpHi');
+  const sprL      = $('#sprL');
+  const sprR      = $('#sprR');
+  const ejSpr1    = $('#ejSpr1');
+  const ejSpr2    = $('#ejSpr2');
+  const gAnnoWp   = $('#gAnnoWp');
+  const gAnnoStr  = $('#gAnnoStr');
+  const gStop     = $('#gStop');
+  const vStroke   = $('#vStroke');
+  const vDepth    = $('#vDepth');
+  const vState    = $('#vState');
+  const desc      = $('#desc');
+  const tc        = $('#tc');
+  const seek      = $('#seek');
+  const playBtn   = $('#play');
+
+  let time = 0, playing = false, rate = 1, lastTs = 0;
+
+  function render(t){
+    const st = state(t);
+    const cur = phaseOf(t);
+
+    /* 上模 / 卸料板 */
+    gUpper.setAttribute('transform', `translate(0,${st.down.toFixed(2)})`);
+    gStripper.setAttribute('transform', `translate(0,${st.stripD.toFixed(2)})`);
+
+    /* 卸料弹簧：上端随固定板，下端随卸料板 */
+    const sy1 = 172 + st.down;
+    const sy2 = STR_TOP + st.stripD;
+    sprL.setAttribute('d', springD(165, sy1, sy2, 2.2, 8));
+    sprR.setAttribute('d', springD(335, sy1, sy2, 2.2, 8));
+
+    /* 条料 / 工件 / 顶件板 */
+    gStrip.setAttribute('transform', `translate(${(st.sxFeed + st.sxNext).toFixed(2)},0)`);
+    gWork.setAttribute('transform', `translate(${(st.sxFeed + st.wx).toFixed(2)},${(st.py + st.wy).toFixed(2)})`);
+    gEject.setAttribute('transform', `translate(0,${st.py.toFixed(2)})`);
+    ejSpr1.setAttribute('d', springD(216, 260 + st.py, 288, 2, 5));
+    ejSpr2.setAttribute('d', springD(284, 260 + st.py, 288, 2, 5));
+
+    /* 工件从条料里"浮现"：剪切一开始描边淡入 */
+    const sepP = clamp(st.py / 2.5, 0, 1);
+    wpHi.setAttribute('opacity', (sepP * 0.95).toFixed(2));
+
+    /* 工件标注跟着工件走 */
+    gAnnoWp.setAttribute('transform', `translate(${(st.sxFeed + st.wx).toFixed(2)},${(st.py + st.wy).toFixed(2)})`);
+    gAnnoStr.setAttribute('transform', `translate(0,${st.stripD.toFixed(2)})`);
+    gStop.style.opacity = (1 - 0.9 * ease(seg(t, T.ou[0] + 0.3, T.ou[0] + 1.9))).toFixed(2);
+
+    /* 分阶段标注 */
+    document.querySelectorAll('#anno [data-on]').forEach(el=>{
+      el.style.opacity = el.dataset.on.split(' ').includes(cur) ? 1 : 0;
+    });
+
+    /* 面板 */
+    vStroke.innerHTML = Math.round(st.down / TOTAL * 100) + '<small>%</small>';
+    vDepth.innerHTML = st.depth.toFixed(1) + '<small>mm</small>';
+
+    const SN = { fd:'送料就位', dn:'滑块下行', cl:'压料', pc:'冲裁中',
+                 bd:'下死点', up:'回程脱料', ej:'顶件', ou:'出件' };
+    vState.textContent = SN[cur];
+    vState.style.color = (cur==='pc') ? '#c0392b' : (cur==='ou' ? '#5f9e42' : '#1c2430');
+
+    desc.innerHTML = TXT[cur] || '';
+
+    document.querySelectorAll('#phases .ph').forEach(el=>{
+      el.classList.toggle('on', el.dataset.ph === cur);
+    });
+
+    tc.textContent = fmt(t) + ' / ' + fmt(DUR);
+    seek.value = Math.round(t / DUR * 1000);
+  }
+
+  const TXT = {
+    fd: '条料沿导料板送进，前端顶住<b>挡料销</b>就位。步距由挡料销定，不靠眼睛量——<span class="hl">送不到位或送过头，冲出来就是废品</span>，还可能撞坏凸模。',
+    dn: '滑块下行，<b>导柱</b>先把上下模对正。<b>凸模</b>固定在凸模固定板上，跟着滑块一起走，此时还没碰到料。',
+    cl: '<b>弹性卸料板</b>先压住条料，弹簧被压缩。这一步很关键：<span class="hl">先压紧、后冲裁</span>，材料不跑、断面才整齐。',
+    pc: '凸模切入。<b>凸模刃口</b>和<b>凹模刃口</b>处同时起裂，两条裂纹相向扩展、在中部会合——这就是<b>剪切分离</b>。<span class="hl">间隙 δ 取料厚的 5%~8%</span>：大了出毛刺、塌角大，小了摩擦大、模具磨损快。',
+    bd: '下死点。凸模刃口进入凹模约 <b>3mm</b>（≈2 倍料厚），保证<span class="hl">完全切透</span>。切不透的件会连着料带被顶回来，刃口容易崩。',
+    up: '滑块回程。条料会箍在凸模上被带起来，靠<b>卸料板</b>挡住——弹簧回弹，把料从凸模上脱下来。没有卸料板，这道工序根本没法连续做。',
+    ej: '工件卡在凹模孔里，<b>顶件板</b>在弹簧作用下上行，把工件顶回凹模面，与条料齐平。孔里不留料，下一步才不会叠片、崩刃。',
+    ou: '工件取出，条料前移一个步距，准备下一冲。<span class="hl">冲一次、送一步</span>——这就是单工序落料模的节奏。'
+  };
+
+  function fmt(t){
+    const m = Math.floor(t / 60), s = Math.floor(t % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  function tick(ts){
+    if(!lastTs) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.08);
+    lastTs = ts;
+    if(playing){
+      time += dt * rate;
+      if(time > DUR) time = 0;
+      render(time);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.onclick = ()=>{
+    playing = !playing;
+    lastTs = 0;
+    playBtn.textContent = playing ? '❚❚ 暂停' : '▶ 播放';
+    if(!playing) render(time);
+  };
+
+  seek.oninput = e=>{
+    time = (+e.target.value) / 1000 * DUR;
+    playing = false;
+    lastTs = 0;
+    playBtn.textContent = '▶ 播放';
+    render(time);
+  };
+
+  document.querySelectorAll('.rates button').forEach(b=>{
+    b.onclick = ()=>{
+      rate = +b.dataset.rate;
+      document.querySelectorAll('.rates button').forEach(x=>x.classList.toggle('on', x === b));
+    };
+  });
+
+  document.querySelectorAll('#phases .ph').forEach(el=>{
+    el.onclick = ()=>{
+      const k = el.dataset.ph;
+      time = (T[k][0] + T[k][1]) / 2;
+      playing = false;
+      lastTs = 0;
+      playBtn.textContent = '▶ 播放';
+      render(time);
+    };
+  });
+
+  $('#annoToggle').onchange = e=>{
+    document.body.classList.toggle('no-anno', !e.target.checked);
+  };
+
+  document.addEventListener('keydown', e=>{
+    if(e.code === 'Space'){ e.preventDefault(); playBtn.click(); }
+  });
+
+  const q = new URLSearchParams(location.search).get('t');
+  if(q !== null && !isNaN(+q)){
+    const v = +q;
+    time = clamp(v <= 1 ? v * DUR : v, 0, DUR);
+  }
+  render(time);
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
