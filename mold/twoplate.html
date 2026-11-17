@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>两板模开模演示 · Two-Plate Mold</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --line:#dde3ea;
+    --ink:#1c2430; --ink2:#5c6b7d; --ink3:#93a1b1;
+    --accent:#1f6feb; --green:#5f9e42; --copper:#c47240; --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);background:var(--panel);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5;max-width:860px}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+    background:#f3f6fa;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+  .body{display:grid;grid-template-columns:1fr 296px;min-height:0;flex:1}
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+  .stage .grid-bg{
+    position:absolute;inset:0;z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.45;pointer-events:none;
+  }
+
+  .phases{position:absolute;top:14px;left:16px;display:flex;flex-wrap:wrap;gap:5px;z-index:3;max-width:calc(100% - 32px)}
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--ink3);
+    backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph:hover{border-color:#c3d0de}
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+
+  aside{
+    border-left:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:14px;
+    background:#fff;overflow:auto;
+  }
+  .k{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);font-weight:600}
+
+  .live{background:#f6f9fd;border:1px solid #e2ebf6;border-radius:12px;padding:12px 14px}
+  .live .h{font-size:13px;font-weight:650;letter-spacing:.2px}
+  .live .cap{font-size:11.5px;color:var(--ink2);margin-top:5px;line-height:1.62;min-height:54px}
+  .live .cap b{color:var(--ink);font-weight:600}
+  .live .cap .hl{color:var(--copper);font-weight:600}
+  .live .cap .warn{color:var(--red);font-weight:600}
+
+  .rows{display:flex;flex-direction:column;border-top:1px solid #eef2f7}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #eef2f7;font-size:12.5px}
+  .row span{color:var(--ink2)}
+  .row b{font-variant-numeric:tabular-nums;font-weight:650;font-size:13px}
+  .row b i{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:400;margin-left:2px}
+  .row.c1 b{color:var(--accent)}
+  .row.c2 b{color:var(--copper)}
+  .row.c3 b{font-size:12px}
+
+  .note{font-size:11.8px;line-height:1.7;color:var(--ink2)}
+  .note b{color:var(--ink);font-weight:600}
+  .note .warn{color:var(--red);font-weight:600}
+
+  .controls{
+    border-top:1px solid var(--line);padding:13px 22px 15px;display:flex;align-items:center;gap:16px;
+    background:linear-gradient(180deg,#fff,#fbfcfe);
+  }
+  button{
+    font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:9px;padding:9px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px;
+    transition:.16s;white-space:nowrap;
+  }
+  button:hover{background:#f5f8fc;border-color:#c9d5e3}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink);min-width:96px;justify-content:center}
+  button.primary:hover{background:#2b3648}
+  .play-ico{width:0;height:0;border-left:9px solid currentColor;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent}
+  button.primary.playing .play-ico{border:0;width:9px;height:11px;border-left:3px solid currentColor;border-right:3px solid currentColor}
+
+  .track{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:#e3eaf3;outline:none}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+    border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .tcode{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums;width:86px;text-align:right}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:9px 11px;background:#fff;font-size:12px;color:var(--ink2)}
+  .seg button.on{background:#eef4fd;color:var(--accent);font-weight:600}
+  .seg button+button{border-left:1px solid var(--line)}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+  .toggle input{accent-color:var(--ink);width:15px;height:15px;cursor:pointer}
+
+  /* ---- 剖面 ---- */
+  .plate{stroke:#7d8b9b;stroke-width:.85;stroke-linejoin:round}
+  .hatch{fill:url(#hatchPat);stroke:none;pointer-events:none}
+  .plateEdge{fill:none;stroke:#5f6d7d;stroke-width:1.35;stroke-linejoin:round}
+  .cavity{fill:#e7eff9;stroke:#9db0c6;stroke-width:.9}
+  .core{fill:#9aabbf;stroke:#5b6a78;stroke-width:1}
+  .pin{fill:#95a3b2;stroke:#5f6d7d;stroke-width:.7}
+  .pinPlate{fill:#b6c4d2;stroke:#6f7d8d;stroke-width:.85}
+  .prod{fill:#e8b887;fill-opacity:.98;stroke:#9c6329;stroke-width:1.1;stroke-linejoin:round;filter:drop-shadow(0 0 1.6px rgba(175,110,45,.38))}
+  #gMelt rect{fill:#e05a28;fill-opacity:.97;stroke:none}
+  .chan{fill:#e4ecf7;stroke:#b6c4d4;stroke-width:.7}
+  .sprue{fill:#b2823f;fill-opacity:.96;stroke:#78531f;stroke-width:.85;stroke-linejoin:round}
+  .rod{fill:#cfb693;stroke:#9a7d58;stroke-width:.7}
+  .bush{fill:#bcc9d7;stroke:#6f7d8d;stroke-width:.9}
+  .cutMark{stroke:#c0392b;stroke-width:1.6;stroke-linecap:round;fill:none}
+
+  .anno{font-size:8.6px;fill:#4e5d73;letter-spacing:.1px;transition:opacity .38s;
+        paint-order:stroke fill;stroke:#f7f9fc;stroke-width:2.8px;stroke-linejoin:round}
+  .anno.b{fill:#1c2430;font-weight:650;font-size:9px}
+  .anno.r{fill:#b0302a;font-weight:650;font-size:9px}
+  .lead{stroke:#a4b2c3;stroke-width:.85;fill:none;transition:opacity .38s}
+  .plateName{font-size:8.4px;fill:#5c6b7d;letter-spacing:.2px;
+        paint-order:stroke fill;stroke:#f7f9fc;stroke-width:2.6px;stroke-linejoin:round}
+  .plateLead{stroke:#b6c2d0;stroke-width:.8;fill:none}
+
+  .dimLn{stroke:#9fb0c2;stroke-width:.9;fill:none}
+  .dimTxt{font-size:9px;font-variant-numeric:tabular-nums;font-weight:650;
+        paint-order:stroke fill;stroke:#f7f9fc;stroke-width:2.8px;stroke-linejoin:round}
+
+  body.no-anno .anno,body.no-anno .lead,body.no-anno .plateName,
+  body.no-anno .plateLead{display:none}
+
+  @media (min-width:1081px){ .app{height:calc(100vh - 36px)} }
+  @media (max-width:1080px){
+    body{height:auto;align-items:flex-start;padding:12px}
+    .app{height:auto;width:100%}
+    .body{grid-template-columns:1fr}
+    .stage{height:auto;aspect-ratio:566/324}
+    aside{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .controls{flex-wrap:wrap}
+    .track{order:9;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>两板模开模 <span>· Two-Plate Mold / 单分型面 · 直接浇口</span></h1>
+      <div class="sub">两板模只有<b>一块分型面（PL）</b>，定模与动模一次开模就分开。主流道直接顶在产品的杯底中心（<b>直接浇口</b>），熔体一路到底。<b>水口料和产品连成一体</b>，随顶针一起推出，必须人工剪掉浇口 —— 这正是三板模要多一块板的理由。</div>
+    </div>
+    <div class="badge"><span class="dot"></span>6 步 · 单分型面 215</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases">
+        <div class="ph" data-ph="cl">合模</div>
+        <div class="ph" data-ph="fi">充填</div>
+        <div class="ph" data-ph="ck">开模</div>
+        <div class="ph" data-ph="ej">顶出</div>
+        <div class="ph" data-ph="ct">剪浇口</div>
+        <div class="ph" data-ph="rs">复位</div>
+      </div>
+
+      <svg id="mold" viewBox="208 154 566 324" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="hatchPat" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="7" stroke="#5f6d7d" stroke-width="1" opacity=".3"/>
+          </pattern>
+          <linearGradient id="gPlate" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#d3dce7"/><stop offset="1" stop-color="#becbda"/>
+          </linearGradient>
+          <linearGradient id="gPlate2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#c8d4e1"/><stop offset="1" stop-color="#b2c1d1"/>
+          </linearGradient>
+          <linearGradient id="gMeltHot" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#f0913f"/><stop offset=".55" stop-color="#e8572f"/><stop offset="1" stop-color="#c93b28"/>
+          </linearGradient>
+          <marker id="arrEnd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 z" fill="#7b8b9d"/>
+          </marker>
+        </defs>
+
+        <!-- ===== 尺寸标注（底） ===== -->
+        <g id="dim1">
+          <line class="dimLn" id="d1ln"/><line class="dimLn" id="d1a"/><line class="dimLn" id="d1b"/>
+          <text class="dimTxt" id="d1tx" text-anchor="middle" fill="#1f6feb"></text>
+        </g>
+
+        <!-- ===== 定模：浇口套 + 定模座板 ===== -->
+        <g id="gFixed">
+          <rect class="plate" x="252" y="186" width="32" height="228" fill="url(#gPlate)"/>
+          <rect class="hatch" x="252" y="186" width="32" height="228"/>
+          <rect class="plateEdge" x="252" y="186" width="32" height="228"/>
+          <!-- 浇口套 -->
+          <path class="bush" d="M221,284 h34 a3,3 0 0 1 3,3 v26 a3,3 0 0 1 -3,3 h-34 a3,3 0 0 1 -3,-3 v-26 a3,3 0 0 1 3,-3 z"/>
+          <g class="plateLead"><line x1="268" y1="414" x2="268" y2="426"/></g>
+          <text class="plateName" x="268" y="437" text-anchor="middle">定模座板</text>
+        </g>
+
+        <!-- ===== A 板（定模，固定不动） ===== -->
+        <g id="gA">
+          <rect class="plate" x="284" y="186" width="75" height="228" fill="url(#gPlate2)"/>
+          <rect class="hatch" x="284" y="186" width="75" height="228"/>
+          <rect class="plateEdge" x="284" y="186" width="75" height="228"/>
+          <!-- 型腔挖空 -->
+          <rect class="cavity" x="300" y="255" width="59" height="90"/>
+          <g class="plateLead"><line x1="321" y1="414" x2="321" y2="426"/></g>
+          <text class="plateName" x="321" y="437" text-anchor="middle">A 板 · 型腔</text>
+        </g>
+
+        <!-- ===== 动模组：B 板 + 型芯 + 垫块 + 座板 ===== -->
+        <g id="gM2">
+          <rect class="plate" x="359" y="186" width="75" height="228" fill="url(#gPlate)"/>
+          <rect class="hatch" x="359" y="186" width="75" height="228"/>
+          <rect class="plateEdge" x="359" y="186" width="75" height="228"/>
+
+          <!-- 型芯 -->
+          <path class="core" d="M304,259 L434,259 L434,341 L304,341 Z"/>
+
+          <!-- 垫块空腔底 -->
+          <rect x="434" y="252" width="92" height="96" fill="#eaf0f8"/>
+
+          <!-- 垫块（上下两块） -->
+          <rect class="plate" x="434" y="186" width="92" height="66" fill="url(#gPlate)"/>
+          <rect class="hatch" x="434" y="186" width="92" height="66"/>
+          <rect class="plateEdge" x="434" y="186" width="92" height="66"/>
+          <rect class="plate" x="434" y="348" width="92" height="66" fill="url(#gPlate)"/>
+          <rect class="hatch" x="434" y="348" width="92" height="66"/>
+          <rect class="plateEdge" x="434" y="348" width="92" height="66"/>
+
+          <!-- 动模座板 -->
+          <rect class="plate" x="526" y="186" width="22" height="228" fill="url(#gPlate)"/>
+          <rect class="hatch" x="526" y="186" width="22" height="228"/>
+          <rect class="plateEdge" x="526" y="186" width="22" height="228"/>
+
+          <g class="plateLead">
+            <line x1="396" y1="414" x2="396" y2="426"/><line x1="480" y1="414" x2="480" y2="426"/>
+            <line x1="537" y1="414" x2="537" y2="426"/>
+          </g>
+          <text class="plateName" x="396" y="437" text-anchor="middle">B 板 · 动模</text>
+          <text class="plateName" x="480" y="437" text-anchor="middle">垫块</text>
+          <text class="plateName" x="537" y="437" text-anchor="middle">动模座板</text>
+
+          <!-- 型芯标注 -->
+          <g data-on="ck ej">
+            <path class="lead" d="M418,378 L418,346"/>
+            <text class="anno" x="418" y="390" text-anchor="middle">型芯</text>
+          </g>
+        </g>
+
+        <!-- ===== 顶针 + 顶针板 ===== -->
+        <g id="gEj">
+          <rect class="pin" x="304" y="295" width="220" height="10" rx="2"/>
+          <rect class="pinPlate" x="502" y="252" width="22" height="96" rx="2"/>
+          <g data-on="ej ct">
+            <path class="lead" d="M464,344 L464,310"/>
+            <text class="anno" x="464" y="356" text-anchor="middle">顶针</text>
+          </g>
+        </g>
+
+        <!-- ===== 流道空槽（刻在板上的槽，充填前可见） ===== -->
+        <g id="gChan">
+          <path class="chan" d="M218,296 L300,297 L300,303 L218,304 Z"/>
+        </g>
+
+        <!-- ===== 产品（杯形，开口朝动模） ===== -->
+        <g id="gProd">
+          <path class="prod" id="prodBody" d="M300,255 L359,255 L359,259 L304,259 L304,341 L359,341 L359,345 L300,345 Z"/>
+          <g id="gMelt">
+            <rect id="mUp" x="300" y="255" width="0" height="4"/>
+            <rect id="mDn" x="300" y="341" width="0" height="4"/>
+            <rect id="mLf" x="300" y="300" width="4" height="0"/>
+          </g>
+          <g data-on="ej ct">
+            <path class="lead" d="M372,246 L362,252"/>
+            <text class="anno b" x="377" y="243" text-anchor="start" fill="#a06d34">产品</text>
+          </g>
+        </g>
+
+        <!-- ===== 水口料 ===== -->
+        <g id="gSprue">
+            <path class="sprue" id="sprueBody" d="M218,296 L218,304 Z"/>
+        </g>
+
+        <!-- ===== 剪口标记 ===== -->
+        <g id="gCut" opacity="0">
+          <circle cx="300" cy="300" r="8" fill="#fff" fill-opacity=".92"/>
+          <path class="cutMark" d="M-5,-5 L5,5 M5,-5 L-5,5" transform="translate(300,300)"/>
+          <path class="lead" d="M282,318 L272,326" style="stroke:#d09090"/>
+          <text class="anno r" x="268" y="338" text-anchor="end">浇口需人工剪除</text>
+        </g>
+
+        <!-- ===== 标注 ===== -->
+        <g id="anno">
+          <g data-on="cl fi">
+            <path class="lead" d="M232,318 L232,332"/>
+            <text class="anno" x="234" y="345" text-anchor="middle">浇口套</text>
+          </g>
+          <g data-on="cl fi">
+            <path class="lead" d="M250,272 L250,293"/>
+            <text class="anno" x="250" y="266" text-anchor="middle">主流道</text>
+            <path class="lead" d="M302,240 L302,262"/>
+            <text class="anno" x="302" y="234" text-anchor="middle">直接浇口</text>
+          </g>
+          <g data-on="ck">
+            <path class="lead" d="M700,176 L772,176" marker-end="url(#arrEnd)" style="stroke:#7b8b9d;stroke-width:1.3"/>
+            <text class="anno" x="736" y="166" text-anchor="middle">动模后退 215</text>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <aside>
+      <div>
+        <div class="k">当前动作</div>
+        <div class="live" style="margin-top:8px">
+          <div class="h" id="phName">合模</div>
+          <div class="cap" id="phCap"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">实时状态</div>
+        <div class="rows">
+          <div class="row c1"><span>分型面 PL 开距</span><b><span id="v1">0</span><i>mm</i></b></div>
+          <div class="row c2"><span>顶出行程</span><b><span id="v2">0</span><i>mm</i></b></div>
+          <div class="row c3"><span>水口料</span><b id="v3">连着产品</b></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">模具参数</div>
+        <div class="rows">
+          <div class="row"><span>板厚 座/A/B/垫</span><b style="font-size:12px">32/75/75/92</b></div>
+          <div class="row"><span>开模行程</span><b>215<i>mm</i></b></div>
+          <div class="row"><span>顶出行程</span><b>62<i>mm</i></b></div>
+          <div class="row"><span>浇口形式</span><b style="font-size:12px">直接浇口 ×1</b></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <b>两板模 vs 三板模</b><br>
+        两板模结构简单、模厚小、成本低，一次开模就分型。但水口料<b>不自动脱落</b>，每模都要人工（或机械手）剪浇口，是自动化的瓶颈。<br>
+        三板模多一块流道板、多一个分型面，靠点浇口在开模时自动拉断，<b class="warn">省掉剪浇口这道工序</b>。
+      </div>
+    </aside>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="play"><span class="play-ico"></span><span id="playTx">播放</span></button>
+    <div class="track">
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <div class="tcode" id="tcode">0.00 s</div>
+    </div>
+    <div class="seg" id="speed">
+      <button data-sp="0.5">0.5×</button>
+      <button data-sp="1" class="on">1×</button>
+      <button data-sp="2">2×</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="annoToggle" checked>标注</label>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DUR = 28.5;
+  /* 时间轴：秒。每段动完留 1 s 左右停顿，上一段的结论先看清 */
+  const T = {
+    cl : [0.5,  2.2],   // 合模
+    fi : [3.2,  8.6],   // 充填 5.4
+    ck : [9.8, 14.6],   // 开模 215
+    ej : [15.8, 18.4],  // 顶出 62
+    ct : [19.6, 23.0],  // 剪浇口
+    rs : [24.2, 28.0]   // 复位
+  };
+  const PHNAME = {
+    cl:'合模 · 锁模', fi:'充填 · 保压', ck:'开模 — PL 一次打开',
+    ej:'顶出', ct:'剪浇口 — 两板模的代价', rs:'复位 · 合模'
+  };
+  const PHCAP = {
+    cl:'定模座板、A 板、B 板贴合，注塑机喷嘴顶住浇口套。锁模力把型腔封住，<b>整个模具只有 PL 一个分型面</b>。',
+    fi:'熔体从喷嘴进入<b>主流道</b>，由<span class="hl">直接浇口</span>从杯底中心进料，向杯口方向推进。压力从浇口向末端逐级衰减，杯口是最难填满的地方。',
+    ck:'动模后退 <span class="hl">215 mm</span>，<b>分型面 PL 一次打开</b>。产品包在型芯上随动模走；主流道凝料被浇口拉着<b>从 A 板里拽出来</b>，和产品一起悬在分型面间隙中。',
+    ej:'注塑机顶杆推动顶针板，顶针把产品从型芯上<b>推出 62 mm</b>，水口料跟着一起出来 —— 两者<b>仍然连在一起</b>。',
+    ct:'直接浇口还连着杯底，只能<span class="warn">人工剪除</span>。两板模没有第二个分型面，凝料无处自动脱落 —— 这就是自动化生产要换三板模的原因。',
+    rs:'顶针复位、分型面闭合，等待下一个循环。'
+  };
+
+  const $ = s => document.querySelector(s);
+  const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const seg=(t,a,b)=>clamp((t-a)/(b-a),0,1);
+  const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+
+  const OPEN = 215, EJECT = 62;
+
+  const gM2=$('#gM2'), gEj=$('#gEj'), gProd=$('#gProd'), gSprue=$('#gSprue'), gCut=$('#gCut');
+  const sprueBody=$('#sprueBody'), gMelt=$('#gMelt'), mUp=$('#mUp'), mDn=$('#mDn'), mLf=$('#mLf');
+  const d1ln=$('#d1ln'),d1a=$('#d1a'),d1b=$('#d1b'),d1tx=$('#d1tx');
+  const v1=$('#v1'), v2=$('#v2'), v3=$('#v3');
+  const phName=$('#phName'), phCap=$('#phCap');
+
+  let time = T.cl[0], playing = false, speed = 1, last = 0, curPh = '';
+  try{
+    const q = new URLSearchParams(location.search).get('t');
+    if(q!==null && !isNaN(+q)){
+      const v = +q;
+      time = clamp(v<=1 ? v*DUR : v, 0, DUR);   // ?t=0.5 按百分比，?t=12 按秒
+    }
+  }catch(e){}
+
+  function state(t){
+    /* 开模：单分型面一次开到位；复位时先回顶针再合模 */
+    const openOut = OPEN * ease(seg(t,10.0,14.4));
+    const openIn  = OPEN * ease(seg(t,25.4,27.8));
+    const d = clamp(openOut - openIn, 0, OPEN);
+
+    const ejOut = EJECT * ease(seg(t,15.8,18.2));
+    const ejIn  = EJECT * ease(seg(t,24.2,25.2));
+    const eject = clamp(ejOut - ejIn, 0, EJECT);
+
+    /* 充填 */
+    const fillR = seg(t,3.4,6.2);          // 主流道
+    const fillC = seg(t,5.9,8.6);          // 型腔（从杯口向杯底）
+    const cool  = ease(seg(t,8.4,10.2));
+    const prodO = seg(t,4.6,6.0);
+
+    /* 剪浇口 */
+    const cutMarkO = seg(t,19.8,20.3) * (1 - ease(seg(t,21.2,21.7)));
+    const cut     = ease(seg(t,20.9,21.5));
+    const sprY    = 96 * ease(seg(t,21.3,22.7));
+    const sprX    = -10 * ease(seg(t,21.3,22.7));
+    const sprO    = 1 - ease(seg(t,22.2,23.0));
+    const pO      = 1 - ease(seg(t,22.8,23.7));
+
+    return {d,eject,fillR,fillC,cool,prodO,cutMarkO,cut,sprY,sprX,sprO,pO};
+  }
+
+  function render(){
+    const t = time;
+    const s = state(t);
+
+    gM2.setAttribute('transform', `translate(${s.d.toFixed(2)},0)`);
+    gEj.setAttribute('transform', `translate(${(s.d - s.eject).toFixed(2)},0)`);
+    gProd.setAttribute('transform', `translate(${(s.d - s.eject).toFixed(2)},0)`);
+    gProd.style.opacity = s.prodO * s.pO;
+
+    /* 水口料：开模被拉出 → 顶出被推动 → 剪断后下沉 */
+    gSprue.setAttribute('transform', `translate(${(s.d - s.eject + s.sprX).toFixed(2)},${s.sprY.toFixed(2)})`);
+    gSprue.style.opacity = s.sprO;
+    {
+      const w = 82 * s.fillR;
+      const x1 = 218 + w, k = w/82;
+      sprueBody.setAttribute('d', `M218,296 L${x1.toFixed(2)},${(296+k).toFixed(2)} L${x1.toFixed(2)},${(304-k).toFixed(2)} L218,304 Z`);
+      sprueBody.style.fill = s.cool > .5 ? '#b2823f' : '#e05a28';
+    }
+
+    /* 剪口标记跟随产品端面 */
+    gCut.setAttribute('transform', `translate(${(s.d - s.eject).toFixed(2)},0)`);
+    gCut.style.opacity = s.cutMarkO;
+
+    /* 熔体：从杯底(300)向杯口(359)推进 */
+    const cw = 59 * s.fillC;
+    mUp.setAttribute('width', cw.toFixed(2));
+    mDn.setAttribute('width', cw.toFixed(2));
+    mLf.setAttribute('y', (300 - 45*s.fillC).toFixed(2));
+    mLf.setAttribute('height', (90*s.fillC).toFixed(2));
+    gMelt.style.opacity = 1 - s.cool;
+
+    /* 尺寸线 */
+    drawDim(359, 359+s.d, 470, s.d);
+
+    v1.textContent = s.d.toFixed(1);
+    v2.textContent = s.eject.toFixed(1);
+    v3.textContent = (s.d < 1 && s.cut > .5) ? '已取出'
+                   : s.cut > .5 ? '已剪断' : '连着产品';
+    v3.style.color = (s.d < 1 && s.cut > .5) ? '#93a1b1' : (s.cut > .5 ? '#c0392b' : '#c47240');
+
+    const ph = phaseOf(t);
+    if(ph !== curPh) setPhase(ph);
+  }
+
+  function drawDim(x0,x1,y,val){
+    const show = val > 2;
+    const opa = show ? 1 : 0;
+    d1ln.setAttribute('x1',x0); d1ln.setAttribute('y1',y); d1ln.setAttribute('x2',x1); d1ln.setAttribute('y2',y);
+    d1ln.style.opacity=opa;
+    d1a.setAttribute('x1',x0); d1a.setAttribute('y1',y); d1a.setAttribute('x2',x0); d1a.setAttribute('y2',y-9);
+    d1a.style.opacity=opa;
+    d1b.setAttribute('x1',x1); d1b.setAttribute('y1',y); d1b.setAttribute('x2',x1); d1b.setAttribute('y2',y-9);
+    d1b.style.opacity=opa;
+    d1tx.setAttribute('x',(x0+x1)/2); d1tx.setAttribute('y',y-14);
+    d1tx.textContent = show ? 'PL  ' + val.toFixed(0) + ' mm' : '';
+    d1tx.style.opacity = show?1:0;
+  }
+
+  function phaseOf(t){
+    if(t < T.fi[0]) return 'cl';
+    if(t < T.ck[0]) return 'fi';
+    if(t < T.ej[0]) return 'ck';
+    if(t < T.ct[0]) return 'ej';
+    if(t < T.rs[0]) return 'ct';
+    return 'rs';
+  }
+
+  function setPhase(key){
+    curPh = key;
+    document.querySelectorAll('.ph').forEach(e=>e.classList.toggle('on', e.dataset.ph===key));
+    phName.textContent = PHNAME[key];
+    phCap.innerHTML = PHCAP[key];
+    document.querySelectorAll('[data-on]').forEach(e=>{
+      e.style.opacity = e.dataset.on.split(' ').includes(key) ? 1 : 0;
+    });
+  }
+
+  /* 播放控制 */
+  const playBtn=$('#play'), playTx=$('#playTx'), scrub=$('#scrub'), tcode=$('#tcode');
+
+  function tick(now){
+    if(playing){
+      if(!last) last = now;
+      const dt = Math.min((now-last)/1000, 0.08);
+      last = now;
+      time += dt * speed;
+      if(time >= DUR){ time = DUR; playing=false; syncBtn(); }
+    } else { last = 0; }
+    render();
+    scrub.value = Math.round(time/DUR*1000);
+    tcode.textContent = time.toFixed(2)+' s';
+    requestAnimationFrame(tick);
+  }
+
+  function syncBtn(){
+    playBtn.classList.toggle('playing', playing);
+    playTx.textContent = playing ? '暂停' : (time>=DUR ? '重播' : '播放');
+  }
+
+  playBtn.onclick = ()=>{
+    if(time>=DUR){ time = 0; }
+    playing = !playing; last = 0; syncBtn();
+  };
+  scrub.oninput = ()=>{
+    time = scrub.value/1000*DUR;
+    playing = false; syncBtn(); render();
+  };
+  document.querySelectorAll('#speed button').forEach(b=>{
+    b.onclick = ()=>{
+      speed = +b.dataset.sp;
+      document.querySelectorAll('#speed button').forEach(x=>x.classList.toggle('on',x===b));
+    };
+  });
+  document.querySelectorAll('.ph').forEach(el=>{
+    el.onclick = ()=>{
+      time = T[el.dataset.ph][0];
+      playing = true; last = 0; syncBtn(); render();
+    };
+  });
+  $('#annoToggle').onchange = e=>{
+    document.body.classList.toggle('no-anno', !e.target.checked);
+  };
+  document.addEventListener('keydown', e=>{
+    if(e.code==='Space'){ e.preventDefault(); playBtn.click(); }
+  });
+
+  setPhase(phaseOf(time));
+  syncBtn();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

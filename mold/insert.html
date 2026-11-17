@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模仁与装配演示 · Mold Insert & Assembly</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --line:#dde3ea;
+    --ink:#1c2430; --ink2:#5c6b7d; --ink3:#93a1b1;
+    --accent:#1f6feb; --green:#5f9e42; --copper:#c47240; --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);background:var(--panel);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5;max-width:820px}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+    background:#f3f6fa;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--copper)}
+
+  .body{display:grid;grid-template-columns:1fr 292px;min-height:0;flex:1}
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+  .stage .grid-bg{
+    position:absolute;inset:0;z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.45;pointer-events:none;
+  }
+
+  .phases{position:absolute;top:14px;left:16px;display:flex;flex-wrap:wrap;gap:5px;z-index:3;max-width:calc(100% - 32px)}
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--ink3);
+    backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph:hover{border-color:#c3d0de}
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+
+  aside{
+    border-left:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:15px;
+    background:#fff;overflow:auto;
+  }
+  .k{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);font-weight:600}
+  .rows{display:flex;flex-direction:column;margin-top:8px;border-top:1px solid #eef2f7}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #eef2f7;font-size:12.5px}
+  .row span{color:var(--ink2)}
+  .row b{font-variant-numeric:tabular-nums;font-weight:650;font-size:13px}
+  .row b i{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:400;margin-left:2px}
+
+  .live{background:#f6f9fd;border:1px solid #e2ebf6;border-radius:12px;padding:12px 14px}
+  .live .h{font-size:12px;font-weight:650;letter-spacing:.2px}
+  .live .big{font-size:25px;font-weight:660;font-variant-numeric:tabular-nums;letter-spacing:-.6px;margin-top:4px}
+  .live .big i{font-style:normal;font-size:12px;color:var(--ink3);font-weight:500;margin-left:3px}
+  .live .cap{font-size:11.5px;color:var(--ink2);margin-top:2px;line-height:1.55}
+  .live .split{display:flex;gap:10px;margin-top:11px;padding-top:10px;border-top:1px dashed #d8e4f2}
+  .live .split div{flex:1}
+  .live .split b{display:block;font-size:13.5px;font-variant-numeric:tabular-nums}
+  .live .split span{font-size:10.5px;color:var(--ink3)}
+
+  .note{font-size:11.8px;line-height:1.68;color:var(--ink2)}
+  .note b{color:var(--ink);font-weight:600}
+  .note .hl{color:var(--copper);font-weight:600}
+  .note .warn{color:var(--red);font-weight:600}
+
+  .controls{
+    border-top:1px solid var(--line);padding:13px 22px 15px;display:flex;align-items:center;gap:16px;
+    background:linear-gradient(180deg,#fff,#fbfcfe);
+  }
+  button{
+    font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:9px;padding:9px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px;
+    transition:.16s;white-space:nowrap;
+  }
+  button:hover{background:#f5f8fc;border-color:#c9d5e3}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink);min-width:96px;justify-content:center}
+  button.primary:hover{background:#2b3648}
+  .play-ico{width:0;height:0;border-left:9px solid currentColor;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent}
+  button.primary.playing .play-ico{border:0;width:9px;height:11px;border-left:3px solid currentColor;border-right:3px solid currentColor}
+
+  .track{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:#e3eaf3;outline:none}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+    border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .tcode{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums;width:88px;text-align:right}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:9px 11px;background:#fff;font-size:12px;color:var(--ink2)}
+  .seg button.on{background:#eef4fd;color:var(--accent);font-weight:600}
+  .seg button+button{border-left:1px solid var(--line)}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+  .toggle input{accent-color:var(--ink);width:15px;height:15px;cursor:pointer}
+
+  /* ---- 等轴测实体 ---- */
+  .tp{fill:url(#gPlateT);stroke:#8e9aa8;stroke-width:.75;stroke-linejoin:round}
+  .sdL{fill:url(#gPlateL);stroke:#5f6a76;stroke-width:.75;stroke-linejoin:round}
+  .sdR{fill:url(#gPlateR);stroke:#48515c;stroke-width:.75;stroke-linejoin:round}
+  .insT{fill:url(#gInsT);stroke:#5a7893;stroke-width:.9;stroke-linejoin:round}
+  .insL{fill:url(#gInsL);stroke:#4d657e;stroke-width:.75;stroke-linejoin:round}
+  .insR{fill:url(#gInsR);stroke:#3a4f66;stroke-width:.75;stroke-linejoin:round}
+  .flgT{fill:url(#gFlgT);stroke:#3f5c76;stroke-width:1.3;stroke-linejoin:round}
+  .flgL{fill:#6f8ba4;stroke:#4d657e;stroke-width:.75;stroke-linejoin:round}
+  .flgR{fill:#55708a;stroke:#3a4f66;stroke-width:.75;stroke-linejoin:round}
+  .prodT{fill:url(#gProd);fill-opacity:.62;stroke:#b98a52;stroke-width:.9;stroke-linejoin:round}
+  .prodS{fill:#d69a58;fill-opacity:.55;stroke:#b0743c;stroke-width:.9;stroke-linejoin:round}
+  #bAperEdge,#aAperEdge{vector-effect:non-scaling-stroke}
+  .stepRow{transition:opacity .3s}
+
+  @media (min-width:1081px){ .app{height:calc(100vh - 36px)} }
+  @media (max-width:1080px){
+    body{height:auto;align-items:flex-start;padding:12px}
+    .app{height:auto;width:100%}
+    .body{grid-template-columns:1fr}
+    .stage{height:auto;aspect-ratio:1000/640}
+    aside{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .controls{flex-wrap:wrap}
+    .track{order:9;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>模仁与装配 <span>· Mold Insert / 镶件 · 装入模架</span></h1>
+      <div class="sub">模架是标准件，只提供导柱、顶针板和装夹；真正刻出产品形状的，是<b>镶进框口里的两块钢</b>——前模仁（型腔）和后模仁（型芯）。挂台坐在沉台上，PL 面齐平，4 颗螺丝吊紧，塞尺 0.02 验贴合。</div>
+    </div>
+    <div class="badge"><span class="dot"></span>7 道工序 · 框口 ≤ 0.02</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases">
+        <div class="ph" data-ph="fr">框口</div>
+        <div class="ph" data-ph="ex">取出</div>
+        <div class="ph" data-ph="al">对位</div>
+        <div class="ph" data-ph="pr">压入</div>
+        <div class="ph" data-ph="bl">吊紧</div>
+        <div class="ph" data-ph="ck">验收</div>
+        <div class="ph" data-ph="cl">合模</div>
+      </div>
+
+      <svg id="mold" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- 模架：中性灰钢 -->
+          <linearGradient id="gPlateT" x1="0" y1="0" x2=".55" y2="1">
+            <stop offset="0" stop-color="#d2dbe5"/>
+            <stop offset=".44" stop-color="#bcc7d3"/>
+            <stop offset="1" stop-color="#a3aeba"/>
+          </linearGradient>
+          <linearGradient id="gPlateL" x1="0" y1="0" x2=".2" y2="1">
+            <stop offset="0" stop-color="#8e99a6"/>
+            <stop offset="1" stop-color="#6b7581"/>
+          </linearGradient>
+          <linearGradient id="gPlateR" x1="0" y1="0" x2=".2" y2="1">
+            <stop offset="0" stop-color="#6d7784"/>
+            <stop offset="1" stop-color="#4d5661"/>
+          </linearGradient>
+          <linearGradient id="gBaseT" x1="0" y1="0" x2=".55" y2="1">
+            <stop offset="0" stop-color="#98a3b0"/>
+            <stop offset="1" stop-color="#78838f"/>
+          </linearGradient>
+
+          <!-- 模仁：偏冷的蓝灰，和模架分开 -->
+          <linearGradient id="gInsT" x1="0" y1="0" x2=".55" y2="1">
+            <stop offset="0" stop-color="#c6d9e9"/>
+            <stop offset=".42" stop-color="#a8c1d6"/>
+            <stop offset="1" stop-color="#87a3bd"/>
+          </linearGradient>
+          <linearGradient id="gInsL" x1="0" y1="0" x2=".2" y2="1">
+            <stop offset="0" stop-color="#7d97b0"/>
+            <stop offset="1" stop-color="#5d7691"/>
+          </linearGradient>
+          <linearGradient id="gInsR" x1="0" y1="0" x2=".2" y2="1">
+            <stop offset="0" stop-color="#5f7791"/>
+            <stop offset="1" stop-color="#445b74"/>
+          </linearGradient>
+          <linearGradient id="gFlgT" x1="0" y1="0" x2=".5" y2="1">
+            <stop offset="0" stop-color="#d8e6f2"/>
+            <stop offset=".5" stop-color="#b6cde0"/>
+            <stop offset="1" stop-color="#94aec5"/>
+          </linearGradient>
+
+          <!-- 产品：暖色，唯一一个非钢件 -->
+          <linearGradient id="gProd" x1="0" y1="0" x2=".5" y2="1">
+            <stop offset="0" stop-color="#f5cf9c"/>
+            <stop offset=".5" stop-color="#e8b477"/>
+            <stop offset="1" stop-color="#cf9455"/>
+          </linearGradient>
+
+          <linearGradient id="gHole" x1="0" y1="0" x2=".4" y2="1">
+            <stop offset="0" stop-color="#1b242e"/>
+            <stop offset="1" stop-color="#0f151c"/>
+          </linearGradient>
+
+          <filter id="soft" x="-25%" y="-25%" width="150%" height="150%">
+            <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#1d2b3c" flood-opacity=".20"/>
+          </filter>
+          <filter id="soft2" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1d2b3c" flood-opacity=".16"/>
+          </filter>
+
+          <filter id="float" x="-40%" y="-40%" width="180%" height="200%">
+            <feDropShadow id="floatSh" dx="2" dy="18" stdDeviation="11" flood-color="#1b2735" flood-opacity=".30"/>
+          </filter>
+
+          <marker id="arw" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1.4 L9.4,5 L0,8.6 Z" fill="#6b7a8b"/>
+          </marker>
+          <marker id="arwR" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1.4 L9.4,5 L0,8.6 Z" fill="#c0392b"/>
+          </marker>
+          <marker id="arwP" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1.4 L9.4,5 L0,8.6 Z" fill="#b4762f"/>
+          </marker>
+          <marker id="arwG" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1.4 L9.4,5 L0,8.6 Z" fill="#5f9e42"/>
+          </marker>
+          <marker id="arwB" viewBox="0 0 10 10" refX="8.6" refY="5" markerWidth="6.4" markerHeight="6.4" orient="auto-start-reverse">
+            <path d="M0,1.4 L9.4,5 L0,8.6 Z" fill="#1f6feb"/>
+          </marker>
+        </defs>
+
+        <!-- ==================== 主图（JS 生成） ==================== -->
+        <g id="scene">
+          <!-- 动模座板 -->
+          <g id="boxBase" filter="url(#soft)">
+            <path id="baseL" class="sdL"/>
+            <path id="baseR" class="sdR"/>
+            <path id="baseT" class="tp"/>
+          </g>
+
+          <!-- B 板（动模框） -->
+          <g id="boxB" filter="url(#soft)">
+            <path id="bL" class="sdL"/>
+            <path id="bR" class="sdR"/>
+            <path id="bT" class="tp"/>
+            <g id="bTopLayer">
+              <rect id="bSeat" fill="#8e9aa8" opacity=".55"/>
+              <rect id="bSeatEdge" fill="none" stroke="#75828f" stroke-width="1" opacity=".75"/>
+              <rect id="bAper" fill="url(#gHole)"/>
+              <rect id="bAperEdge" fill="none" stroke="#8fa2b6" stroke-width="1" opacity=".5"/>
+            </g>
+          </g>
+
+          <!-- 后模仁（型芯） -->
+          <g id="coreGrp" filter="url(#float)">
+            <g id="coreBody">
+              <path id="cbL" class="insL"/>
+              <path id="cbR" class="insR"/>
+              <path id="cbT" class="insT"/>
+            </g>
+            <g id="coreFlg">
+              <path id="cfL" class="flgL"/>
+              <path id="cfR" class="flgR"/>
+              <path id="cfT" class="flgT"/>
+            </g>
+            <!-- 型芯凸台（伸到 PL 面之上，插进型腔） -->
+            <g id="corePin">
+              <path id="cpL" class="insL"/>
+              <path id="cpR" class="insR"/>
+              <path id="cpT" class="insT"/>
+            </g>
+            <!-- 后模仁顶面细节：顶针孔 / 螺钉 / 运水 -->
+            <g id="coreTopLayer"></g>
+          </g>
+
+          <!-- 产品 -->
+          <g id="prodGrp">
+            <path id="pdL" class="prodS"/>
+            <path id="pdR" class="prodS"/>
+            <path id="pdT" class="prodT"/>
+          </g>
+
+          <!-- A 板（定模框），随 aShift 整体上下 -->
+          <g id="boxA" filter="url(#soft)">
+            <path id="aL" class="sdL"/>
+            <path id="aR" class="sdR"/>
+            <path id="aT" class="tp"/>
+            <g id="aTopLayer">
+              <rect id="aAper" fill="url(#gHole)"/>
+              <rect id="aAperEdge" fill="none" stroke="#8fa2b6" stroke-width="1" opacity=".5"/>
+            </g>
+
+            <!-- 前模仁（型腔），跟着 A 板走 -->
+            <g id="cavGrp">
+              <g id="cavBody">
+                <path id="vbL" class="insL"/>
+                <path id="vbR" class="insR"/>
+                <path id="vbT" class="insT"/>
+              </g>
+              <g id="cavFlg">
+                <path id="vfL" class="flgL"/>
+                <path id="vfR" class="flgR"/>
+                <path id="vfT" class="flgT"/>
+              </g>
+              <g id="cavTopLayer"></g>
+            </g>
+          </g>
+
+          <!-- 塞尺（验收） -->
+          <g id="feelerGrp" opacity="0">
+            <path id="feelWedge" d="" fill="#c0392b" stroke="#ffffff" stroke-width="1.1"/>
+            <rect id="feelBg" x="0" y="0" width="122" height="17" rx="4" fill="#ffffff" opacity=".92"/>
+            <text id="feelTxt" text-anchor="end" fill="#c0392b" font-size="11" font-family="inherit" font-weight="700"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.6;stroke-linejoin:round">塞尺 0.02 · 通不过</text>
+          </g>
+        </g>
+
+        <!-- ==================== 标注 ==================== -->
+        <g id="anno">
+          <g id="gAnnoFr">
+            <text x="168" y="96" fill="#1c2430" font-size="12.5" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round">模架 A / B 板</text>
+            <text x="168" y="114" fill="#5c6b7d" font-size="10.5" font-family="inherit"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.6;stroke-linejoin:round">S50C 中碳钢 · 不淬火</text>
+          </g>
+
+          <g id="gAnnoCav" opacity="0">
+            <path id="ldCav" d="" fill="none" stroke="#6b7a8b" stroke-width="1.1" marker-end="url(#arw)"/>
+            <text id="txCav" x="0" y="0" text-anchor="end" fill="#1c2430" font-size="12" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round">前模仁 · 型腔</text>
+            <text id="txCav2" x="0" y="0" text-anchor="end" fill="#5c6b7d" font-size="10.2" font-family="inherit"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.4;stroke-linejoin:round">SKD61 · HRC52 · 做产品外表面</text>
+          </g>
+
+          <g id="gAnnoCore" opacity="0">
+            <path id="ldCore" d="" fill="none" stroke="#6b7a8b" stroke-width="1.1" marker-end="url(#arw)"/>
+            <text id="txCore" x="0" y="0" text-anchor="start" fill="#1c2430" font-size="12" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round">后模仁 · 型芯</text>
+            <text id="txCore2" x="0" y="0" text-anchor="start" fill="#5c6b7d" font-size="10.2" font-family="inherit"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.4;stroke-linejoin:round">做内表面 · 带顶针孔</text>
+          </g>
+
+          <g id="gAnnoFlg" opacity="0">
+            <path id="ldFlg" d="" fill="none" stroke="#6b7a8b" stroke-width="1.1" marker-end="url(#arw)"/>
+            <text id="txFlg" x="0" y="0" text-anchor="start" fill="#1c2430" font-size="11.5" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round">挂台 190 宽</text>
+          </g>
+
+          <g id="gAnnoPl" opacity="0">
+            <path id="plBar" d="" fill="none" stroke="#1f6feb" stroke-width="2.2" stroke-linecap="round" opacity=".85"/>
+            <text id="txPl" x="0" y="0" fill="#1f6feb" font-size="10.8" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.8;stroke-linejoin:round">PL 面</text>
+          </g>
+
+          <g id="gAnnoFit" opacity="0">
+            <path id="ldFit" d="" fill="none" stroke="#c0392b" stroke-width="1" marker-end="url(#arwR)" opacity=".8"/>
+            <text id="txFit" x="0" y="0" text-anchor="middle" fill="#c0392b" font-size="11" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.8;stroke-linejoin:round">单边 0.006 ~ 0.020</text>
+          </g>
+
+          <g id="gAnnoBolt" opacity="0">
+            <path id="ldBolt" d="" fill="none" stroke="#1f6feb" stroke-width="1" marker-end="url(#arwB)" opacity=".85"/>
+            <text id="txBolt" x="0" y="0" text-anchor="middle" fill="#1f6feb" font-size="11" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.8;stroke-linejoin:round">4 × M8 · 25 N·m</text>
+          </g>
+
+          <g id="gAnnoFlush" opacity="0">
+            <path id="ldFlush" d="" fill="none" stroke="#5f9e42" stroke-width="1.1" marker-end="url(#arwG)"/>
+            <text id="txFlush" x="0" y="0" text-anchor="end" fill="#4a8a33" font-size="11" font-family="inherit" font-weight="650"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.8;stroke-linejoin:round">顶面与 PL 面齐平 ≤0.02</text>
+          </g>
+
+          <g id="gAnnoProd" opacity="0">
+            <path id="ldProd" d="" fill="none" stroke="#b4762f" stroke-width="1" marker-end="url(#arwP)"/>
+            <text id="txProd" x="0" y="0" fill="#a8691f" font-size="11.5" font-family="inherit" font-weight="650"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round">产品 · 在型腔与型芯之间</text>
+          </g>
+        </g>
+
+        <!-- ==================== 右上：框口配合剖视 ==================== -->
+        <g id="zoom" opacity="0">
+          <rect x="556" y="44" width="404" height="256" rx="13" fill="#ffffff" stroke="#dfe6ee" stroke-width="1"/>
+          <text x="578" y="70" fill="#1c2430" font-size="12.2" font-family="inherit" font-weight="650">框口配合 · 局部剖视</text>
+          <text x="578" y="87" fill="#8d9aaa" font-size="10" font-family="inherit">后模仁装入 B 板 · 放大 8×</text>
+
+          <!-- 模板：右边 + 沉台下方 -->
+          <path d="M749,102 L938,102 L938,234 L701,234 L701,126 L749,126 Z" fill="#d3dae3" stroke="#7d8896" stroke-width="1"/>
+          <!-- 模仁（可随压入上下移动） -->
+          <g id="secIns">
+            <rect x="576" y="126" width="124" height="108" fill="#93aec7" stroke="#4a647d" stroke-width="1"/>
+            <rect x="576" y="102" width="171" height="24" fill="#b4cfe4" stroke="#3f5d78" stroke-width="1.2"/>
+          </g>
+          <!-- 框口配合面（间隙夸大 2px） -->
+          <line x1="700.4" y1="126" x2="700.4" y2="234" stroke="#3f5364" stroke-width="1.6"/>
+          <line x1="701" y1="102" x2="701" y2="126" stroke="#3f5364" stroke-width="1.4"/>
+          <!-- 台阶面 -->
+          <line x1="701" y1="126" x2="749" y2="126" stroke="#2f4354" stroke-width="1.8"/>
+
+          <!-- 尺寸与标注 -->
+          <path d="M576,254 L938,254" stroke="#b6c3d0" stroke-width="1" stroke-dasharray="4 4"/>
+          <text x="930" y="228" fill="#5c6b7d" font-size="9.6" font-family="inherit" text-anchor="end">模板 B 板</text>
+          <text x="600" y="228" fill="#3f5364" font-size="9.6" font-family="inherit">模仁</text>
+
+          <path d="M624,158 L624,124" fill="none" stroke="#4f6d88" stroke-width="1" marker-end="url(#arw)" opacity=".75"/>
+          <text x="632" y="166" fill="#3f5364" font-size="9.4" font-family="inherit">挂台</text>
+
+          <path d="M726,158 L726,130" fill="none" stroke="#4f6d88" stroke-width="1" marker-end="url(#arw)" opacity=".75"/>
+          <text x="732" y="172" fill="#3f5364" font-size="9.4" font-family="inherit">沉台深 15</text>
+
+          <path d="M702,196 L648,196" fill="none" stroke="#c0392b" stroke-width="1" marker-start="url(#arwR)"/>
+          <text x="930" y="200" fill="#c0392b" font-size="9.4" font-family="inherit" font-weight="600" text-anchor="end">单边配合 0.006~0.020</text>
+
+          <text x="938" y="98" text-anchor="end" fill="#1f6feb" font-size="9.4" font-family="inherit" font-weight="600">PL 面</text>
+          <line x1="701" y1="102" x2="938" y2="102" stroke="#1f6feb" stroke-width="1.6" opacity=".65"/>
+
+          <text x="578" y="262" fill="#5c6b7d" font-size="9.8" font-family="inherit">配作：先镗框口，再按框口实测尺寸配磨模仁</text>
+          <text x="578" y="280" fill="#c0392b" font-size="9.8" font-family="inherit" font-weight="600">挂台端面与 PL 面齐平 ≤ 0.02，否则跑飞边</text>
+        </g>
+
+        <!-- ==================== 右下：装配 6 步 ==================== -->
+        <g id="steps" opacity="0">
+          <rect x="556" y="316" width="404" height="288" rx="13" fill="#ffffff" stroke="#dfe6ee" stroke-width="1"/>
+          <text x="578" y="342" fill="#1c2430" font-size="12.2" font-family="inherit" font-weight="650">装配顺序</text>
+          <text x="938" y="342" text-anchor="end" fill="#93a1b1" font-size="9.8" font-family="inherit">6 道</text>
+          <g id="stepList"></g>
+        </g>
+
+        <!-- 页脚 -->
+        <text x="340" y="620" text-anchor="middle" fill="#9aa7b6" font-size="11.4" font-family="inherit">
+          模架用标准件、不淬火；模仁用模具钢、要热处理 —— 这就是为什么产品形状不直接挖在模板上
+        </text>
+      </svg>
+    </div>
+
+    <aside>
+      <div>
+        <div class="k">模仁参数</div>
+        <div class="rows">
+          <div class="row"><span>前模仁（型腔）</span><b>150×150×80<i>mm</i></b></div>
+          <div class="row"><span>后模仁（型芯）</span><b>150×150×80<i>mm</i></b></div>
+          <div class="row"><span>挂台 / 沉台</span><b>190×190×15</b></div>
+          <div class="row"><span>框口配合</span><b>150 H7 / m6</b></div>
+          <div class="row"><span>吊紧螺丝</span><b>M8 × 4</b></div>
+          <div class="row"><span>模仁材料</span><b>SKD61 <i>HRC52</i></b></div>
+        </div>
+      </div>
+
+      <div class="live">
+        <div class="h" id="phName">框口</div>
+        <div class="big" id="phBig">150<span style="font-size:14px;color:#93a1b1"> × 150</span></div>
+        <div class="cap" id="phCap">A / B 板各开一个通框</div>
+        <div class="split">
+          <div><b id="d1">0.020</b><span id="d1k">单边间隙上限</span></div>
+          <div><b id="d2">15</b><span id="d2k">沉台深度 mm</span></div>
+        </div>
+      </div>
+
+      <div class="note" id="noteBox">
+        模架（A/B 板）是<b>标准件</b>，买来就有导柱孔、螺丝孔、顶针板。产品形状挖在它上面要整块淬火，<span class="hl">一裂整套报废</span>；挖在镶件上，坏了只换镶件。
+      </div>
+
+      <div class="note" style="border-top:1px solid #eef2f7;padding-top:12px">
+        <b>为什么要镶不直接挖</b><br>
+        ① 模仁要淬火到 HRC52，模架只能到 HRC30<br>
+        ② 一套模架可换多副模仁，小批量摊薄成本<br>
+        ③ 深腔、薄壁单独加工和抛光<br>
+        ④ 改产品只改模仁，模架不动
+      </div>
+    </aside>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="play"><i class="play-ico"></i><span id="playTxt">暂停</span></button>
+    <div class="track">
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <div class="tcode" id="tcode">0%</div>
+    </div>
+    <div class="seg" id="speed">
+      <button data-s="0.5">0.5×</button>
+      <button data-s="1" class="on">1×</button>
+      <button data-s="2">2×</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="annoChk" checked>标注</label>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ==================== 等轴测投影 ==================== */
+  const SX = 0.64, SY = 0.367, ZK = 0.55, OX = 318, OY = 266;
+  const V = (x,y,z) => [OX + (x-y)*SX, OY + (x+y)*SY - z*ZK];
+  const p2 = p => p[0].toFixed(1) + ',' + p[1].toFixed(1);
+
+  const $ = id => document.getElementById(id);
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+  const ease = x => { x = clamp(x,0,1); return x*x*(3-2*x); };
+  const seg = (v,a,b) => clamp((v-a)/(b-a), 0, 1);
+  const lerp = (a,b,u) => a + (b-a)*u;
+
+  /* 立方体可见三面：top / right(x=x2) / left(y=y2) */
+  function boxD(x1,x2,y1,y2,z1,z2){
+    const A=V(x1,y1,z2), B=V(x2,y1,z2), C=V(x2,y2,z2), D=V(x1,y2,z2);
+    const B0=V(x2,y1,z1), C0=V(x2,y2,z1), D0=V(x1,y2,z1);
+    return {
+      top: `M${p2(A)}L${p2(B)}L${p2(C)}L${p2(D)}Z`,
+      right: `M${p2(B)}L${p2(C)}L${p2(C0)}L${p2(B0)}Z`,
+      left: `M${p2(D)}L${p2(C)}L${p2(C0)}L${p2(D0)}Z`
+    };
+  }
+  /* 顶面平面坐标系（世界 x,y → 屏幕），z 固定 */
+  function plane(z){ return `matrix(${SX},${SY},${-SX},${SY},${OX},${(OY - z*ZK).toFixed(2)})`; }
+
+  /* ==================== 世界尺寸 ==================== */
+  const PX0 = 0, PX1 = 340;                // 板 340×340
+  const Z_BASE = [0, 25];                  // 动模座板
+  const Z_B = [40, 120];                   // B 板（后模框），与底板留 15 缝
+  const Z_A_BASE = [210, 290];             // A 板开模位置（与 B 板顶相距 90）
+  const GAP_CLOSE = 90;                    // 合模行程
+
+  const AP0 = 95, AP1 = 245;               // 框口 150
+  const FG0 = 75, FG1 = 265;               // 挂台 190
+  const FGZ = 15;                          // 沉台深 15
+
+  const CORE_BODY = [40, 105];             // 后模仁主体
+  const CORE_FLG  = [105, 120];            // 后模仁挂台（顶面 = PL）
+  const PIN_Z = [120, 145];                // 型芯凸台
+  const PIN0 = 125, PIN1 = 215;            // 型芯 90×90
+
+  const CAV_BODY = [210, 275];             // 前模仁主体（相对 A 板底）
+  const CAV_FLG  = [275, 290];
+
+  /* ==================== 场景搭建 ==================== */
+  const scene = {
+    base: { l:$('baseL'), r:$('baseR'), t:$('baseT'), z:Z_BASE },
+    b:    { l:$('bL'),    r:$('bR'),    t:$('bT'),    z:Z_B },
+    a:    { l:$('aL'),    r:$('aR'),    t:$('aT'),    z:Z_A_BASE }
+  };
+  function setBox(set, box){
+    const d = boxD(PX0,PX1,PX0,PX1, box.z[0], box.z[1]);
+    set.l.setAttribute('d', d.left);
+    set.r.setAttribute('d', d.right);
+    set.t.setAttribute('d', d.top);
+  }
+  (function(){
+    const d = boxD(15,325,15,325, Z_BASE[0], Z_BASE[1]);
+    $('baseL').setAttribute('d', d.left);
+    $('baseR').setAttribute('d', d.right);
+    $('baseT').setAttribute('d', d.top);
+  })();
+  setBox(scene.b, scene.b);
+  setBox(scene.a, scene.a);
+
+  /* 后模仁主体 + 挂台 */
+  (function(){
+    const body = boxD(AP0,AP1,AP0,AP1, CORE_BODY[0], CORE_BODY[1]);
+    const flg  = boxD(FG0,FG1,FG0,FG1, CORE_FLG[0], CORE_FLG[1]);
+    $('cbL').setAttribute('d', body.left);  $('cbR').setAttribute('d', body.right);  $('cbT').setAttribute('d', body.top);
+    $('cfL').setAttribute('d', flg.left);   $('cfR').setAttribute('d', flg.right);   $('cfT').setAttribute('d', flg.top);
+    const pin = boxD(PIN0,PIN1,PIN0,PIN1, PIN_Z[0], PIN_Z[1]);
+    $('cpL').setAttribute('d', pin.left);   $('cpR').setAttribute('d', pin.right);   $('cpT').setAttribute('d', pin.top);
+  })();
+
+  /* 前模仁主体 + 挂台（A 板组内，坐标相对世界） */
+  (function(){
+    const body = boxD(AP0,AP1,AP0,AP1, CAV_BODY[0], CAV_BODY[1]);
+    const flg  = boxD(FG0,FG1,FG0,FG1, CAV_FLG[0], CAV_FLG[1]);
+    $('vbL').setAttribute('d', body.left);  $('vbR').setAttribute('d', body.right);  $('vbT').setAttribute('d', body.top);
+    $('vfL').setAttribute('d', flg.left);   $('vfR').setAttribute('d', flg.right);   $('vfT').setAttribute('d', flg.top);
+  })();
+
+  /* 产品：100×100×30 薄壁盒 */
+  (function(){
+    const box = boxD(120,220,120,220, 120,150);
+    $('pdL').setAttribute('d', box.left); $('pdR').setAttribute('d', box.right); $('pdT').setAttribute('d', box.top);
+  })();
+
+  /* 框口洞（顶面平面内） */
+  const bTopLayer = $('bTopLayer'), aTopLayer = $('aTopLayer');
+  bTopLayer.setAttribute('transform', plane(Z_B[1]));
+  aTopLayer.setAttribute('transform', plane(Z_A_BASE[1]));
+  [['bAper','bAperEdge'],['aAper','aAperEdge']].forEach(([f,e])=>{
+    $(f).setAttribute('x', AP0); $(f).setAttribute('y', AP0);
+    $(f).setAttribute('width', AP1-AP0); $(f).setAttribute('height', AP1-AP0);
+    $(e).setAttribute('x', AP0); $(e).setAttribute('y', AP0);
+    $(e).setAttribute('width', AP1-AP0); $(e).setAttribute('height', AP1-AP0);
+  });
+  [['bSeat','bSeatEdge']].forEach(([f,e])=>{
+    $(f).setAttribute('x', FG0); $(f).setAttribute('y', FG0);
+    $(f).setAttribute('width', FG1-FG0); $(f).setAttribute('height', FG1-FG0);
+    $(e).setAttribute('x', FG0); $(e).setAttribute('y', FG0);
+    $(e).setAttribute('width', FG1-FG0); $(e).setAttribute('height', FG1-FG0);
+  });
+
+  /* 后模仁顶面细节：顶针孔 + 螺钉 + 运水 */
+  const coreTop = $('coreTopLayer');
+  coreTop.setAttribute('transform', plane(CORE_FLG[1]));
+  coreTop.innerHTML = `
+    <g fill="#26333f" opacity=".78">
+      <ellipse cx="118" cy="170" rx="4.2" ry="4.2"/>
+      <ellipse cx="222" cy="170" rx="4.2" ry="4.2"/>
+      <ellipse cx="170" cy="118" rx="4.2" ry="4.2"/>
+      <ellipse cx="170" cy="222" rx="4.2" ry="4.2"/>
+    </g>
+    <g fill="#5d7691" opacity=".55">
+      <ellipse cx="118" cy="170" rx="1.5" ry="1.5"/>
+      <ellipse cx="222" cy="170" rx="1.5" ry="1.5"/>
+      <ellipse cx="170" cy="118" rx="1.5" ry="1.5"/>
+      <ellipse cx="170" cy="222" rx="1.5" ry="1.5"/>
+    </g>`;
+  const cavTop = $('cavTopLayer');
+  cavTop.setAttribute('transform', plane(CAV_FLG[1]));
+  cavTop.innerHTML = `
+    <g fill="#26333f" opacity=".78">
+      <ellipse cx="118" cy="170" rx="4.2" ry="4.2"/>
+      <ellipse cx="222" cy="170" rx="4.2" ry="4.2"/>
+      <ellipse cx="170" cy="118" rx="4.2" ry="4.2"/>
+      <ellipse cx="170" cy="222" rx="4.2" ry="4.2"/>
+    </g>
+    <g fill="#5d7691" opacity=".55">
+      <ellipse cx="118" cy="170" rx="1.5" ry="1.5"/>
+      <ellipse cx="222" cy="170" rx="1.5" ry="1.5"/>
+      <ellipse cx="170" cy="118" rx="1.5" ry="1.5"/>
+      <ellipse cx="170" cy="222" rx="1.5" ry="1.5"/>
+    </g>`;
+
+  /* 装配步骤列表 */
+  const STEPS = [
+    '框口去毛刺、清铁屑',
+    '模仁不敲，手推试装',
+    '铜棒轻敲到位',
+    'M8×4 吊紧 25 N·m',
+    '塞尺 0.02 验 PL 面',
+    '红丹试合模看印痕'
+  ];
+  $('stepList').innerHTML = STEPS.map((s,i)=>`
+    <g class="stepRow" data-i="${i}">
+      <circle cx="586" cy="${370+i*39}" r="9" fill="#f2f6fb" stroke="#dbe4ee" stroke-width="1"/>
+      <text class="stepNum" x="586" y="${374+i*39}" text-anchor="middle" fill="#a8b6c5"
+            font-size="9.6" font-family="inherit" font-weight="700">${i+1}</text>
+      <text class="stepTxt" x="606" y="${374+i*39}" fill="#6b7a8b" font-size="10.8" font-family="inherit">${s}</text>
+    </g>`).join('');
+
+  /* ==================== 时间轴 ==================== */
+  const T = {
+    fr: [0.010, 0.095],
+    ex: [0.095, 0.300],
+    al: [0.300, 0.460],
+    pr: [0.460, 0.605],
+    bl: [0.605, 0.735],
+    ck: [0.735, 0.865],
+    cl: [0.865, 0.965]
+  };
+  const DUR = 15;
+  const ORDER = ['fr','ex','al','pr','bl','ck','cl'];
+
+  const CORE_LIFT = 145;  // 后模仁抽出量（要大到挂台投影离开框口）
+  const CAV_LIFT  = 95;   // 前模仁抽出量
+  const A_UP      = 0;    // A 板只在开场/合模出现，中间淡出让位
+
+  /* ==================== 文案 ==================== */
+  const TXT = {
+    fr: { n:'框口', b:'150 <span style="font-size:14px;color:#93a1b1">× 150</span>', cap:'A / B 板各开一个通框',
+          d1:'15', d1k:'沉台深度 mm', d2:'0.020', d2k:'PL 齐平允差',
+          note:'模架（A/B 板）是<b>标准件</b>，买来就有导柱孔、螺丝孔、顶针板。产品形状挖在它上面要整块淬火，<span class="hl">一裂整套报废</span>；挖在镶件上，坏了只换镶件。' },
+    ex: { n:'取出 · 认零件', b:'2 <span style="font-size:14px;color:#93a1b1">块</span>', cap:'前模仁做外形，后模仁做内形',
+          d1:'SKD61', d1k:'模仁材料', d2:'52', d2k:'淬火硬度 HRC',
+          note:'前模仁的型腔刻在<b>底面</b>，做产品外观面；后模仁的型芯凸在<b>顶面</b>，做内表面。两块合起来中间的空腔就是产品。<span class="hl">挂台比框口大一圈</span>，是它唯一能坐在台阶上的理由。' },
+    al: { n:'对位', b:'H7<span style="font-size:14px;color:#93a1b1"> / </span>m6', cap:'框口镗准，模仁配磨',
+          d1:'0.006', d1k:'单边最小 mm', d2:'0.020', d2k:'单边最大 mm',
+          note:'框口按 <b>H7</b> 镗（+0.040/0），模仁按 <b>m6</b> 磨（+0.025/+0.012），理论单边 0.006~0.020。<span class="warn">配作</span>：先镗框口，再拿框口实测尺寸去配磨模仁 —— 不能两块各自按图纸做。' },
+    pr: { n:'压入', b:'15 <span style="font-size:14px;color:#93a1b1">mm</span>', cap:'挂台落到底，主体下到位',
+          d1:'190', d1k:'挂台尺寸 mm', d2:'0.02', d2k:'齐平允差 mm',
+          note:'模仁下落，挂台先碰沉台，主体继续进到框底。挂台端面与 PL 面<b>齐平 ≤ 0.02</b>。<span class="warn">凸出</span>合模压不实、<span class="warn">凹陷</span>跑飞边 —— 这两种都得拆下来重磨。' },
+    bl: { n:'吊紧', b:'M8 <span style="font-size:14px;color:#93a1b1">× 4</span>', cap:'螺钉从挂台穿下去咬进模板',
+          d1:'25', d1k:'拧紧扭矩 N·m', d2:'4', d2k:'螺钉数量',
+          note:'螺钉只负责<b>吊住</b>，不负责定位（定位靠框口配合）。开模时产品会粘在型芯上，<span class="hl">没吊紧的模仁会被产品一起带出来</span> —— 这是最典型的装配事故。' },
+    ck: { n:'验收', b:'0.02 <span style="font-size:14px;color:#93a1b1">mm</span>', cap:'塞尺塞 PL 面四周',
+          d1:'0.02', d1k:'塞尺通不过', d2:'4', d2k:'检查面数',
+          note:'塞尺 0.02 沿 PL 面四周塞一圈，<b>全部通不过</b>才算贴合。然后打红丹试合模，看型腔和型芯的印痕是否均匀 —— 印痕偏一侧，说明模仁装歪了。' },
+    cl: { n:'合模', b:'40 <span style="font-size:14px;color:#93a1b1">mm</span>', cap:'A 板落到 B 板，产品闭合',
+          d1:'0.02', d1k:'分型面间隙上限', d2:'0.05', d2k:'型腔预留量 mm',
+          note:'合模后产品在型腔与型芯之间成形。<b>型腔要预留 0.05mm 给省模</b>，省过头 R 角会塌、棱边倒钝，整套模具报废。装配不到位的第一症状永远是分型面飞边。' }
+  };
+
+  /* ==================== 渲染 ==================== */
+  function phaseOf(t){
+    let cur = 'fr';
+    for(const k of ORDER){ if(t >= T[k][0]) cur = k; }
+    return cur;
+  }
+
+  function render(t){
+    const cur = phaseOf(t);
+
+    /* --- 模仁升降 --- */
+    const liftUp = ease(seg(t, T.ex[0]+0.02, T.ex[0]+0.17));
+    const liftDn = ease(seg(t, T.pr[0]+0.02, T.pr[0]+0.13));
+    const coreLift = (CORE_LIFT * liftUp) * (1 - liftDn);
+    const cavLift  = (CAV_LIFT  * liftUp) * (1 - liftDn);
+
+    /* --- A 板：分解时抬起让位，合模时落到 B 板顶面 --- */
+    const closeP = ease(seg(t, T.cl[0], T.cl[0]+0.075));
+    const aShift = GAP_CLOSE * closeP;   // 正值 = 向屏幕下方落
+
+    $('boxA').setAttribute('transform', `translate(0,${(aShift*ZK).toFixed(1)})`);
+    /* A 板：开场半透明交代“上面还有一块”，分解时彻底淡出，合模时落回并转实 */
+    const fadeA = ease(seg(t, T.ex[0], T.ex[0]+0.075));
+    const ghost = (1 - fadeA) * (1 - closeP) + 0.40 * closeP;
+    $('boxA').setAttribute('opacity', ghost.toFixed(2));
+    $('coreGrp').setAttribute('transform', `translate(0,${(-coreLift*ZK).toFixed(1)})`);
+    $('floatSh').setAttribute('dy', (coreLift*0.16).toFixed(1));
+    const sideOn = clamp(coreLift/26, 0, 1).toFixed(2);
+    ['cbL','cbR','cfL','cfR'].forEach(k=>$(k).setAttribute('opacity', sideOn));
+    $('cavGrp').setAttribute('transform', `translate(0,${(-cavLift*ZK).toFixed(1)})`);
+
+    /* --- 产品：合模时被 A 板遮住，自然隐藏；开模可见 --- */
+    $('prodGrp').setAttribute('transform', `translate(0,${(-coreLift*ZK).toFixed(1)})`);
+    $('prodGrp').setAttribute('opacity', '1');
+
+    /* --- 右上剖视：模仁随升降微移 --- */
+    $('secIns').setAttribute('transform', `translate(0,${(-coreLift*0.045).toFixed(1)})`);
+
+    /* --- 标注显隐 --- */
+    $('gAnnoFr').setAttribute('opacity', cur==='fr' ? 1 : 0);
+    $('gAnnoFlg').setAttribute('opacity', (cur==='ex'||cur==='al') ? 1 : 0);
+    $('gAnnoPl').setAttribute('opacity', (cur==='pr'||cur==='ck'||cur==='cl') ? 1 : 0);
+    $('gAnnoFit').setAttribute('opacity', (cur==='al') ? 1 : 0);
+    $('gAnnoBolt').setAttribute('opacity', (cur==='bl') ? 1 : 0);
+    $('gAnnoFlush').setAttribute('opacity', (cur==='ck') ? 1 : 0);
+    const fp = V(AP1, AP1, Z_B[1]);
+    $('txFlush').setAttribute('x', (fp[0]-16).toFixed(1));
+    $('txFlush').setAttribute('y', (fp[1]+52).toFixed(1));
+    $('ldFlush').setAttribute('d', `M${(fp[0]-16).toFixed(1)},${(fp[1]+42).toFixed(1)} L${(fp[0]-8).toFixed(1)},${(fp[1]+6).toFixed(1)}`);
+    $('gAnnoProd').setAttribute('opacity', (cur==='cl') ? 1 : 0);
+    const pr8 = V(220, 220, 135 + 0);
+    $('txProd').setAttribute('x', (pr8[0]+26).toFixed(1));
+    $('txProd').setAttribute('y', (pr8[1]+30).toFixed(1));
+    $('ldProd').setAttribute('d', `M${(pr8[0]+24).toFixed(1)},${(pr8[1]+25).toFixed(1)} L${(pr8[0]+4).toFixed(1)},${(pr8[1]+2).toFixed(1)}`);
+
+    /* --- 前模仁标签（左侧，只随 A 板出现） --- */
+    const cavZ = CAV_FLG[1] + cavLift + aShift;
+    const cp = V(AP0, AP0, cavZ);
+    $('gAnnoCav').setAttribute('opacity', ghost > 0.30 ? 1 : 0);
+    $('gAnnoCore').setAttribute('opacity', (cur==='ex'||cur==='al') ? 1 : 0);
+    $('txCav').setAttribute('x', (cp[0]-96).toFixed(1));
+    $('txCav').setAttribute('y', (cp[1]+4).toFixed(1));
+    $('txCav2').setAttribute('x', (cp[0]-96).toFixed(1));
+    $('txCav2').setAttribute('y', (cp[1]+22).toFixed(1));
+    $('ldCav').setAttribute('d', `M${(cp[0]-92).toFixed(1)},${cp[1].toFixed(1)} L${(cp[0]-8).toFixed(1)},${cp[1].toFixed(1)}`);
+
+    /* --- 后模仁标签（右侧） --- */
+    const coreZ = CORE_FLG[1] + coreLift;
+    const kp = V(AP1, AP0, coreZ);
+    $('txCore').setAttribute('x', (kp[0]+18).toFixed(1));
+    $('txCore').setAttribute('y', (kp[1]-2).toFixed(1));
+    $('txCore2').setAttribute('x', (kp[0]+18).toFixed(1));
+    $('txCore2').setAttribute('y', (kp[1]+20).toFixed(1));
+    $('ldCore').setAttribute('d', `M${(kp[0]+14).toFixed(1)},${(kp[1]-5).toFixed(1)} L${(kp[0]+4).toFixed(1)},${(kp[1]-5).toFixed(1)}`);
+
+    /* --- 挂台标注（后模仁左下） --- */
+    const flgPt = V(FG0, FG1, coreZ);
+    $('txFlg').setAttribute('x', (flgPt[0]-12).toFixed(1));
+    $('txFlg').setAttribute('y', (flgPt[1]+18).toFixed(1));
+    $('ldFlg').setAttribute('d', `M${(flgPt[0]-54).toFixed(1)},${(flgPt[1]+14).toFixed(1)} L${(flgPt[0]-4).toFixed(1)},${(flgPt[1]+2).toFixed(1)}`);
+
+    /* --- PL 面：B 板顶面靠前两条棱 --- */
+    const plB = V(PX1, PX0, Z_B[1]), plC = V(PX1, PX1, Z_B[1]), plD = V(PX0, PX1, Z_B[1]);
+    $('plBar').setAttribute('d', `M${p2(plB)}L${p2(plC)}L${p2(plD)}`);
+    $('txPl').setAttribute('x', (plD[0]-10).toFixed(1));
+    $('txPl').setAttribute('y', (plD[1]-6).toFixed(1));
+
+    /* --- 配合面标注 --- */
+    const fitL = V(AP0, AP1, Z_B[1]), fitR = V(AP1, AP1, Z_B[1]);
+    const fixMid = (fitL[0]+fitR[0])/2;
+    $('txFit').setAttribute('x', fixMid.toFixed(1));
+    $('txFit').setAttribute('y', (fitR[1]+36).toFixed(1));
+    $('ldFit').setAttribute('d', `M${fixMid.toFixed(1)},${(fitR[1]+30).toFixed(1)} L${fixMid.toFixed(1)},${(fitR[1]+11).toFixed(1)}`);
+
+    /* --- 螺栓标注 --- */
+    const boltPt = V(110, 110, CORE_FLG[1] + coreLift);
+    $('txBolt').setAttribute('x', (boltPt[0]-10).toFixed(1));
+    $('txBolt').setAttribute('y', (boltPt[1]-16).toFixed(1));
+    $('ldBolt').setAttribute('d', `M${(boltPt[0]-6).toFixed(1)},${(boltPt[1]-20).toFixed(1)} L${(boltPt[0]-4).toFixed(1)},${(boltPt[1]-7).toFixed(1)}`);
+
+    /* --- 塞尺 --- */
+    const feelP = seg(t, T.ck[0]+0.03, T.ck[0]+0.14);
+    $('feelerGrp').setAttribute('opacity', (t>T.ck[0] && t<T.cl[0] ? feelP : 0).toFixed(2));
+    if(feelP > 0){
+      const e1 = V(170, 245, Z_B[1]), e2 = V(170, 330, Z_B[1]);
+      const u = ease(feelP);
+      const x1 = lerp(e1[0], e2[0], u);
+      const y1 = lerp(e1[1], e2[1], u);
+      $('feelWedge').setAttribute('d', `M${e1[0].toFixed(1)},${(e1[1]-3).toFixed(1)} L${x1.toFixed(1)},${(y1-3).toFixed(1)} L${x1.toFixed(1)},${(y1+6).toFixed(1)} L${e1[0].toFixed(1)},${(e1[1]+6).toFixed(1)} Z`);
+      $('feelTxt').setAttribute('x', (x1-6).toFixed(1));
+      $('feelTxt').setAttribute('y', (y1+18).toFixed(1));
+      $('feelTxt').setAttribute('text-anchor', 'end');
+      $('feelBg').setAttribute('x', (x1-128).toFixed(1));
+      $('feelBg').setAttribute('y', (y1+6).toFixed(1));
+    }
+
+    /* --- 卡片 / 面板 --- */
+    $('zoom').setAttribute('opacity', t > T.ex[0] ? 1 : 0.35);
+    $('steps').setAttribute('opacity', 1);
+
+    const idxMap = { fr:0, ex:0, al:1, pr:2, bl:3, ck:4, cl:5 };
+    const activeStep = idxMap[cur];
+    document.querySelectorAll('.stepRow').forEach((el,i)=>{
+      const done = i < activeStep;
+      const on = i === activeStep;
+      el.querySelector('circle').setAttribute('fill', on ? '#1f6feb' : (done ? '#e8f3e4' : '#f2f6fb'));
+      el.querySelector('circle').setAttribute('stroke', on ? '#1f6feb' : (done ? '#bcd9b0' : '#dbe4ee'));
+      el.querySelector('.stepNum').setAttribute('fill', on ? '#fff' : (done ? '#5f9e42' : '#a8b6c5'));
+      el.querySelector('.stepTxt').setAttribute('fill', on ? '#1c2430' : (done ? '#7d8b98' : '#8b98a6'));
+      el.querySelector('.stepTxt').setAttribute('font-weight', on ? '650' : '400');
+    });
+
+    const tx = TXT[cur];
+    if($('phName').textContent !== tx.n){
+      $('phName').textContent = tx.n;
+      $('phBig').innerHTML = tx.b;
+      $('phCap').textContent = tx.cap;
+      $('d1').textContent = tx.d1;
+      $('d1k').textContent = tx.d1k;
+      $('d2').textContent = tx.d2;
+      $('d2k').textContent = tx.d2k;
+      $('noteBox').innerHTML = tx.note;
+    }
+    document.querySelectorAll('.ph').forEach(el=>el.classList.toggle('on', el.dataset.ph === cur));
+  }
+
+  /* ==================== 播放控制 ==================== */
+  let t = 0, playing = true, speed = 1, last = 0;
+
+  function loop(ts){
+    if(!last) last = ts;
+    const dt = Math.min((ts-last)/1000, 0.06);
+    last = ts;
+    if(playing){
+      t += dt / DUR * speed;
+      if(t >= 1){ t = 1; playing = false; syncPlay(); }
+      $('scrub').value = Math.round(t*1000);
+      $('tcode').textContent = Math.round(t*100)+'%';
+    }
+    render(t);
+    requestAnimationFrame(loop);
+  }
+
+  function syncPlay(){
+    const b = $('play');
+    b.classList.toggle('playing', playing);
+    $('playTxt').textContent = playing ? '暂停' : (t>=1 ? '重播' : '播放');
+  }
+
+  $('play').onclick = ()=>{
+    if(t >= 1) t = 0;
+    playing = !playing; last = 0; syncPlay();
+  };
+  $('scrub').oninput = e=>{
+    t = +e.target.value/1000;
+    $('tcode').textContent = Math.round(t*100)+'%';
+    playing = false; syncPlay(); render(t);
+  };
+  $('speed').onclick = e=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    speed = +b.dataset.s;
+    [...$('speed').children].forEach(x=>x.classList.toggle('on', x===b));
+  };
+  $('annoChk').onchange = e=>{
+    const on = e.target.checked;
+    $('anno').setAttribute('opacity', on ? 1 : 0);
+    $('zoom').setAttribute('opacity', on ? 1 : 0);
+  };
+  document.querySelectorAll('.ph').forEach(el=>{
+    el.onclick = ()=>{
+      t = T[el.dataset.ph][0] + 0.014;
+      $('scrub').value = Math.round(t*1000);
+      $('tcode').textContent = Math.round(t*100)+'%';
+      playing = false; last = 0; syncPlay(); render(t);
+    };
+  });
+
+  const qs = new URLSearchParams(location.search);
+  if(qs.has('t')){
+    t = clamp(parseFloat(qs.get('t')),0,1);
+    playing = false;
+    $('scrub').value = Math.round(t*1000);
+    $('tcode').textContent = Math.round(t*100)+'%';
+  }
+
+  render(t);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

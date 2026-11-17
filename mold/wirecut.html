@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线割演示 · Wire EDM Animation</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --line:#dde3ea;
+    --ink:#1c2430; --ink2:#5c6b7d; --ink3:#93a1b1;
+    --accent:#1f6feb; --green:#5f9e42; --copper:#c47240; --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);background:var(--panel);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+    background:#f3f6fa;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+  .body{display:grid;grid-template-columns:1fr 292px;min-height:0;flex:1}
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+  .stage .grid-bg{
+    position:absolute;inset:0;z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.45;pointer-events:none;
+  }
+
+  .phases{position:absolute;top:14px;left:16px;display:flex;flex-wrap:wrap;gap:5px;z-index:3;max-width:calc(100% - 32px)}
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--ink3);
+    backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph:hover{border-color:#c3d0de}
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+
+  aside{
+    border-left:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:15px;
+    background:#fff;overflow:auto;
+  }
+  .k{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);font-weight:600}
+  .rows{display:flex;flex-direction:column;margin-top:8px;border-top:1px solid #eef2f7}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #eef2f7;font-size:12.5px}
+  .row span{color:var(--ink2)}
+  .row b{font-variant-numeric:tabular-nums;font-weight:650;font-size:13px}
+  .row b i{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:400;margin-left:2px}
+
+  .live{background:#f6f9fd;border:1px solid #e2ebf6;border-radius:12px;padding:12px 14px}
+  .live .big{font-size:25px;font-weight:660;font-variant-numeric:tabular-nums;letter-spacing:-.6px}
+  .live .big i{font-style:normal;font-size:12px;color:var(--ink3);font-weight:500;margin-left:3px}
+  .live .cap{font-size:11.5px;color:var(--ink2);margin-top:2px}
+  .live .split{display:flex;gap:10px;margin-top:11px;padding-top:10px;border-top:1px dashed #d8e4f2}
+  .live .split div{flex:1}
+  .live .split b{display:block;font-size:13.5px;font-variant-numeric:tabular-nums}
+  .live .split span{font-size:10.5px;color:var(--ink3)}
+
+  .passes{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+  .pass{
+    display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;
+    border:1px solid #eef2f7;background:#fcfdff;font-size:11.5px;transition:.28s;
+  }
+  .pass b{font-size:10.5px;font-weight:700;color:#b6c1cd;letter-spacing:.5px;width:24px;transition:.28s}
+  .pass span{color:var(--ink2);width:26px}
+  .pass i{font-style:normal;color:#b0bcc9;margin-left:auto;font-variant-numeric:tabular-nums;font-size:10.5px}
+  .pass.on{background:#eef4fd;border-color:#cddff7;box-shadow:0 2px 8px -4px rgba(31,111,235,.35)}
+  .pass.on b{color:var(--accent)}
+  .pass.on i{color:#5c8bc9}
+  .pass.done{opacity:.5}
+
+  .note{font-size:11.8px;line-height:1.68;color:var(--ink2)}
+  .note b{color:var(--ink);font-weight:600}
+  .note .hl{color:var(--copper);font-weight:600}
+
+  .controls{
+    border-top:1px solid var(--line);padding:13px 22px 15px;display:flex;align-items:center;gap:16px;
+    background:linear-gradient(180deg,#fff,#fbfcfe);
+  }
+  button{
+    font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:9px;padding:9px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px;
+    transition:.16s;white-space:nowrap;
+  }
+  button:hover{background:#f5f8fc;border-color:#c9d5e3}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink);min-width:96px;justify-content:center}
+  button.primary:hover{background:#2b3648}
+  .play-ico{width:0;height:0;border-left:9px solid currentColor;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent}
+  button.primary.playing .play-ico{border:0;width:9px;height:11px;border-left:3px solid currentColor;border-right:3px solid currentColor}
+
+  .track{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:#e3eaf3;outline:none}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+    border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .tcode{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums;width:88px;text-align:right}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:9px 11px;background:#fff;font-size:12px;color:var(--ink2)}
+  .seg button.on{background:#eef4fd;color:var(--accent);font-weight:600}
+  .seg button+button{border-left:1px solid var(--line)}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+  .toggle input{accent-color:var(--ink);width:15px;height:15px;cursor:pointer}
+
+  @media (min-width:1081px){ .app{height:calc(100vh - 36px)} }
+  @media (max-width:1080px){
+    body{height:auto;align-items:flex-start;padding:12px}
+    .app{height:auto;width:100%}
+    .body{grid-template-columns:1fr}
+    .stage{height:auto;aspect-ratio:900/670}
+    aside{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .controls{flex-wrap:wrap}
+    .track{order:9;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>线割演示 <span>· Wire EDM / 线切割</span></h1>
+      <div class="sub">淬到 HRC60 的钢、任意异形通孔、0.2mm 的清角 —— 都交给一根 <b>φ0.25</b> 的黄铜丝。没有成形电极，只有一条一直在走的丝。按真机顺序：<b>穿丝 → 引入 → 粗割 1st → 修割 2nd → 精修 3rd → 剪丝</b>。</div>
+    </div>
+    <div class="badge"><span class="dot"></span>三次切割 · 单向走丝</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases">
+        <div class="ph" data-ph="th">穿丝</div>
+        <div class="ph" data-ph="en">引入</div>
+        <div class="ph" data-ph="c1">粗割 1st</div>
+        <div class="ph" data-ph="c2">修割 2nd</div>
+        <div class="ph" data-ph="c3">精修 3rd</div>
+        <div class="ph" data-ph="dn">剪丝</div>
+      </div>
+
+      <svg id="mold" viewBox="90 70 900 670" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- 投影：等轴测 30°，缩放 0.68 -->
+          <path id="holeShape" d="M430,500 L518,500 A22,22 0 0 0 540,478 L540,302 A22,22 0 0 0 518,280 L342,280 A22,22 0 0 0 320,302 L320,478 A22,22 0 0 0 342,500 Z"/>
+          <clipPath id="holeClipW"><use href="#holeShape"/></clipPath>
+          <clipPath id="holeClipS"><use href="#holeShape" transform="matrix(0.5196,0.3,-0.5196,0.3,420,95)"/></clipPath>
+
+          <linearGradient id="gWork" x1="0" y1="0" x2="0.62" y2="1">
+            <stop offset="0" stop-color="#cfd8e2"/>
+            <stop offset=".42" stop-color="#b2bec9"/>
+            <stop offset="1" stop-color="#98a4b0"/>
+          </linearGradient>
+          <linearGradient id="gSideL" x1="0" y1="0" x2="0.22" y2="1">
+            <stop offset="0" stop-color="#7c8794"/>
+            <stop offset="1" stop-color="#5b6672"/>
+          </linearGradient>
+          <linearGradient id="gSideR" x1="0" y1="0" x2="0.22" y2="1">
+            <stop offset="0" stop-color="#5c6673"/>
+            <stop offset="1" stop-color="#3d454f"/>
+          </linearGradient>
+          <linearGradient id="gSlug" x1="0" y1="0" x2="0.62" y2="1">
+            <stop offset="0" stop-color="#cbd5df"/>
+            <stop offset=".42" stop-color="#aebac5"/>
+            <stop offset="1" stop-color="#95a1ad"/>
+          </linearGradient>
+          <linearGradient id="gTable" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8b95a0"/>
+            <stop offset=".38" stop-color="#737d88"/>
+            <stop offset="1" stop-color="#5c656f"/>
+          </linearGradient>
+          <linearGradient id="gWireFade" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="72">
+            <stop offset="0" stop-color="#cf7c48" stop-opacity=".72"/>
+            <stop offset=".34" stop-color="#c47240" stop-opacity=".46"/>
+            <stop offset=".66" stop-color="#a75f30" stop-opacity=".18"/>
+            <stop offset="1" stop-color="#8d4a1c" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="gGlow">
+            <stop offset="0" stop-color="#eefcff" stop-opacity=".75"/>
+            <stop offset=".38" stop-color="#8ae2ff" stop-opacity=".4"/>
+            <stop offset="1" stop-color="#3aa8e8" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gHit">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+            <stop offset=".4" stop-color="#9ce6ff" stop-opacity=".68"/>
+            <stop offset="1" stop-color="#3aa8e8" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gWater">
+            <stop offset=".45" stop-color="#d5ecf8" stop-opacity="0"/>
+            <stop offset=".78" stop-color="#c6e7f6" stop-opacity=".42"/>
+            <stop offset="1" stop-color="#a9d6ec" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="gSpray" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#cfe6f4" stop-opacity="0"/>
+            <stop offset=".55" stop-color="#c2e0f1" stop-opacity=".34"/>
+            <stop offset="1" stop-color="#a9d2e8" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="gEdgeL" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#e9f0f7" stop-opacity=".62"/>
+            <stop offset="1" stop-color="#e9f0f7" stop-opacity=".1"/>
+          </linearGradient>
+
+          <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#202c3c" flood-opacity=".22"/>
+          </filter>
+          <filter id="bloom" x="-90%" y="-90%" width="280%" height="280%">
+            <feGaussianBlur stdDeviation="1.6"/>
+          </filter>
+          <filter id="holeShade" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="3.4"/>
+          </filter>
+
+          <marker id="arwT" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,1.4 L9,5 L0,8.6 z" fill="#7fa8bd"/>
+          </marker>
+          <marker id="arwW" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,1.2 L9,5 L0,8.8 z" fill="#5f8fa8"/>
+          </marker>
+          <clipPath id="zclip"><rect x="772" y="116" width="184" height="148"/></clipPath>
+        </defs>
+
+        <!-- ==================== 主图 ==================== -->
+        <g id="geoms">
+          <!-- 机床工作台（工件底面所在的平面） -->
+          <path d="M394,322 L716.2,508 L487.6,640 L165.4,454 Z"
+                fill="url(#gTable)" filter="url(#soft)"/>
+          <path d="M394,322 L716.2,508" stroke="#c8d2dc" stroke-width="1.4" opacity=".34" fill="none"/>
+
+          <!-- 工件：右前侧面（x=710 面） -->
+          <path id="sideR" d="M685,368 L487.6,482 L487.6,622 L685,508 Z"
+                fill="url(#gSideR)"/>
+          <!-- 工件：左前侧面（y=580 面） -->
+          <path id="sideL" d="M487.6,482 L196.6,314 L196.6,454 L487.6,622 Z"
+                fill="url(#gSideL)"/>
+
+          <!-- 侧面上下的棱 -->
+          <path d="M196.6,454 L487.6,622 L685,508" fill="none" stroke="#333b45" stroke-width="1.3" opacity=".5"/>
+          <path d="M196.6,314 L487.6,482 L685,368" fill="none" stroke="#dbe5ef" stroke-width="1.2" opacity=".45"/>
+
+          <!-- 顶面平面（等轴测投影，z=0） -->
+          <g id="topPlane" transform="matrix(0.5196,0.3,-0.5196,0.3,420,95)">
+            <rect id="work" x="150" y="200" width="560" height="380" rx="3"
+                  fill="url(#gWork)" stroke="#4b5561" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+
+            <!-- 待割轮廓：程序里排好的路径 -->
+            <path id="preOutline" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="#414d5a" stroke-width="1.8" stroke-dasharray="6 5" opacity=".5"
+                  vector-effect="non-scaling-stroke"/>
+
+            <!-- 孔洞：芯块落下去之后才真正露出来（暗底 + 孔壁受光） -->
+            <g id="holeGrp" opacity="0">
+              <use href="#holeShape" fill="#141a21"/>
+              <g clip-path="url(#holeClipW)">
+                <use href="#holeShape" fill="none" stroke="#59656f" stroke-width="24" opacity=".26" vector-effect="non-scaling-stroke"/>
+                <use href="#holeShape" fill="none" stroke="#3a444e" stroke-width="13" opacity=".34" vector-effect="non-scaling-stroke"/>
+              </g>
+            </g>
+
+
+            <!-- 割缝：沟槽 + 三刀 -->
+            <path id="cutEdge" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="#4c5661" stroke-width="16" stroke-linecap="butt" stroke-linejoin="round"
+                  opacity=".26" pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000"
+                  vector-effect="non-scaling-stroke"/>
+            <path id="cutGroove" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="#0d1319" stroke-width="10" stroke-linecap="butt" stroke-linejoin="round"
+                  opacity=".82" pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000"
+                  vector-effect="non-scaling-stroke"/>
+            <path id="cut1" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="#8ec9e2" stroke-width="5" stroke-linecap="butt" stroke-linejoin="round"
+                  pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000"
+                  vector-effect="non-scaling-stroke"/>
+            <path id="cut2" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="#3f93c0" stroke-width="5" stroke-linecap="butt" stroke-linejoin="round"
+                  pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000"
+                  vector-effect="non-scaling-stroke"/>
+            <path id="cut3" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="#e2f6fc" stroke-width="5.2" stroke-linecap="butt" stroke-linejoin="round"
+                  pathLength="1000" stroke-dasharray="1000" stroke-dashoffset="1000"
+                  vector-effect="non-scaling-stroke" filter="url(#bloom)"/>
+
+            <circle id="threadHole" cx="430" cy="447.5" r="7.6" fill="#eef4f9" stroke="#6b7885" stroke-width="1.4"
+                    vector-effect="non-scaling-stroke"/>
+
+            <!-- 计算用（不可见） -->
+            <path id="cutPath" d="M430,447.5 L430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 L430,497.5"
+                  fill="none" stroke="none"/>
+          </g>
+
+          <!-- 顶面前棱高光 -->
+          <path d="M487.6,482 L685,368 M487.6,482 L196.6,314" stroke="url(#gEdgeL)"
+                stroke-width="2" fill="none" opacity=".75"/>
+
+          <!-- 芯块下落的容器（屏幕坐标，裁在孔口内） -->
+          <g id="slugMove" clip-path="url(#holeClipS)">
+            <g transform="matrix(0.5196,0.3,-0.5196,0.3,420,95)">
+              <path id="slugMoving" d="M430,497.5 L518,497.5 A19.5,19.5 0 0 0 537.5,478 L537.5,302 A19.5,19.5 0 0 0 518,282.5 L342,282.5 A19.5,19.5 0 0 0 322.5,302 L322.5,478 A19.5,19.5 0 0 0 342,497.5 Z"
+                    fill="url(#gSlug)" opacity="1"/>
+            </g>
+          </g>
+
+          <!-- 丝 + 上导丝嘴 -->
+          <g id="wireGrp" opacity="0">
+            <!-- 孔内段：越深越淡，表示丝一直穿到 60mm 底 -->
+            <line x1="0" y1="0" x2="0" y2="72" stroke="url(#gWireFade)" stroke-width="2.6" stroke-linecap="butt"/>
+            <!-- 上段：从喷嘴到工件表面 -->
+            <line x1="0" y1="-98" x2="0" y2="0" stroke="#c47240" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="-0.7" y1="-98" x2="-0.7" y2="0" stroke="#ffd7b0" stroke-width=".9" opacity=".72"/>
+            <!-- 高压水冲淋（贴工件表面） -->
+            <ellipse cx="0" cy="-12" rx="25" ry="9" fill="url(#gWater)"/>
+            <!-- 放电点 -->
+            <circle id="wHalo" cx="0" cy="0" r="14" fill="url(#gGlow)" opacity="0"/>
+            <circle cx="0" cy="0" r="2.4" fill="#fffaf3" opacity=".95"/>
+            <g id="sparks"></g>
+            <!-- 上导丝嘴 -->
+            <g id="nz">
+              <path d="M-18,-124 L18,-124 L9.5,-98 L-9.5,-98 Z" fill="#a9bccd" stroke="#6f8598" stroke-width="1"/>
+              <rect x="-4.8" y="-98" width="9.6" height="5" fill="#e6f0f7" stroke="#8fa2b3" stroke-width=".7"/>
+              <path d="M-18,-124 L18,-124" stroke="#d3e2ee" stroke-width="1.4"/>
+            </g>
+          </g>
+
+          <!-- 丝跟标 -->
+          <g id="wireTag" opacity="0">
+            <rect x="14" y="-16" width="62" height="20" rx="5" fill="#fffaf4" stroke="#e6c6aa" stroke-width=".9"/>
+            <text x="45" y="-1.5" text-anchor="middle" fill="#a85a2a" font-size="10.5" font-family="inherit" font-weight="600">丝 φ0.25</text>
+          </g>
+        </g>
+
+        <!-- ==================== 局部放大 ==================== -->
+        <g id="zoomWin">
+          <rect x="758" y="76" width="212" height="232" rx="12" fill="#ffffff" stroke="#e1e8f0" filter="url(#soft)"/>
+          <text id="zoomTitle" x="772" y="99" fill="#93a1b1" font-size="11" font-family="inherit" letter-spacing=".4">穿丝 · 侧视</text>
+          <path d="M772,107 L956,107" stroke="#eef2f7" stroke-width="1"/>
+          <g clip-path="url(#zclip)">
+            <g id="winThread">
+              <rect x="772" y="116" width="184" height="148" fill="#fbfdff"/>
+              <rect x="792" y="166" width="144" height="62" fill="#8b97a4"/>
+              <rect x="792" y="166" width="144" height="3" fill="#cbd6e0" opacity=".75"/>
+              <rect x="792" y="225" width="144" height="3" fill="#57626e" opacity=".55"/>
+              <text x="800" y="158" fill="#8a97a6" font-size="9" font-family="inherit">工件截面（厚 60）</text>
+              <rect x="857" y="166" width="12" height="62" fill="#eef5fa"/>
+              <path d="M857,166 L857,228 M869,166 L869,228" stroke="#6f7c8a" stroke-width=".8" opacity=".5"/>
+              <path d="M842,140 L886,140 L879,163 L849,163 Z" fill="#a3b8ca" stroke="#6f8598" stroke-width="1"/>
+              <path d="M842,252 L886,252 L879,229 L849,229 Z" fill="#a3b8ca" stroke="#6f8598" stroke-width="1"/>
+              <rect x="859" y="140" width="8" height="7" fill="#e2edf5"/>
+              <rect x="859" y="245" width="8" height="7" fill="#e2edf5"/>
+              <path d="M863,116 L863,264" stroke="#c47240" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M863,116 L863,264" stroke="#ffdcb8" stroke-width=".9" opacity=".75"/>
+              <path d="M896,122 L896,148" stroke="#5f8fa8" stroke-width="1.5" marker-end="url(#arwW)"/>
+              <text x="902" y="138" fill="#5f8fa8" font-size="9" font-family="inherit">走丝</text>
+              <text x="842" y="136" text-anchor="end" fill="#6b7887" font-size="9" font-family="inherit">上嘴</text>
+              <text x="842" y="250" text-anchor="end" fill="#6b7887" font-size="9" font-family="inherit">下嘴</text>
+              <text x="884" y="204" fill="#8b98a6" font-size="8.5" font-family="inherit">φ1.5</text>
+              <text x="852" y="128" text-anchor="end" fill="#a85a2a" font-size="10" font-family="inherit" font-weight="600">φ0.25</text>
+            </g>
+
+            <g id="winGap" opacity="0">
+              <rect x="772" y="116" width="184" height="148" fill="#e9eff5"/>
+              <rect x="772" y="116" width="184" height="52" fill="#8b97a4"/>
+              <rect x="772" y="116" width="184" height="3" fill="#cbd6e0" opacity=".55"/>
+              <rect id="zMargin" x="772" y="168" width="184" height="12.5" fill="#d6a966"/>
+              <rect id="zGap" x="772" y="180.5" width="184" height="40" fill="#daeef8"/>
+              <rect id="zSlug" x="772" y="220.5" width="184" height="43.5" fill="#aab5c1"/>
+              <rect id="zWhite" x="772" y="168" width="184" height="3.2" fill="#e3c486"/>
+              <circle id="zWire" cx="864" cy="200.5" r="15.5" fill="#c47240" stroke="#7e401a" stroke-width="1.4"/>
+              <circle id="zWireIn" cx="864" cy="200.5" r="5.5" fill="#f8e6d5" opacity=".45"/>
+              <g id="zSparks"></g>
+              <text x="778" y="146" fill="#eef4fa" font-size="9" font-family="inherit" opacity=".9">工件（保留）</text>
+              <text id="zSlugTxt" x="778" y="250" fill="#5a6674" font-size="9" font-family="inherit" opacity=".9">芯块（废料）</text>
+              <g id="zTicks">
+                <path d="M940,168 L952,168" stroke="#c0392b" stroke-width="1.5"/>
+                <path d="M942,171.75 L952,171.75" stroke="#c0392b" stroke-width="1.3" opacity=".65"/>
+                <path d="M944,180.5 L952,180.5" stroke="#c0392b" stroke-width="1.3" opacity=".4"/>
+                <text x="952" y="163" text-anchor="end" fill="#c0392b" font-size="8.5" font-family="inherit">3rd</text>
+                <text x="952" y="192" text-anchor="end" fill="#c0392b" font-size="8.5" font-family="inherit" opacity=".5">1st</text>
+              </g>
+            </g>
+          </g>
+          <rect x="772" y="116" width="184" height="148" fill="none" stroke="#e8eef5"/>
+          <text id="zoomCap" x="772" y="284" fill="#8a97a6" font-size="10.5" font-family="inherit"
+                style="paint-order:stroke;stroke:#fff;stroke-width:3;stroke-linejoin:round">丝从穿丝孔穿过工件</text>
+          <text id="zoomSub" x="772" y="299" fill="#a7b3c1" font-size="9.5" font-family="inherit">上下导丝嘴夹住定位 · 高压水冲淋</text>
+        </g>
+
+        <!-- ==================== 右侧信息 ==================== -->
+        <g id="wireInfo">
+          <text x="758" y="344" fill="#93a1b1" font-size="10" font-family="inherit" letter-spacing="1.1">WIRE · 电极丝</text>
+          <path d="M758,352 L970,352" stroke="#eef2f7" stroke-width="1"/>
+          <text x="758" y="376" fill="#1c2430" font-size="14" font-family="inherit" font-weight="650" font-variant-numeric="tabular-nums">φ0.25</text>
+          <text x="806" y="376" fill="#93a1b1" font-size="10.5" font-family="inherit">mm · 黄铜丝</text>
+          <text x="758" y="398" fill="#5c6b7d" font-size="11" font-family="inherit">单向走丝 10 m/min · 张力 12 N</text>
+          <text x="758" y="416" fill="#a7b3c1" font-size="10" font-family="inherit">慢走丝一次性用丝；快走丝用钼丝往复</text>
+
+          <text x="758" y="452" fill="#93a1b1" font-size="10" font-family="inherit" letter-spacing="1.1">KERF · 割缝</text>
+          <path d="M758,460 L970,460" stroke="#eef2f7" stroke-width="1"/>
+          <text x="758" y="484" fill="#1c2430" font-size="13.5" font-family="inherit" font-weight="650" font-variant-numeric="tabular-nums">0.25 + 2 × 0.035</text>
+          <text x="758" y="506" fill="#5c6b7d" font-size="11" font-family="inherit">= 0.32 mm，内清角最小 <tspan fill="#c47240" font-weight="650">R0.16</tspan></text>
+          <text x="758" y="524" fill="#a7b3c1" font-size="10" font-family="inherit">再小的清角，线割就只能让位给电火花</text>
+        </g>
+
+        <!-- ==================== 标注 ==================== -->
+        <g id="anno">
+          <text x="308" y="252" fill="#ffffff" font-size="11.5" font-family="inherit" font-weight="600"
+                style="paint-order:stroke;stroke:#8f9caa;stroke-width:3.2;stroke-linejoin:round">工件 Workpiece</text>
+          <text x="308" y="269" fill="#eef4f9" font-size="10" font-family="inherit" letter-spacing=".3"
+                style="paint-order:stroke;stroke:#8f9caa;stroke-width:2.8;stroke-linejoin:round">SKD11 · HRC60 · 厚 60</text>
+
+          <g id="annoHole">
+            <path d="M408,362 L302,392" fill="none" stroke="#a8c8da" stroke-width="1.1" marker-end="url(#arwT)"/>
+            <text x="296" y="408" text-anchor="end" fill="#eaf2f9" font-size="12.5" font-family="inherit" font-weight="600"
+                  style="paint-order:stroke;stroke:#4a535e;stroke-width:3.2;stroke-linejoin:round">穿丝孔</text>
+            <text x="296" y="426" text-anchor="end" fill="#cfdae5" font-size="10.5" font-family="inherit"
+                  style="paint-order:stroke;stroke:#4a535e;stroke-width:3;stroke-linejoin:round">φ1.5 · 预先钻好</text>
+          </g>
+
+          <g id="dimBox">
+            <text x="502" y="434" text-anchor="middle" fill="#cfdde9" font-size="11.5" font-family="inherit" font-variant-numeric="tabular-nums"
+                  style="paint-order:stroke;stroke:#93a0ad;stroke-width:3;stroke-linejoin:round">□40.0 通孔</text>
+          </g>
+
+          <g id="dropTag" opacity="0">
+            <path d="M440,188 L440,268" stroke="#c0392b" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>
+            <path d="M436.5,262 L440,270 L443.5,262" fill="none" stroke="#c0392b" stroke-width="1.2" opacity=".7"/>
+            <text x="430" y="178" text-anchor="middle" fill="#c0392b" font-size="11.5" font-family="inherit"
+                  font-weight="600" style="paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round">芯块已分离 · 落料</text>
+          </g>
+
+          <text x="540" y="706" text-anchor="middle" fill="#9aa7b6" font-size="11.5" font-family="inherit" letter-spacing=".3">割缝 = 丝径 0.25 + 两侧间隙各 0.035 = 0.32mm —— 这个数决定了内清角最小只能到 R0.16，再小就得回电火花</text>
+        </g>
+      </svg>
+    </div>
+
+    <aside>
+      <div>
+        <div class="k">加工状态</div>
+        <div class="live" style="margin-top:9px">
+          <div class="big"><span id="runLen">0</span><i>mm</i></div>
+          <div class="cap">累计切割行程 · 三遍共约 506 mm</div>
+          <div class="split">
+            <div><b id="curCut">1st</b><span>当前刀次</span></div>
+            <div><b id="curGap">0.10</b><span>单边余量 mm</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">三次切割</div>
+        <div class="passes" id="passes">
+          <div class="pass" data-p="1"><b>1st</b><span>粗割</span><i>0.10 · Ra3.2</i></div>
+          <div class="pass" data-p="2"><b>2nd</b><span>修割</span><i>0.03 · Ra1.6</i></div>
+          <div class="pass" data-p="3"><b>3rd</b><span>精修</span><i>0 · Ra0.4</i></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">工艺参数</div>
+        <div class="rows">
+          <div class="row"><span>电极丝</span><b>φ0.25<i>mm</i></b></div>
+          <div class="row"><span>割缝宽</span><b>0.32<i>mm</i></b></div>
+          <div class="row"><span>单边间隙</span><b>0.035<i>mm</i></b></div>
+          <div class="row"><span>工件厚度</span><b>60<i>mm</i></b></div>
+          <div class="row"><span>走丝速度</span><b>10<i>m/min</i></b></div>
+          <div class="row"><span>工作液</span><b>去离子水</b></div>
+        </div>
+      </div>
+
+      <div class="note" id="note">
+        <b>线割的第一件事不是切，是穿丝：</b>工件上必须有个预先钻好的穿丝孔，丝才能从中间穿下去 —— 没有孔，丝进不去。
+      </div>
+    </aside>
+  </div>
+
+  <div class="controls">
+    <button class="primary playing" id="play"><span class="play-ico"></span><span id="playTxt">暂停</span></button>
+    <div class="track">
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <div class="tcode" id="tcode">0%</div>
+    </div>
+    <div class="seg" id="speed">
+      <button data-s="0.5">0.5×</button>
+      <button data-s="1" class="on">1×</button>
+      <button data-s="2">2×</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="annoChk" checked>标注</label>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+  const seg = (t,a,b)=>clamp((t-a)/(b-a),0,1);
+  const ease = x=>x*x*(3-2*x);
+
+  /* ---------------- 等轴测投影 ---------------- */
+  const SX = 0.5196, SY = 0.30, OX = 420, OY = 95, DEP = 140;
+  const proj = (x,y)=>[OX + (x-y)*SX, OY + (x+y)*SY];
+
+  /* ---------------- 时间轴 ---------------- */
+  const T = {
+    th:[0.010,0.135],   // 穿丝
+    en:[0.135,0.290],   // 引入
+    c1:[0.290,0.545],   // 粗割
+    c2:[0.545,0.740],   // 修割
+    c3:[0.740,0.890],   // 精修
+    dn:[0.890,0.970]    // 剪丝
+  };
+  const DUR = 14;
+
+  const pth = $('cutPath');
+  const LTOT = pth.getTotalLength();
+  const INTRO_PX = 50;
+  const FIN = INTRO_PX / LTOT;
+
+  function wireLen(p){
+    if(p <= 0) return 0;
+    if(p <= 1) return LTOT * p;
+    const k = Math.floor(p), f = p - k;
+    return INTRO_PX + (LTOT - INTRO_PX) * f;
+  }
+  function walkedPx(p){
+    if(p <= 1) return LTOT * Math.max(0,p);
+    return LTOT + (LTOT - INTRO_PX) * (p - 1);
+  }
+  function totalProgress(t){
+    if(t < T.en[0]) return 0;
+    if(t < T.en[1]) return FIN * seg(t, T.en[0], T.en[1]);
+    if(t < T.c1[1]) return FIN + (1-FIN)*seg(t, T.c1[0], T.c1[1]);
+    if(t < T.c2[1]) return 1 + seg(t, T.c2[0], T.c2[1]);
+    if(t < T.c3[1]) return 2 + seg(t, T.c3[0], T.c3[1]);
+    return 3;
+  }
+
+  /* ---------------- 火花 ---------------- */
+  function makeBolts(parent, n, stroke){
+    const arr = [];
+    for(let i=0;i<n;i++){
+      const g = document.createElementNS(NS,'g');
+      const halo = document.createElementNS(NS,'circle');
+      halo.setAttribute('fill','url(#gHit)');
+      const p = document.createElementNS(NS,'path');
+      p.setAttribute('fill','none');
+      p.setAttribute('stroke', stroke);
+      p.setAttribute('stroke-linecap','round');
+      g.appendChild(halo); g.appendChild(p);
+      g.setAttribute('opacity','0');
+      parent.appendChild(g);
+      arr.push({g,p,halo});
+    }
+    return arr;
+  }
+  const bolts = makeBolts($('sparks'), 12, '#dcf8ff');
+  const zbolts = makeBolts($('zSparks'), 7, '#eefcff');
+
+  function boltPath(x1,y1,x2,y2,amp){
+    const n=3, dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1;
+    const nx=-dy/L, ny=dx/L;
+    let d = `M${x1.toFixed(1)},${y1.toFixed(1)}`;
+    for(let i=1;i<=n;i++){
+      const u=i/n;
+      let x=x1+dx*u, y=y1+dy*u;
+      if(i<n){ const j=(Math.random()-.5)*amp; x+=nx*j; y+=ny*j; }
+      d += ` L${x.toFixed(1)},${y.toFixed(1)}`;
+    }
+    return d;
+  }
+
+  /* ---------------- 文案 ---------------- */
+  const NOTE = {
+    th:'<b>线割的第一件事不是切，是穿丝：</b>工件上必须有个预先钻好的 <span class="hl">φ1.5</span> 穿丝孔，丝才能从中间穿下去。孔太小穿不进，太大就白浪费一段割缝宽度。',
+    en:'<b>引线：</b>丝从穿丝孔走到轮廓起点，这段不是多余的 —— 它留下的痕迹最后落在废料里。引线位置选错，就会在成品面上留一道疤。',
+    c1:'<b>第一刀只负责割开：</b>大电流、快走丝，效率最高，但表面粗、割缝也偏大。它每边留 <span class="hl">0.10mm</span>，等着后面两刀来削。',
+    c2:'<b>第二刀沿同一条程序再走一遍：</b>只削掉余量的三分之二。线割的精度不是一刀出来的 —— 同一段轮廓走三遍，是它的常规操作。',
+    c3:'<b>第三刀 offset 归零：</b>丝贴着最终轮廓走完最后一圈，Ra 从 3.2 拉到 0.4。尺寸精度就定在这一刀，前面的两刀都是在给它铺路。',
+    dn:'<b>抬丝、剪断、芯块落下。</b>线割能割任意异形通孔和 0.2mm 清角，但盲腔它一点办法都没有 —— 那是电火花成形的活。'
+  };
+  const CAP = {
+    th:['丝从穿丝孔穿过工件','上下导丝嘴夹住定位 · 高压水冲淋'],
+    en:['引线段：从穿丝孔走到轮廓起点','段长 10 mm · 痕迹留在废料侧'],
+    c1:['1st 粗割：大电流快走，只求割开','每边留 0.10 余量 · Ra 3.2'],
+    c2:['2nd 修割：同一路径再走一遍','余量降到 0.03 · Ra 1.6'],
+    c3:['3rd 精修：offset 归零，切到最终尺寸','余量 0 · Ra 0.4'],
+    dn:['剪丝：抬丝、剪断，芯块落下','线割只能做贯通轮廓']
+  };
+
+  function phaseOf(t){
+    if(t < T.en[0]) return 'th';
+    if(t < T.c1[0]) return 'en';
+    if(t < T.c2[0]) return 'c1';
+    if(t < T.c3[0]) return 'c2';
+    if(t < T.dn[0]) return 'c3';
+    return 'dn';
+  }
+
+  /* ---------------- 渲染 ---------------- */
+  function render(t){
+    const p = totalProgress(t);
+    const c1p = clamp(p,0,1), c2p = clamp(p-1,0,1), c3p = clamp(p-2,0,1);
+
+    $('cutEdge').setAttribute('stroke-dashoffset', (1000*(1-c1p)).toFixed(1));
+    $('cutGroove').setAttribute('stroke-dashoffset', (1000*(1-c1p)).toFixed(1));
+    $('cut1').setAttribute('stroke-dashoffset', (1000*(1-c1p)).toFixed(1));
+    $('cut2').setAttribute('stroke-dashoffset', (1000*(1-c2p)).toFixed(1));
+    $('cut3').setAttribute('stroke-dashoffset', (1000*(1-c3p)).toFixed(1));
+
+    /* 丝的世界坐标 → 屏幕坐标 */
+    const len = clamp(wireLen(p), 0, LTOT);
+    const pt = pth.getPointAtLength(len);
+    const [wx, wy] = proj(pt.x, pt.y);
+
+    /* 穿丝：喷嘴下落贴合 */
+    const thp = seg(t, T.th[0], T.th[1]);
+    const nzDrop = -34 * (1 - ease(seg(thp, 0.18, 0.72)));   // 喷嘴从上方降下来
+    const nzO = seg(thp, 0.10, 0.42);
+    const wg = $('wireGrp');
+    const lift = ease(seg(t, T.dn[0], T.dn[0]+0.030)) * 112;
+    const wFade = 1 - seg(t, T.dn[0]+0.028, T.dn[0]+0.060);
+    wg.setAttribute('transform', `translate(${wx.toFixed(2)},${(wy-lift).toFixed(2)})`);
+    wg.setAttribute('opacity', (nzO*wFade).toFixed(2));
+    $('nz').setAttribute('transform', `translate(0,${nzDrop.toFixed(1)})`);
+    $('wireTag').setAttribute('transform', `translate(${(wx+9).toFixed(1)},${(wy-30).toFixed(1)})`);
+    $('wireTag').setAttribute('opacity', (seg(thp,0.45,0.8)*wFade).toFixed(2));
+
+    /* 芯块：割开后加深，松脱 → 下落 */
+    const sep1 = seg(p, 0.88, 1.0);
+    const slack = ease(seg(p, 2.86, 2.93)) * 5;
+    const drop  = ease(seg(p, 2.92, 3.0));
+    $('slugMove').setAttribute('transform',
+      `translate(0,${(sep1*2.5 + slack + drop*128).toFixed(1)})`);
+
+    /* 放电 */
+    const live = t >= T.en[0] && t < T.dn[0];
+    const fine = p >= 2;
+
+    if(live){
+      $('wHalo').setAttribute('opacity', (0.4+0.4*Math.random()).toFixed(2));
+      $('wHalo').setAttribute('r', (11 + Math.random()*6).toFixed(1));
+    } else {
+      $('wHalo').setAttribute('opacity', 0);
+    }
+
+    for(let i=0;i<bolts.length;i++){
+      const b = bolts[i];
+      if(!live || Math.random() > 0.52){ b.g.setAttribute('opacity','0'); continue; }
+      const a = Math.random()*Math.PI*2, d = 5 + Math.random()*13;
+      const x2 = Math.cos(a)*d, y2 = Math.sin(a)*d*0.72;   // 顺着等轴测压扁
+      b.p.setAttribute('d', boltPath(0,0,x2,y2,2.4));
+      b.p.setAttribute('stroke-width', (0.9+Math.random()*1.3).toFixed(2));
+      b.p.setAttribute('opacity', (0.55+Math.random()*0.45).toFixed(2));
+      b.halo.setAttribute('cx', x2.toFixed(1)); b.halo.setAttribute('cy', y2.toFixed(1));
+      b.halo.setAttribute('r', (3.2+Math.random()*3.2).toFixed(1));
+      b.g.setAttribute('opacity','1');
+    }
+
+    /* ---- 放大窗 ---- */
+    const mixT = seg(t, 0.116, 0.152);
+    $('winThread').setAttribute('opacity', (1-mixT).toFixed(2));
+    $('winGap').setAttribute('opacity', mixT.toFixed(2));
+
+    const margin = p < 1 ? 12.5 : (p < 2 ? 3.75 : 0);
+    const mTop = 168 + margin;
+    $('zMargin').setAttribute('y', mTop.toFixed(2));
+    $('zMargin').setAttribute('height', margin.toFixed(2));
+    $('zGap').setAttribute('y', mTop.toFixed(2));
+    $('zSlug').setAttribute('y', (mTop+40).toFixed(2));
+    $('zSlug').setAttribute('height', (264-(mTop+40)).toFixed(2));
+    $('zWire').setAttribute('cy', (mTop+20).toFixed(2));
+    $('zWireIn').setAttribute('cy', (mTop+20).toFixed(2));
+    $('zWhite').setAttribute('height', (fine?2:3.2).toFixed(2));
+    $('zWhite').setAttribute('fill', fine?'#ecd6a6':'#e3c486');
+    $('zMargin').setAttribute('opacity', margin>0.5?'1':'0');
+    $('zTicks').setAttribute('opacity', (1-seg(p,2.90,3)).toFixed(2));
+
+    for(let i=0;i<zbolts.length;i++){
+      const b = zbolts[i];
+      if(!live || Math.random()>0.58){ b.g.setAttribute('opacity','0'); continue; }
+      const x = 786 + Math.random()*156;
+      b.p.setAttribute('d', boltPath(x, mTop+9, x+(Math.random()-.5)*7, mTop-1, 2.2));
+      b.p.setAttribute('stroke-width', (0.8+Math.random()*1.1).toFixed(2));
+      b.p.setAttribute('opacity', (0.6+Math.random()*0.4).toFixed(2));
+      b.halo.setAttribute('cx', x); b.halo.setAttribute('cy', mTop);
+      b.halo.setAttribute('r', (4+Math.random()*3.5).toFixed(1));
+      b.g.setAttribute('opacity','1');
+    }
+
+    /* ---- 标注 ---- */
+    $('preOutline').setAttribute('opacity', (0.5 * (1 - seg(p, 0.9, 1.0))).toFixed(2));
+    $('holeGrp').setAttribute('opacity', drop.toFixed(2));
+    $('slugMoving').setAttribute('opacity', clamp(1 - drop*1.35, 0, 1).toFixed(2));
+
+    $('annoHole').setAttribute('opacity', t < T.c1[0] ? 1 : 0);
+    $('dropTag').setAttribute('opacity', seg(p,2.80,2.92).toFixed(2));
+
+    /* ---- 面板 ---- */
+    $('runLen').textContent = (walkedPx(p)/5).toFixed(0);
+    const cutIdx = p < 1 ? 1 : (p < 2 ? 2 : 3);
+    $('curCut').textContent = (p >= 2.995) ? 'OK' : cutIdx + (cutIdx===1?'st':cutIdx===2?'nd':'rd');
+    $('curGap').textContent = (p<1?'0.10':(p<2?'0.03':'0.00'));
+
+    [...$('passes').children].forEach(el=>{
+      const n = +el.dataset.p;
+      const on = (p < 2.995) && n === cutIdx && t >= T.en[0];
+      el.classList.toggle('on', on);
+      el.classList.toggle('done', p > n);
+    });
+
+    const ph = phaseOf(t);
+    document.querySelectorAll('.ph').forEach(e=>e.classList.toggle('on', e.dataset.ph===ph));
+    $('note').innerHTML = NOTE[ph];
+    $('zoomTitle').textContent = ph==='th' ? '穿丝 · 侧视' : '割缝截面 · 局部放大';
+    $('zoomCap').textContent = CAP[ph][0];
+    $('zoomSub').textContent = CAP[ph][1];
+  }
+
+  /* ---------------- 播放 ---------------- */
+  let t=0, playing=true, speed=1, last=0, hold=0;
+
+  function loop(ts){
+    if(!playing) return;
+    if(!last) last=ts;
+    const dt = Math.min(64, ts-last)/1000; last=ts;
+    if(hold>0){
+      hold -= dt;
+      if(hold<=0) t=0;
+    } else {
+      t += dt/DUR*speed;
+      if(t>=1){ t=1; hold=2.0; }
+    }
+    render(t);
+    $('scrub').value = Math.round(t*1000);
+    $('tcode').textContent = Math.round(t*100)+'%';
+    requestAnimationFrame(loop);
+  }
+
+  function setPlaying(p){
+    playing = p; last = 0;
+    $('play').classList.toggle('playing', p);
+    $('playTxt').textContent = p ? '暂停' : '播放';
+    if(p) requestAnimationFrame(loop);
+  }
+
+  $('play').addEventListener('click', ()=>{
+    if(!playing && t>=1) t=0;
+    setPlaying(!playing);
+  });
+  $('scrub').addEventListener('input', e=>{
+    t = +e.target.value/1000; hold = 0; render(t);
+    $('tcode').textContent = Math.round(t*100)+'%';
+  });
+  $('speed').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    speed = +b.dataset.s;
+    [...$('speed').children].forEach(x=>x.classList.toggle('on', x===b));
+  });
+  $('annoChk').addEventListener('change', e=>{ $('anno').style.opacity = e.target.checked ? 1 : 0; });
+  document.querySelectorAll('.ph').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const m = {th:0.06, en:0.21, c1:0.42, c2:0.64, c3:0.82, dn:0.93};
+      t = m[el.dataset.ph]; hold = 0; render(t);
+      $('scrub').value = Math.round(t*1000);
+      $('tcode').textContent = Math.round(t*100)+'%';
+    });
+  });
+
+  const q = new URLSearchParams(location.search);
+  if(q.has('t')){ t = clamp(parseFloat(q.get('t')),0,1); playing = false; }
+  render(t);
+  if(playing) requestAnimationFrame(loop);
+  else {
+    $('play').classList.remove('playing'); $('playTxt').textContent='播放';
+    $('scrub').value = Math.round(t*1000); $('tcode').textContent = Math.round(t*100)+'%';
+  }
+})();
+</script>
+</body>
+</html>

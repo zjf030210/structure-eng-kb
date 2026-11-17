@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>省模演示 · Mold Polishing Animation</title>
+<style>
+  :root{
+    --bg:#eef1f5; --panel:#ffffff; --line:#dde3ea;
+    --ink:#1c2430; --ink2:#5c6b7d; --ink3:#93a1b1;
+    --accent:#1f6feb; --green:#5f9e42; --copper:#c47240; --red:#c0392b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:18px;
+  }
+  .app{
+    width:min(1360px,100%);background:var(--panel);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 18px 48px -28px rgba(20,40,70,.35),0 2px 6px rgba(20,40,70,.05);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    padding:20px 26px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fbfcfe,#fff);
+  }
+  h1{font-size:19px;letter-spacing:.2px;font-weight:650}
+  h1 span{color:var(--ink3);font-weight:400;font-size:13px;margin-left:8px;letter-spacing:0}
+  .sub{margin-top:5px;font-size:12.5px;color:var(--ink2);line-height:1.5}
+  .sub b{color:var(--ink);font-weight:600}
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);
+    background:#f3f6fa;border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+  .body{display:grid;grid-template-columns:1fr 292px;min-height:0;flex:1}
+  .stage{position:relative;background:#f7f9fc;overflow:hidden}
+  .stage svg{display:block;width:100%;height:100%;position:relative;z-index:1}
+  .stage .grid-bg{
+    position:absolute;inset:0;z-index:0;
+    background-image:radial-gradient(circle at 1px 1px,#d8dfe8 1px,transparent 0);
+    background-size:26px 26px;opacity:.45;pointer-events:none;
+  }
+
+  .phases{position:absolute;top:14px;left:16px;display:flex;flex-wrap:wrap;gap:5px;z-index:3;max-width:calc(100% - 32px)}
+  .ph{
+    font-size:11px;padding:5px 10px;border-radius:7px;cursor:pointer;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);color:var(--ink3);
+    backdrop-filter:blur(6px);transition:.25s;letter-spacing:.2px;
+  }
+  .ph:hover{border-color:#c3d0de}
+  .ph.on{background:var(--ink);border-color:var(--ink);color:#fff;box-shadow:0 4px 12px -4px rgba(28,36,48,.5)}
+
+  aside{
+    border-left:1px solid var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:15px;
+    background:#fff;overflow:auto;
+  }
+  .k{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);font-weight:600}
+  .rows{display:flex;flex-direction:column;margin-top:8px;border-top:1px solid #eef2f7}
+  .row{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #eef2f7;font-size:12.5px}
+  .row span{color:var(--ink2)}
+  .row b{font-variant-numeric:tabular-nums;font-weight:650;font-size:13px}
+  .row b i{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:400;margin-left:2px}
+
+  .live{background:#f6f9fd;border:1px solid #e2ebf6;border-radius:12px;padding:12px 14px}
+  .live .big{font-size:25px;font-weight:660;font-variant-numeric:tabular-nums;letter-spacing:-.6px}
+  .live .big i{font-style:normal;font-size:12px;color:var(--ink3);font-weight:500;margin-left:3px}
+  .live .cap{font-size:11.5px;color:var(--ink2);margin-top:2px}
+  .live .split{display:flex;gap:10px;margin-top:11px;padding-top:10px;border-top:1px dashed #d8e4f2}
+  .live .split div{flex:1}
+  .live .split b{display:block;font-size:13.5px;font-variant-numeric:tabular-nums}
+  .live .split span{font-size:10.5px;color:var(--ink3)}
+
+  .passes{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+  .pass{
+    display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;
+    border:1px solid #eef2f7;background:#fcfdff;font-size:11.5px;transition:.28s;
+  }
+  .pass b{font-size:10.5px;font-weight:700;color:#b6c1cd;letter-spacing:.5px;width:24px;transition:.28s}
+  .pass span{color:var(--ink2);width:26px}
+  .pass i{font-style:normal;color:#b0bcc9;margin-left:auto;font-variant-numeric:tabular-nums;font-size:10.5px}
+  .pass.on{background:#eef4fd;border-color:#cddff7;box-shadow:0 2px 8px -4px rgba(31,111,235,.35)}
+  .pass.on b{color:var(--accent)}
+  .pass.on i{color:#5c8bc9}
+  .pass.done{opacity:.5}
+
+  .note{font-size:11.8px;line-height:1.68;color:var(--ink2)}
+  .note b{color:var(--ink);font-weight:600}
+  .note .hl{color:var(--copper);font-weight:600}
+
+  .controls{
+    border-top:1px solid var(--line);padding:13px 22px 15px;display:flex;align-items:center;gap:16px;
+    background:linear-gradient(180deg,#fff,#fbfcfe);
+  }
+  button{
+    font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:9px;padding:9px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:7px;
+    transition:.16s;white-space:nowrap;
+  }
+  button:hover{background:#f5f8fc;border-color:#c9d5e3}
+  button.primary{background:var(--ink);color:#fff;border-color:var(--ink);min-width:96px;justify-content:center}
+  button.primary:hover{background:#2b3648}
+  .play-ico{width:0;height:0;border-left:9px solid currentColor;border-top:5.5px solid transparent;border-bottom:5.5px solid transparent}
+  button.primary.playing .play-ico{border:0;width:9px;height:11px;border-left:3px solid currentColor;border-right:3px solid currentColor}
+
+  .track{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:#e3eaf3;outline:none}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+    border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .tcode{font-size:11.5px;color:var(--ink3);font-variant-numeric:tabular-nums;width:88px;text-align:right}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:0;border-radius:0;padding:9px 11px;background:#fff;font-size:12px;color:var(--ink2)}
+  .seg button.on{background:#eef4fd;color:var(--accent);font-weight:600}
+  .seg button+button{border-left:1px solid var(--line)}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);cursor:pointer;user-select:none}
+  .toggle input{accent-color:var(--ink);width:15px;height:15px;cursor:pointer}
+
+  @media (min-width:1081px){ .app{height:calc(100vh - 36px)} }
+  @media (max-width:1080px){
+    body{height:auto;align-items:flex-start;padding:12px}
+    .app{height:auto;width:100%}
+    .body{grid-template-columns:1fr}
+    .stage{height:auto;aspect-ratio:912/596}
+    aside{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .controls{flex-wrap:wrap}
+    .track{order:9;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>省模演示 <span>· Mold Polishing / 抛光</span></h1>
+      <div class="sub">电火花留下的白层和麻点，只能用磨料一级一级削掉：<b>油石 → 砂纸 → 钻石膏 → 棉花</b>。四道，每道换向 45°，看不见上一道的纹才算省透。最后 Ra 0.012，模具表面能照出倒影。</div>
+    </div>
+    <div class="badge"><span class="dot"></span>四道磨料 · 逐级换向</div>
+  </header>
+
+  <div class="body">
+    <div class="stage">
+      <div class="grid-bg"></div>
+      <div class="phases">
+        <div class="ph" data-ph="st">来料</div>
+        <div class="ph" data-ph="c1">粗省</div>
+        <div class="ph" data-ph="c2">中省</div>
+        <div class="ph" data-ph="c3">精省</div>
+        <div class="ph" data-ph="c4">镜面</div>
+        <div class="ph" data-ph="ck">检验</div>
+      </div>
+
+      <svg id="mold" viewBox="76 40 912 596" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <!-- 磨痕：平面内三个方向 + EDM 麻点 -->
+          <pattern id="k0" width="16" height="16" patternUnits="userSpaceOnUse">
+            <circle cx="4" cy="5" r="1.7" fill="#4a5663" opacity=".62"/>
+            <circle cx="12" cy="11.5" r="2" fill="#525f6c" opacity=".55"/>
+            <circle cx="12.5" cy="3.5" r="1.2" fill="#8a8274" opacity=".5"/>
+            <circle cx="6.5" cy="13" r="1.1" fill="#8a8274" opacity=".44"/>
+            <circle cx="1.5" cy="11" r=".9" fill="#4a5663" opacity=".5"/>
+          </pattern>
+          <pattern id="k1" width="20" height="8" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="2" x2="20" y2="2" stroke="#333d48" stroke-width="2.1" opacity=".58"/>
+            <line x1="0" y1="6.4" x2="20" y2="6.4" stroke="#4b5763" stroke-width="1" opacity=".40"/>
+          </pattern>
+          <pattern id="k2" width="17" height="5.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="1.7" x2="17" y2="1.7" stroke="#3c4753" stroke-width="1.5" opacity=".46"/>
+          </pattern>
+          <pattern id="k3" width="16" height="4.4" patternUnits="userSpaceOnUse" patternTransform="rotate(90)">
+            <line x1="0" y1="1.5" x2="16" y2="1.5" stroke="#47535f" stroke-width="1.1" opacity=".36"/>
+          </pattern>
+          <pattern id="kz" width="14" height="4.2" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="1.6" x2="14" y2="1.6" stroke="#4d5966" stroke-width="1" opacity=".4"/>
+          </pattern>
+
+          <linearGradient id="gTop" x1="0" y1="0" x2="0.55" y2="1">
+            <stop offset="0" id="gTop1" stop-color="#8b97a4"/>
+            <stop offset=".45" id="gTop2" stop-color="#7d8a97"/>
+            <stop offset="1" id="gTop3" stop-color="#6e7b88"/>
+          </linearGradient>
+          <linearGradient id="gSideL" x1="0" y1="0" x2="0.18" y2="1">
+            <stop offset="0" id="gSL1" stop-color="#68737f"/>
+            <stop offset="1" id="gSL2" stop-color="#48525d"/>
+          </linearGradient>
+          <linearGradient id="gSideR" x1="0" y1="0" x2="0.18" y2="1">
+            <stop offset="0" id="gSR1" stop-color="#4e5864"/>
+            <stop offset="1" id="gSR2" stop-color="#333b44"/>
+          </linearGradient>
+
+          <!-- 镜面：环境的明暗倒影 -->
+          <linearGradient id="gReflect" x1="0.04" y1="0" x2="0.92" y2="0.26">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+            <stop offset=".11" stop-color="#ffffff" stop-opacity=".95"/>
+            <stop offset=".17" stop-color="#18212b" stop-opacity=".46"/>
+            <stop offset=".29" stop-color="#ffffff" stop-opacity=".04"/>
+            <stop offset=".45" stop-color="#ffffff" stop-opacity=".52"/>
+            <stop offset=".52" stop-color="#18212b" stop-opacity=".38"/>
+            <stop offset=".61" stop-color="#ffffff" stop-opacity=".03"/>
+            <stop offset=".72" stop-color="#ffffff" stop-opacity=".82"/>
+            <stop offset=".84" stop-color="#ffffff" stop-opacity="0"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="gSteelZ" x1="0" y1="0" x2="0.25" y2="1">
+            <stop offset="0" stop-color="#cdd7e2"/>
+            <stop offset=".18" stop-color="#9fabb8"/>
+            <stop offset=".62" stop-color="#79858f"/>
+            <stop offset="1" stop-color="#5c6772"/>
+          </linearGradient>
+          <linearGradient id="gGlowP" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffe9c9" stop-opacity=".9"/>
+            <stop offset="1" stop-color="#ffd9a8" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="gSteel" x1="0" y1="0" x2="0.6" y2="1">
+            <stop offset="0" stop-color="#c3cdd8"/>
+            <stop offset=".55" stop-color="#93a0ad"/>
+            <stop offset="1" stop-color="#69757f"/>
+          </linearGradient>
+
+          <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#202c3c" flood-opacity=".26"/>
+          </filter>
+          <filter id="gshadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="10"/>
+          </filter>
+          <filter id="tshadow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="2.6"/>
+          </filter>
+
+          <clipPath id="clipTop"><path d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z"/></clipPath>
+          <clipPath id="clipSideL"><path d="M162.6,222 L391.2,354 L391.2,504 L162.6,372 Z"/></clipPath>
+          <clipPath id="clipSideR"><path d="M391.2,354 L567.8,252 L567.8,402 L391.2,504 Z"/></clipPath>
+          <clipPath id="clipAll">
+            <path d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z"/>
+            <path d="M162.6,222 L391.2,354 L391.2,504 L162.6,372 Z"/>
+            <path d="M391.2,354 L567.8,252 L567.8,402 L391.2,504 Z"/>
+          </clipPath>
+          <clipPath id="zclip"><rect x="660" y="96" width="234" height="102"/></clipPath>
+
+          <marker id="arwM" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0,1.2 L9.2,5 L0,8.8 z" fill="#1c2430"/>
+          </marker>
+        </defs>
+
+        <!-- ==================== 主图 ==================== -->
+        <g id="geoms">
+          <!-- 地面投影 -->
+          <path d="M339.2,270 L567.8,402 L391.2,504 L162.6,372 Z"
+                transform="translate(18,22)" fill="#57616d" opacity=".28" filter="url(#gshadow)"/>
+
+          <!-- 右前侧面（x=620 面，暗） -->
+          <path id="sideR" d="M391.2,354 L567.8,252 L567.8,402 L391.2,504 Z" fill="url(#gSideR)"/>
+          <g clip-path="url(#clipSideR)" opacity=".6">
+            <rect id="skSR0" x="380" y="240" width="200" height="280" fill="url(#k0)"/>
+            <rect id="skSR1" x="380" y="240" width="200" height="280" fill="url(#kz)" opacity="0"/>
+          </g>
+
+          <!-- 左前侧面（y=560 面，亮） -->
+          <path id="sideL" d="M162.6,222 L391.2,354 L391.2,504 L162.6,372 Z" fill="url(#gSideL)"/>
+          <g clip-path="url(#clipSideL)" opacity=".68">
+            <rect id="skSL0" x="155" y="210" width="250" height="310" fill="url(#k0)"/>
+            <rect id="skSL1" x="155" y="210" width="250" height="310" fill="url(#kz)" opacity="0"/>
+          </g>
+
+          <!-- 顶面（成型面，主战场） -->
+          <path id="top" d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z" fill="url(#gTop)"/>
+          <g clip-path="url(#clipTop)">
+            <path id="sk0" d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z" fill="url(#k0)" opacity="1"/>
+            <path id="sk1" d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z" fill="url(#k1)" opacity="0"/>
+            <path id="sk2" d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z" fill="url(#k2)" opacity="0"/>
+            <path id="sk3" d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z" fill="url(#k3)" opacity="0"/>
+            <rect id="bright" x="150" y="110" width="430" height="260" fill="#ffffff" opacity="0"/>
+          </g>
+
+          <!-- 镜面反射（跨三个面连续） -->
+          <g clip-path="url(#clipAll)">
+            <rect id="mirror" x="150" y="110" width="430" height="410" fill="url(#gReflect)" opacity="0"/>
+          </g>
+
+          <!-- 棱边 -->
+          <path d="M162.6,222 L391.2,354 L567.8,252" fill="none" stroke="#d3dde8" stroke-width="1.5" opacity=".58"/>
+          <path d="M162.6,222 L162.6,372 M567.8,252 L567.8,402" fill="none" stroke="#2a333d" stroke-width="1.2" opacity=".55"/>
+          <path d="M162.6,372 L391.2,504 L567.8,402" fill="none" stroke="#222a33" stroke-width="1.3" opacity=".62"/>
+          <path d="M339.2,120 L567.8,252 L391.2,354 L162.6,222 Z" fill="none"
+                stroke="#37424e" stroke-width="1.6" opacity=".9"/>
+        </g>
+
+        <!-- ==================== 工具 ==================== -->
+        <g id="toolGrp" opacity="0">
+          <!-- 落影 -->
+          <ellipse cx="4" cy="6" rx="25" ry="11" fill="#1e2833" opacity=".17" filter="url(#tshadow)"/>
+          <!-- 接触光晕 -->
+          <ellipse id="toolGlow" cx="0" cy="0" rx="30" ry="14" fill="url(#gGlowP)" opacity=".7"/>
+
+          <!-- 磨石（扁方块，等轴测） -->
+          <g id="blockM">
+            <path id="bL" d="M-22,0 L0,11 L0,-1 L-22,-12 Z" fill="#8b97a4" stroke="#5d6976" stroke-width=".9"/>
+            <path id="bR" d="M0,11 L22,0 L22,-12 L0,-1 Z" fill="#76828f" stroke="#5d6976" stroke-width=".9"/>
+            <path id="bT" d="M-22,-12 L0,-23 L22,-12 L0,-1 Z" fill="#b6c0cb" stroke="#5d6976" stroke-width=".95"/>
+          </g>
+
+          <!-- 羊毛轮 / 棉花（圆盘） -->
+          <g id="wheelM" opacity="0">
+            <ellipse id="wDisc" cx="0" cy="-11" rx="19" ry="19" fill="#eee8db" stroke="#a89f8c" stroke-width="1"/>
+            <g id="wSpokes"></g>
+            <ellipse id="wCore" cx="0" cy="-11" rx="6" ry="6" fill="#fbf8f2" stroke="#b9b0a0" stroke-width=".8"/>
+          </g>
+
+          <!-- 手柄 -->
+          <path id="handle" d="M-4.5,-24 L4.5,-24 L3.5,-62 L-3.5,-62 Z" fill="#94a0ae" stroke="#6a7683" stroke-width=".9"/>
+          <rect x="-7" y="-68" width="14" height="7.5" rx="3" fill="#737f8d"/>
+        </g>
+
+        <!-- 往复方向指示 -->
+        <g id="dirGrp" opacity="0">
+          <line id="dirBase" x1="0" y1="0" x2="0" y2="0" stroke="#ffffff" stroke-width="5.6"
+                stroke-linecap="round" opacity=".72"/>
+          <line id="dirLine" x1="0" y1="0" x2="0" y2="0" stroke="#1c2430" stroke-width="1.7"
+                marker-start="url(#arwM)" marker-end="url(#arwM)"/>
+          <text id="dirTxt" x="0" y="0" text-anchor="middle" fill="#1c2430" font-size="10.5" font-family="inherit"
+                font-weight="700" style="paint-order:stroke;stroke:#fff;stroke-width:3.8;stroke-linejoin:round">0°</text>
+        </g>
+
+        <!-- ==================== 标注 ==================== -->
+        <g id="anno">
+          <g id="lbWork">
+            <text x="406" y="106" fill="#1c2430" font-size="12.5" font-family="inherit" font-weight="640"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:4.4;stroke-linejoin:round">型芯 Workpiece</text>
+            <text x="406" y="124" fill="#4d5a68" font-size="10.5" font-family="inherit" letter-spacing=".2"
+                  style="paint-order:stroke;stroke:#fff;stroke-width:3.8;stroke-linejoin:round">S136 ESR · HRC52 · 120×120×60</text>
+          </g>
+
+          <g id="lbDir" opacity="1">
+            <rect x="176" y="342" width="112" height="21" rx="6" fill="#ffffff" opacity=".86"/>
+            <text x="232" y="357" text-anchor="middle" fill="#37424e" font-size="10.5" font-family="inherit" font-weight="600">侧壁纹 · 顺出模 ↑</text>
+          </g>
+
+          <text x="532" y="592" text-anchor="middle" fill="#95a2b1" font-size="11.5" font-family="inherit" letter-spacing=".3">省模不是「磨亮」，是四道磨料逐级把上道的纹削掉 —— 每道换向 45°，看不见上道纹才算省透</text>
+        </g>
+
+        <!-- ==================== 放大窗：表面轮廓 ==================== -->
+        <g id="zoom">
+          <rect x="648" y="50" width="258" height="204" rx="12" fill="#ffffff" stroke="#dbe3ec" stroke-width="1"
+                filter="url(#soft)"/>
+          <text id="zoomTitle" x="662" y="72" fill="#1c2430" font-size="11.5" font-family="inherit" font-weight="640">表面轮廓 · 高度放大</text>
+          <text id="zoomSub" x="662" y="87" fill="#8d9aaa" font-size="9.8" font-family="inherit">Ra 3.20 μm · 白层未去</text>
+          <text x="894" y="72" text-anchor="end" fill="#a3b0be" font-size="9.6" font-family="inherit">高度 ×2000</text>
+
+          <g clip-path="url(#zclip)">
+            <path id="zBody" d="" fill="url(#gSteelZ)" opacity=".96"/>
+            <path id="zShine" d="" fill="none" stroke="#ffffff" stroke-width="1.6" opacity="0"/>
+            <path id="zWhite2" d="" fill="none" stroke="#e0c78a" stroke-width="4.2" opacity=".9"/>
+            <path id="zGhost" d="" fill="none" stroke="#c07a4c" stroke-width="1.1" stroke-dasharray="4 3"
+                  stroke-linejoin="round" opacity="0"/>
+            <path id="zLine" d="" fill="none" stroke="#2a343f" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M660,161 L894,161" stroke="#b9c6d4" stroke-width="1" stroke-dasharray="4 4" opacity=".7"/>
+          </g>
+
+
+          <text id="zRa" x="662" y="240" fill="#1c2430" font-size="16" font-family="inherit" font-weight="660" font-variant-numeric="tabular-nums">3.20</text>
+          <text x="707" y="240" fill="#8d9aaa" font-size="10" font-family="inherit">μm Ra</text>
+          <text id="zAbr" x="894" y="240" text-anchor="end" fill="#c47240" font-size="11" font-family="inherit" font-weight="600">EDM 面</text>
+        </g>
+
+        <!-- ==================== 磨料粒径阶梯 ==================== -->
+        <g id="grit">
+          <rect x="648" y="276" width="258" height="196" rx="12" fill="#ffffff" stroke="#dbe3ec" stroke-width="1"
+                filter="url(#soft)"/>
+          <text x="662" y="298" fill="#1c2430" font-size="11.5" font-family="inherit" font-weight="640">磨料粒径 · 逐级递减</text>
+          <text x="894" y="298" text-anchor="end" fill="#a3b0be" font-size="9.6" font-family="inherit">μm</text>
+
+          <g id="gritRows"></g>
+
+          <text x="662" y="452" fill="#8d9aaa" font-size="9.8" font-family="inherit">粒径每降一级，上道留下的凹谷才够得着</text>
+        </g>
+      </svg>
+    </div>
+
+    <aside>
+      <div>
+        <div class="k">表面状态</div>
+        <div class="live" style="margin-top:9px">
+          <div class="big"><span id="raBig">3.20</span><i>μm Ra</i></div>
+          <div class="cap" id="raCap">电火花加工面 · 白层 8 μm · 麻点密布</div>
+          <div class="split">
+            <div><b id="curAbr">—</b><span>当前磨料</span></div>
+            <div><b id="curCut">0</b><span>已去除 μm</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">四道工序</div>
+        <div class="passes" id="passes">
+          <div class="pass" data-p="1"><b>1</b><span>粗省</span><i>油石 #400</i></div>
+          <div class="pass" data-p="2"><b>2</b><span>中省</span><i>砂纸 #1200</i></div>
+          <div class="pass" data-p="3"><b>3</b><span>精省</span><i>钻石膏 W3</i></div>
+          <div class="pass" data-p="4"><b>4</b><span>镜面</span><i>W1 + 棉花</i></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="k">工艺参数</div>
+        <div class="rows">
+          <div class="row"><span>模具材料</span><b>S136 ESR</b></div>
+          <div class="row"><span>淬火硬度</span><b>HRC 52</b></div>
+          <div class="row"><span>型腔预留</span><b>0.05<i>mm</i></b></div>
+          <div class="row"><span>总去除量</span><b>0.045<i>mm</i></b></div>
+          <div class="row"><span>目标粗糙度</span><b>Ra 0.012</b></div>
+          <div class="row"><span>走纹方向</span><b>顺出模</b></div>
+        </div>
+      </div>
+
+      <div class="note" id="note">
+        <b>电火花切完，表面是一层脆的白层加一层麻点。</b>它不是「不够亮」，是<b>结构已经坏了</b> —— 白层不磨掉，脱模一定拉伤，还会在模具寿命中间成片剥落。
+      </div>
+    </aside>
+  </div>
+
+  <div class="controls">
+    <button class="primary playing" id="play"><span class="play-ico"></span><span id="playTxt">暂停</span></button>
+    <div class="track">
+      <input type="range" id="scrub" min="0" max="1000" value="0">
+      <div class="tcode" id="tcode">0%</div>
+    </div>
+    <div class="seg" id="speed">
+      <button data-s="0.5">0.5×</button>
+      <button data-s="1" class="on">1×</button>
+      <button data-s="2">2×</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="annoChk" checked>标注</label>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const NS = 'http://www.w3.org/2000/svg';
+  const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+  const seg = (t,a,b)=>clamp((t-a)/(b-a),0,1);
+  const ease = x=>x*x*(3-2*x);
+  const pow2 = x=>x*x;
+
+  /* ---------------- 等轴测投影 ---------------- */
+  const SX = 0.5196, SY = 0.30, OX = 360, OY = 150, ZT = 150;
+  const proj = (x,y,z)=>[OX + (x-y)*SX, OY + (x+y)*SY - (z===undefined?ZT:z)];
+
+  /* ---------------- 时间轴 ---------------- */
+  const T = {
+    st:[0.010,0.115],
+    c1:[0.115,0.330],
+    c2:[0.330,0.545],
+    c3:[0.545,0.760],
+    c4:[0.760,0.895],
+    ck:[0.895,0.975]
+  };
+  const DUR = 13.5;
+
+  /* ---------------- Ra / 去除量 ---------------- */
+  const RAK = [[0.010,3.20],[0.115,3.20],[0.330,0.80],[0.545,0.20],[0.760,0.05],[0.895,0.012],[1.001,0.012]];
+  function raAt(t){
+    for(let i=0;i<RAK.length-1;i++){
+      if(t <= RAK[i+1][0]){
+        const a=RAK[i], b=RAK[i+1];
+        return a[1] + (b[1]-a[1])*ease(seg(t,a[0],b[0]));
+      }
+    }
+    return 0.012;
+  }
+  const CUTK = [[0.010,0],[0.115,0],[0.330,25],[0.545,37],[0.760,43],[0.895,45],[1.001,45]];
+  function cutAt(t){
+    for(let i=0;i<CUTK.length-1;i++){
+      if(t <= CUTK[i+1][0]){
+        const a=CUTK[i], b=CUTK[i+1];
+        return a[1] + (b[1]-a[1])*ease(seg(t,a[0],b[0]));
+      }
+    }
+    return 45;
+  }
+
+  /* ---------------- 轮廓曲线 ---------------- */
+  const ZX0 = 660, ZW = 234, ZBASE = 162, ZBOT = 198, ZN = 130;
+  function wave(u){
+    return 0.40*Math.sin(u*Math.PI*5.4)
+         + 0.26*Math.sin(u*Math.PI*13.1 + 1.1)
+         + 0.19*Math.sin(u*Math.PI*27.0 + 2.7)
+         + 0.13*Math.sin(u*Math.PI*43.0 + 0.6)
+         + 0.08*Math.sin(u*Math.PI*71.0 + 1.9);
+  }
+  function surfLine(amp){
+    let d = '';
+    for(let i=0;i<=ZN;i++){
+      const u = i/ZN, x = ZX0 + u*ZW;
+      const y = ZBASE - amp*(wave(u) + 0.18);
+      d += (i?' L':'M') + x.toFixed(1) + ',' + y.toFixed(1);
+    }
+    return d;
+  }
+  function surfBody(amp){
+    return surfLine(amp) + ' L' + (ZX0+ZW) + ',' + ZBOT + ' L' + ZX0 + ',' + ZBOT + ' Z';
+  }
+
+  /* ---------------- 磨料粒径阶梯 ---------------- */
+  const GRIT = [
+    {n:'油石 #400',   d:37, pass:1},
+    {n:'砂纸 #1200',  d:10, pass:2},
+    {n:'钻石膏 W3',   d:3,  pass:3},
+    {n:'钻石膏 W1',   d:1,  pass:4}
+  ];
+  (function(){
+    const host = $('gritRows');
+    GRIT.forEach((g,i)=>{
+      const y = 316 + i*30;
+      const w = 232 * Math.sqrt(g.d/37);
+      const wrap = document.createElementNS(NS,'g');
+      wrap.setAttribute('id','grit'+g.pass);
+      const lab = document.createElementNS(NS,'text');
+      lab.setAttribute('x','662'); lab.setAttribute('y', String(y-6));
+      lab.setAttribute('fill','#5c6b7d'); lab.setAttribute('font-size','9.6');
+      lab.setAttribute('font-family','inherit');
+      lab.textContent = g.n;
+      const val = document.createElementNS(NS,'text');
+      val.setAttribute('x','894'); val.setAttribute('y', String(y-6));
+      val.setAttribute('text-anchor','end');
+      val.setAttribute('fill','#8d9aaa'); val.setAttribute('font-size','9.6');
+      val.setAttribute('font-family','inherit');
+      val.setAttribute('font-variant-numeric','tabular-nums');
+      val.textContent = g.d + ' μm';
+      const barBg = document.createElementNS(NS,'rect');
+      barBg.setAttribute('x','662'); barBg.setAttribute('y', String(y));
+      barBg.setAttribute('width','232'); barBg.setAttribute('height','7');
+      barBg.setAttribute('rx','3.5'); barBg.setAttribute('fill','#f2f5f9');
+      const bar = document.createElementNS(NS,'rect');
+      bar.setAttribute('id','gbar'+g.pass);
+      bar.setAttribute('x','662'); bar.setAttribute('y', String(y));
+      bar.setAttribute('width', Math.max(w,4).toFixed(1)); bar.setAttribute('height','7');
+      bar.setAttribute('rx','3.5'); bar.setAttribute('fill','#dbe3ec');
+      wrap.appendChild(lab); wrap.appendChild(val); wrap.appendChild(barBg); wrap.appendChild(bar);
+      host.appendChild(wrap);
+    });
+  })();
+
+  /* ---------------- 轮辐 ---------------- */
+  (function(){
+    const g = $('wSpokes');
+    for(let i=0;i<8;i++){
+      const a = i*Math.PI/4;
+      const l = document.createElementNS(NS,'line');
+      l.setAttribute('x1',(Math.cos(a)*5).toFixed(1));
+      l.setAttribute('y1',(-11+Math.sin(a)*5).toFixed(1));
+      l.setAttribute('x2',(Math.cos(a)*17).toFixed(1));
+      l.setAttribute('y2',(-11+Math.sin(a)*17).toFixed(1));
+      l.setAttribute('stroke','#c6bca8'); l.setAttribute('stroke-width','1.5');
+      g.appendChild(l);
+    }
+  })();
+
+  /* ---------------- 文案 ---------------- */
+  const NOTE = {
+    st:'<b>电火花切完，表面是一层脆的白层加一层麻点。</b>它不是「不够亮」，是<span class="hl">结构已经坏了</span> —— 白层不磨掉，脱模一定拉伤，还会在模具寿命中间成片剥落。',
+    c1:'<b>粗省只做一件事：把白层和 EDM 纹整片削掉。</b>油石必须<span class="hl">交叉十字走</span>，只朝一个方向推，凹谷永远磨不到 —— 推过去只是把波峰压平，谷底还是原样。',
+    c2:'<b>每换一级砂纸，方向转 45°。</b>转方向不是为了好看：是为了让上一道的纹暴露出来。<span class="hl">还能看见上道的纹，就说明没省透</span>，必须重走。',
+    c3:'<b>到钻石膏这一级，钢已经「咬不住」磨料了。</b>靠的是膏体里的金刚石微粒被羊毛轮压进微谷，一点点削平。这一级的去除量只有几微米，但决定了最后能不能出镜面。',
+    c4:'<b>镜面不是「更亮的雾面」。</b>Ra 0.012 的意思是表面能<span class="hl">反射出形状</span> —— 你看到的不是白色，是环境在钢上的倒影。手机镜头、车灯、导光条，要的就是这一层。',
+    ck:'<b>省模最贵的错误不是省不亮，是省过头。</b>R 角省塌、棱边倒钝、尺寸超差 —— 一套模具就废了。所以型腔加工时必须先<span class="hl">预留 0.05mm</span> 给省模，而不是切到尺寸再来抛。'
+  };
+  const CAP = {
+    st:['电火花面 · 白层密布','白层 8μm · 麻点 Ra 3.2'],
+    c1:['粗省：削掉白层和 EDM 纹','油石 #400 · 0° 十字交叉'],
+    c2:['中省：换向 45°，去掉粗痕','砂纸 #800→#1200 · 45°'],
+    c3:['精省：磨料细到看不见切削','钻石膏 W10→W3 · 90°'],
+    c4:['镜面：表面开始反射环境','W1 + 棉花轮 · Ra 0.012'],
+    ck:['检验：光照 / 倒影 / R 角','余量已用完 · 尺寸到下限']
+  };
+  const ABR = { st:'EDM 面', c1:'油石 #400', c2:'砂纸 #1200', c3:'钻石膏 W3', c4:'棉花 + W1', ck:'完成' };
+  const DIR = { c1:[1,0,'0°'], c2:[1,1,'45°'], c3:[0,1,'90°'], c4:[1,0,'→'] };
+
+  function phaseOf(t){
+    if(t < T.c1[0]) return 'st';
+    if(t < T.c2[0]) return 'c1';
+    if(t < T.c3[0]) return 'c2';
+    if(t < T.c4[0]) return 'c3';
+    if(t < T.ck[0]) return 'c4';
+    return 'ck';
+  }
+
+  /* ---------------- 工具轨迹 ---------------- */
+  function toolPos(t){
+    if(t < T.c1[0]) return [470, 470];
+    if(t < T.c2[0]){
+      const u = seg(t,T.c1[0],T.c1[1]);
+      return [400 + 158*Math.sin(u*Math.PI*2*3.2), 390 + 52*Math.sin(u*Math.PI*2*1.15)];
+    }
+    if(t < T.c3[0]){
+      const u = seg(t,T.c2[0],T.c2[1]);
+      const s = Math.sin(u*Math.PI*2*2.6);
+      return [400 + 126*s, 390 + 126*s];
+    }
+    if(t < T.c4[0]){
+      const u = seg(t,T.c3[0],T.c3[1]);
+      return [400 + 42*Math.sin(u*Math.PI*2*1.3), 390 + 104*Math.sin(u*Math.PI*2*3.1)];
+    }
+    if(t < T.ck[0]){
+      const u = seg(t,T.c4[0],T.c4[1]);
+      const a = u*Math.PI*2*2.2;
+      return [400 + 84*Math.cos(a), 390 + 84*Math.sin(a)];
+    }
+    return [400, 390];
+  }
+
+  /* ---------------- 渲染 ---------------- */
+  function render(t){
+    const ph = phaseOf(t);
+    const ra = raAt(t);
+    const cut = cutAt(t);
+
+    /* --- 磨痕层级 --- */
+    $('sk0').setAttribute('opacity', clamp(1 - seg(t,T.c1[0]+0.03,T.c1[1]),0,1).toFixed(3));
+    $('skSR0').setAttribute('opacity', clamp(1 - seg(t,T.c1[0],T.c1[1]),0,1).toFixed(3));
+    $('skSL0').setAttribute('opacity', clamp(1 - seg(t,T.c1[0],T.c1[1]),0,1).toFixed(3));
+
+    // 上一道的纹在新一道开工的头 10% 内被覆盖掉 —— 否则两个方向叠在一起，换向就看不出来了
+    const s1 = seg(t,T.c1[0]+0.02,T.c1[0]+0.18) * (1 - seg(t,T.c2[0],T.c2[0]+0.10));
+    const s2 = seg(t,T.c2[0]+0.02,T.c2[0]+0.18) * (1 - seg(t,T.c3[0],T.c3[0]+0.10));
+    const s3 = seg(t,T.c3[0]+0.02,T.c3[0]+0.18) * (1 - seg(t,T.c4[0],T.c4[0]+0.08));
+    $('sk1').setAttribute('opacity', s1.toFixed(3));
+    $('sk2').setAttribute('opacity', s2.toFixed(3));
+    $('sk3').setAttribute('opacity', s3.toFixed(3));
+
+    const tgt = 1 - seg(t,T.c4[0]+0.02,T.c4[1]);
+    $('skSR1').setAttribute('opacity', (0.8*tgt).toFixed(3));
+    $('skSL1').setAttribute('opacity', (0.8*tgt).toFixed(3));
+    $('lbDir').setAttribute('opacity', (0.18 + 0.82*tgt).toFixed(2));
+
+    /* --- 提亮 / 镜面 --- */
+    const lift = seg(t, T.c1[0], T.c4[1]);
+    $('bright').setAttribute('opacity', (0.10*lift*lift).toFixed(3));
+    $('mirror').setAttribute('opacity', (0.92*seg(t,T.c3[0],T.c4[1])).toFixed(3));
+
+    const mixc = (a,b,k)=>{
+      const pa = parseInt(a.slice(1),16), pb = parseInt(b.slice(1),16);
+      const r = Math.round(((pa>>16)&255)*(1-k)+((pb>>16)&255)*k);
+      const g = Math.round(((pa>>8)&255)*(1-k)+((pb>>8)&255)*k);
+      const bl = Math.round((pa&255)*(1-k)+(pb&255)*k);
+      return '#' + ((1<<24)+(r<<16)+(g<<8)+bl).toString(16).slice(1);
+    };
+    $('gTop1').setAttribute('stop-color', mixc('#8b97a4','#d6e0eb', lift));
+    $('gTop2').setAttribute('stop-color', mixc('#7d8a97','#c6d2df', lift));
+    $('gTop3').setAttribute('stop-color', mixc('#6e7b88','#b3c0cd', lift));
+    $('gSL1').setAttribute('stop-color', mixc('#68737f','#aab7c5', lift));
+    $('gSL2').setAttribute('stop-color', mixc('#48525d','#7e8a98', lift));
+    $('gSR1').setAttribute('stop-color', mixc('#4e5864','#8d9aa8', lift));
+    $('gSR2').setAttribute('stop-color', mixc('#333b44','#616d7a', lift));
+
+    /* --- 工具 --- */
+    const pos = toolPos(t);
+    const [wx, wy] = proj(pos[0], pos[1], ZT);
+    const toolO = seg(t,T.c1[0],T.c1[0]+0.045) * (1 - seg(t,T.ck[0]-0.008,T.ck[0]+0.028));
+    const tg = $('toolGrp');
+    tg.setAttribute('transform', `translate(${wx.toFixed(1)},${wy.toFixed(1)})`);
+    tg.setAttribute('opacity', toolO.toFixed(3));
+
+    const wMix = seg(t, T.c3[0]-0.014, T.c3[0]+0.032);
+    $('blockM').setAttribute('opacity', (1-wMix).toFixed(2));
+    $('wheelM').setAttribute('opacity', wMix.toFixed(2));
+    $('handle').setAttribute('opacity', (1-wMix*0.45).toFixed(2));
+
+    // 磨石配色：油石灰 → 砂纸褐
+    const isP2 = (ph==='c2');
+    $('bT').setAttribute('fill', isP2 ? '#d8bd82' : '#b6c0cb');
+    $('bL').setAttribute('fill', isP2 ? '#b2955c' : '#8b97a4');
+    $('bR').setAttribute('fill', isP2 ? '#9a8050' : '#76828f');
+
+    // 轮子旋转 + 棉花更白
+    if(wMix > 0.01){
+      const spin = (t*2900) % 360;
+      $('wSpokes').setAttribute('transform', `rotate(${spin.toFixed(0)},0,-11)`);
+      const white = (ph==='c4'||ph==='ck');
+      $('wDisc').setAttribute('fill', white ? '#fbf8f2' : '#ece5d6');
+      $('wCore').setAttribute('fill', white ? '#ffffff' : '#f8f4ea');
+    }
+
+    const glowO = 0.42 + 0.3*Math.sin(t*52);
+    $('toolGlow').setAttribute('opacity', clamp(glowO,0,1).toFixed(2));
+
+    /* --- 往复方向指示 --- */
+    const dg = $('dirGrp');
+    const d = DIR[ph];
+    if(d && ph!=='ck'){
+      const [dx, dy, lab] = d;
+      let vx = SX*(dx-dy), vy = SY*(dx+dy);
+      const L = Math.hypot(vx,vy) || 1;
+      vx = vx/L*30; vy = vy/L*30;
+      const ax = wx - 44, ay = wy - 36;
+      ['dirBase','dirLine'].forEach(k=>{
+        const el = $(k);
+        el.setAttribute('x1',(ax-vx).toFixed(1));
+        el.setAttribute('y1',(ay-vy).toFixed(1));
+        el.setAttribute('x2',(ax+vx).toFixed(1));
+        el.setAttribute('y2',(ay+vy).toFixed(1));
+      });
+      $('dirTxt').setAttribute('x', ax.toFixed(1));
+      $('dirTxt').setAttribute('y', (ay-13).toFixed(1));
+      $('dirTxt').textContent = lab;
+      dg.setAttribute('opacity', (ph==='c4' ? 0.0 : toolO*0.9).toFixed(2));
+    } else {
+      dg.setAttribute('opacity', 0);
+    }
+
+    /* --- 放大窗 --- */
+    const amp = Math.max(26 * (ra/3.2), 0.12);
+    $('zLine').setAttribute('d', surfLine(amp));
+    $('zBody').setAttribute('d', surfBody(amp));
+    $('zWhite2').setAttribute('d', surfLine(amp));
+    $('zShine').setAttribute('d', surfLine(amp));
+    $('zGhost').setAttribute('d', surfLine(26));
+    $('zGhost').setAttribute('opacity', (0.55*seg(t,T.c4[0],T.c4[0]+0.06)).toFixed(2));
+    $('zShine').setAttribute('opacity', (0.85*pow2(seg(t,T.c3[0],T.c4[1]))).toFixed(2));
+    $('zWhite2').setAttribute('opacity', clamp(1 - seg(t,T.c1[0],T.c1[1]*0.75),0,1).toFixed(2));
+    $('zRa').textContent = ra < 0.1 ? ra.toFixed(3) : ra.toFixed(2);
+    $('zAbr').textContent = ABR[ph];
+    $('zoomSub').textContent = 'Ra ' + (ra<0.1?ra.toFixed(3):ra.toFixed(2)) + ' μm · ' + CAP[ph][1];
+
+    /* --- 粒径阶梯 --- */
+    const idx = ph==='st' ? 0 : (ph==='c1'?1:(ph==='c2'?2:(ph==='c3'?3:(ph==='c4'?4:5))));
+    GRIT.forEach(g=>{
+      const bar = $('gbar'+g.pass);
+      if(!bar) return;
+      if(idx > g.pass) { bar.setAttribute('fill','#a8c6a0'); }
+      else if(idx === g.pass) { bar.setAttribute('fill','#1f6feb'); }
+      else { bar.setAttribute('fill','#dbe3ec'); }
+    });
+
+    /* --- 面板 --- */
+    $('raBig').textContent = ra < 0.1 ? ra.toFixed(3) : ra.toFixed(2);
+    $('raCap').textContent = CAP[ph][0];
+    $('curAbr').textContent = ABR[ph];
+    $('curCut').textContent = cut.toFixed(0);
+
+    [...$('passes').children].forEach(el=>{
+      const n = +el.dataset.p;
+      el.classList.toggle('on', n === idx);
+      el.classList.toggle('done', idx > n);
+    });
+
+    document.querySelectorAll('.ph').forEach(e=>e.classList.toggle('on', e.dataset.ph===ph));
+    $('note').innerHTML = NOTE[ph];
+  }
+
+  /* ---------------- 播放控制 ---------------- */
+  let t = 0, playing = true, speed = 1, last = 0;
+
+  function loop(ts){
+    if(!last) last = ts;
+    const dt = Math.min((ts-last)/1000, 0.06);
+    last = ts;
+    if(playing){
+      t += dt / DUR * speed;
+      if(t >= 1){ t = 1; playing = false; syncPlay(); }
+      $('scrub').value = Math.round(t*1000);
+      $('tcode').textContent = Math.round(t*100)+'%';
+    }
+    render(t);
+    requestAnimationFrame(loop);
+  }
+
+  function syncPlay(){
+    const b = $('play');
+    b.classList.toggle('playing', playing);
+    $('playTxt').textContent = playing ? '暂停' : (t>=1 ? '重播' : '播放');
+  }
+
+  $('play').onclick = ()=>{
+    if(t >= 1) t = 0;
+    playing = !playing; last = 0; syncPlay();
+  };
+  $('scrub').oninput = e=>{
+    t = +e.target.value/1000;
+    $('tcode').textContent = Math.round(t*100)+'%';
+    playing = false; syncPlay(); render(t);
+  };
+  $('speed').onclick = e=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    speed = +b.dataset.s;
+    [...$('speed').children].forEach(x=>x.classList.toggle('on', x===b));
+  };
+  $('annoChk').onchange = e=>{
+    const on = e.target.checked;
+    $('anno').setAttribute('opacity', on ? 1 : 0);
+    $('zoom').setAttribute('opacity', on ? 1 : 0);
+    $('grit').setAttribute('opacity', on ? 1 : 0);
+  };
+  document.querySelectorAll('.ph').forEach(el=>{
+    el.onclick = ()=>{
+      const map = {st:T.st[0],c1:T.c1[0],c2:T.c2[0],c3:T.c3[0],c4:T.c4[0],ck:T.ck[0]};
+      t = map[el.dataset.ph] + 0.012;
+      $('scrub').value = Math.round(t*1000);
+      $('tcode').textContent = Math.round(t*100)+'%';
+      playing = false; last = 0; syncPlay(); render(t);
+    };
+  });
+
+  const qs = new URLSearchParams(location.search);
+  if(qs.has('t')){
+    t = clamp(parseFloat(qs.get('t')),0,1);
+    playing = false;
+    $('scrub').value = Math.round(t*1000);
+    $('tcode').textContent = Math.round(t*100)+'%';
+    syncPlay(); render(t);
+  }
+
+  render(t);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
