@@ -3731,6 +3731,7 @@ function openMold(id){
   frame.src = m.file;
   modal.classList.add("open");
   document.body.style.overflow = "hidden";
+  document.body.classList.add("mold-open");   // 把左下角浏览量角标让开
   try{ history.replaceState(null, "", "?mod=mold&id=" + id); }catch(e){}
   const btn = document.getElementById("mmClose");
   if(btn) btn.focus({ preventScroll: true });
@@ -3743,6 +3744,7 @@ function closeMold(){
   const frame = document.getElementById("mmFrame");
   if(frame) frame.src = "about:blank";     // 卸载掉，动画定时器随之停止
   document.body.style.overflow = "";
+  document.body.classList.remove("mold-open");
   try{ history.replaceState(null, "", location.pathname + location.hash); }catch(e){}
 }
 
